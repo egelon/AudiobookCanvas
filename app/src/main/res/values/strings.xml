@@ -1,12 +1,26 @@
 <resources>
     <string name="app_name">Audiobook Canvas</string>
     <string name="action_settings">Settings</string>
+    <string name="action_about">About</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
+    <string name="settings_fragment_label">Settings</string>
+
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+
+
+    <!-- Preference Titles -->
+    <string name="app_preferences_header">App preferences</string>
+
+    <!-- Application Preferences -->
+    <string name="skip_get_started_title">Skip the \"Get Started\" screen</string>
+    <string name="skip_get_started_summary_off">The \"Get Started\" screen will be shown on application start</string>
+    <string name="skip_get_started_summary_on">The \"Select File\" screen will be shown on application start</string>
+    <string name="skip_get_started_summary">Toggles whether the \"Get Started\" screen will be shown on application start</string>
+
 </resources>
