@@ -9,11 +9,12 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.example.audiobookcanvas.databinding.FragmentFirstBinding;
+import com.example.audiobookcanvas.databinding.FragmentWelcomeBinding;
+import com.google.android.material.snackbar.Snackbar;
 
-public class FirstFragment extends Fragment {
+public class WelcomeFragment extends Fragment {
 
-    private FragmentFirstBinding binding;
+    private FragmentWelcomeBinding binding;
 
     @Override
     public View onCreateView(
@@ -21,7 +22,7 @@ public class FirstFragment extends Fragment {
             Bundle savedInstanceState
     ) {
 
-        binding = FragmentFirstBinding.inflate(inflater, container, false);
+        binding = FragmentWelcomeBinding.inflate(inflater, container, false);
         return binding.getRoot();
 
     }
@@ -29,11 +30,14 @@ public class FirstFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        binding.buttonFirst.setOnClickListener(new View.OnClickListener() {
+        binding.btnImport.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NavHostFragment.findNavController(FirstFragment.this)
-                        .navigate(R.id.action_FirstFragment_to_SecondFragment);
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+
+               // NavHostFragment.findNavController(WelcomeFragment.this)
+               //        .navigate(R.id.action_WelcomeFragment_to_SecondFragment);
             }
         });
     }

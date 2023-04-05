@@ -17,21 +17,26 @@
     <include layout="@layout/content_main" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
+        android:id="@+id/fastActionBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginBottom="16dp"
-        app:srcCompat="@android:drawable/ic_dialog_email" />
+        android:clickable="true"
+        app:backgroundTint="#006689"
+        app:ensureMinTouchTargetSize="true"
+        app:srcCompat="@android:drawable/ic_input_add" />
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+        android:id="@+id/mainToolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/teal_700"
+        android:background="#00668A"
         app:layout_anchor="@+id/appBarLayout"
         app:layout_anchorGravity="center"
-        app:popupTheme="@style/Theme.AudiobookCanvas.PopupOverlay" />
+        app:logo="@drawable/ic_launcher_foreground"
+        app:popupTheme="@style/Theme.AudiobookCanvas.PopupOverlay"
+        app:titleTextColor="#FAFAFA" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
