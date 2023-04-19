@@ -2,12 +2,14 @@ package com.example.audiobookcanvas;
 
 import android.os.Bundle;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.view.View;
 
+import androidx.appcompat.widget.PopupMenu;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
@@ -19,7 +21,7 @@ import com.example.audiobookcanvas.databinding.ActivityMainBinding;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener{
 
     private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
@@ -37,6 +39,19 @@ public class MainActivity extends AppCompatActivity {
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
+
+        FloatingActionButton fab = findViewById(R.id.fastActionBtn);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                PopupMenu popup = new PopupMenu(MainActivity.this, view);
+                popup.setOnMenuItemClickListener(MainActivity.this);
+                popup.inflate(R.menu.popup_action_menu);
+                popup.show();
+            }
+        });
+
+        /*
         binding.fastActionBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -45,7 +60,29 @@ public class MainActivity extends AppCompatActivity {
                 binding.fastActionBtn.hide();
             }
         });
+        */
     }
+
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item1:
+                /*getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.nav_host_fragment_content_main, new SecondFragment())
+                        .addToBackStack(null)
+                        .commit();*/
+                NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
+                navController.navigate(R.id.action_WelcomeFragment_to_SecondFragment);
+                // Hide the floating action button
+                binding.fastActionBtn.hide();
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
