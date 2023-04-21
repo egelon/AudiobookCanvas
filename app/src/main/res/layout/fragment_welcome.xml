@@ -17,21 +17,7 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:src="@android:drawable/sym_def_app_icon" />
 
-    <Button
-        android:id="@+id/btnImport"
-        android:layout_width="260dp"
-        android:layout_height="48dp"
-        android:layout_marginBottom="100dp"
-        android:backgroundTint="#00668A"
-        android:text="@string/import_audiobook_project"
-        android:textAllCaps="false"
-        android:textIsSelectable="false"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
     <TextView
-        android:id="@+id/txtWelcome"
         android:layout_width="372dp"
         android:layout_height="86dp"
         android:layout_marginTop="32dp"

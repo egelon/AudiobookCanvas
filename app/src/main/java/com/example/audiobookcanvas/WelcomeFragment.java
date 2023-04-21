@@ -29,17 +29,6 @@ public class WelcomeFragment extends Fragment {
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        binding.btnImport.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-
-               // NavHostFragment.findNavController(WelcomeFragment.this)
-               //        .navigate(R.id.action_WelcomeFragment_to_SecondFragment);
-            }
-        });
     }
 
     @Override
