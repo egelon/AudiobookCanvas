@@ -17,16 +17,46 @@
     <include layout="@layout/content_main" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fastActionBtn"
+        android:id="@+id/fabMenu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_marginEnd="@dimen/fab_margin"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="24dp"
+        app:layout_constraintBottom_toBottomOf = "parent"
+        app:layout_constraintEnd_toEndOf = "parent"
+        android:clickable="true"
+        android:focusable="true"
+        app:ensureMinTouchTargetSize="true"
+        app:backgroundTint="@color/popup_menu_item"
+        android:tint="@color/white"
+        app:srcCompat="@drawable/ic_fab_menu" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnOpenFile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:clickable="true"
-        app:backgroundTint="#006689"
-        app:ensureMinTouchTargetSize="true"
-        app:srcCompat="@android:drawable/ic_input_add" />
+        android:focusable="true"
+        app:layout_constraintBottom_toTopOf = "@+id/fabMenu"
+        app:layout_constraintEnd_toEndOf = "@+id/fabMenu"
+        app:backgroundTint="@color/teal_200"
+        android:tint="@color/white"
+        app:srcCompat="@drawable/ic_open_new_file" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnEditProject"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toTopOf = "@+id/btnOpenFile"
+        app:layout_constraintEnd_toEndOf = "@+id/btnOpenFile"
+        app:backgroundTint="@color/teal_200"
+        android:tint="@color/white"
+        app:srcCompat="@drawable/ic_edit_existing_proj" />
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/mainToolbar"

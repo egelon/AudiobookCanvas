@@ -3,7 +3,6 @@ package com.example.audiobookcanvas;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -12,7 +11,6 @@ import android.view.View;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
@@ -26,6 +24,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
 
+    FloatingActionButton fabMenu, btnOpen, btnEdit;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,14 +39,14 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
 
-        FloatingActionButton fab = findViewById(R.id.fastActionBtn);
-        fab.setOnClickListener(new View.OnClickListener() {
+        fabMenu = findViewById(R.id.fabMenu);
+        btnOpen = findViewById(R.id.btnOpenFile);
+        btnEdit = findViewById(R.id.btnEditProject);
+
+        fabMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                PopupMenu popup = new PopupMenu(MainActivity.this, view);
-                popup.setOnMenuItemClickListener(MainActivity.this);
-                popup.inflate(R.menu.popup_action_menu);
-                popup.show();
+
             }
         });
 
