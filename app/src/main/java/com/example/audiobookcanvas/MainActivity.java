@@ -8,7 +8,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.view.View;
 
-import androidx.appcompat.widget.PopupMenu;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -32,7 +31,7 @@ public class MainActivity extends AppCompatActivity{
     private FloatingActionButton fabMenu, btnOpen, btnEdit;
     private TextView openLabel, editLabel;
     Animation rotateOpenAnim, rotateCloseAnim, fromBottomAnim, toBottomAnim;
-    private boolean isFABClicked = false;
+    private boolean isFABMenuOpen = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,10 +79,6 @@ public class MainActivity extends AppCompatActivity{
         });
 
 
-
-
-
-
         /*
         binding.fastActionBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,14 +92,14 @@ public class MainActivity extends AppCompatActivity{
     }
 
     private void onFABMenuClicked() {
-        setVisibility(isFABClicked);
-        setAnimation(isFABClicked);
-
-        isFABClicked = !isFABClicked;
+        setVisibility(isFABMenuOpen);
+        setAnimation(isFABMenuOpen);
+        //toggle the state of the fab menu
+        isFABMenuOpen = !isFABMenuOpen;
     }
 
-    private void setAnimation(boolean isClicked) {
-        if(isClicked)
+    private void setAnimation(boolean isMenuClosed) {
+        if(isMenuClosed)
         {
             fabMenu.startAnimation(rotateCloseAnim);
             btnOpen.startAnimation(toBottomAnim);
@@ -122,8 +117,8 @@ public class MainActivity extends AppCompatActivity{
         }
     }
 
-    private void setVisibility(boolean isClicked) {
-        if(isClicked)
+    private void setVisibility(boolean isMenuClosed) {
+        if(isMenuClosed)
         {
             btnOpen.setVisibility(View.INVISIBLE);
             openLabel.setVisibility(View.INVISIBLE);
