@@ -17,10 +17,7 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include
-        layout="@layout/content_main"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <include layout="@layout/content_main" />
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/mainToolbar"
@@ -44,6 +41,7 @@
         android:layout_marginBottom="24dp"
         android:clickable="true"
         android:focusable="true"
+        android:onClick="onFABMenuClicked"
         android:tint="@android:color/white"
         app:backgroundTint="@color/popup_menu_item"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -57,6 +55,7 @@
         android:layout_marginBottom="16dp"
         android:clickable="true"
         android:focusable="true"
+        android:onClick="onEditProjectClicked"
         android:tint="@android:color/white"
         android:tooltipText="Edit Project"
         android:visibility="invisible"
@@ -71,6 +70,7 @@
         android:layout_marginBottom="16dp"
         android:clickable="true"
         android:focusable="true"
+        android:onClick="onOpenTxtFileClicked"
         android:tint="@android:color/white"
         android:tooltipText="Import text file"
         android:visibility="invisible"
@@ -83,7 +83,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="12dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="20dp"
         android:text="@string/action_import"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/btnOpenFile"
@@ -94,7 +94,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="12dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="20dp"
         android:text="@string/action_edit_proj"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/btnEditProject"

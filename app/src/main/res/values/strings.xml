@@ -11,7 +11,7 @@
 
     <!-- Fragment labels -->
     <string name="welcome_fragment_label">Audiobook Canvas</string>
-    <string name="second_fragment_label">Second Fragment</string>
+    <string name="preview_txt_fragment_label">Preview text file</string>
     <string name="settings_fragment_label">Settings</string>
 
     <!-- Get Started screen UI element labels -->
