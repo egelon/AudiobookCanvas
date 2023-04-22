@@ -30,5 +30,7 @@
     <string name="skip_get_started_summary_off">The \"Get Started\" screen will be shown on application start</string>
     <string name="skip_get_started_summary_on">The \"Select File\" screen will be shown on application start</string>
     <string name="skip_get_started_summary">Toggles whether the \"Get Started\" screen will be shown on application start</string>
+    <string name="list_characters">List characters</string>
+    <string name="default_project_name">newAudiobookProject</string>
 
 </resources>
