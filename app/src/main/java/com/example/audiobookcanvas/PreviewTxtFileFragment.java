@@ -25,8 +25,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.toolbox.StringRequest;
 import com.example.audiobookcanvas.databinding.FragmentPreviewTextFileBinding;
 
+import org.json.JSONException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedReader;
@@ -38,8 +44,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import org.json.JSONObject;
+
+import com.example.audiobookcanvas.RequestQueueSingleton;
 
 public class PreviewTxtFileFragment extends Fragment {
 
@@ -50,7 +68,10 @@ public class PreviewTxtFileFragment extends Fragment {
     ActivityResultLauncher<Intent> filePicker;
     private FragmentPreviewTextFileBinding binding;
     private ArrayList<String> contentChunks;
-    private int maxChunkSize = 2800;
+    private int maxChunkSize = 1800;
+    String openai_completions_endpoint = "https://api.openai.com/v1/completions";
+    public static final String requestTag = "NamedEntityRecognitionRequest";
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
@@ -69,6 +90,12 @@ public class PreviewTxtFileFragment extends Fragment {
         btnListCharacters.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 createProjectXML(editProjectName.getText().toString() + ".xml", appActivityContext);
+                int testChunk = 150;
+                try {
+                    getCompletion(contentChunks.get(testChunk), appActivityContext);
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -222,13 +249,60 @@ public class PreviewTxtFileFragment extends Fragment {
         }
     }
 
+    private void getCompletion(String textChunk, Context context) throws JSONException {
+        // setting text on for question on below line.
+        // creating a queue for request queue.
+        // creating a json object on below line.
+        JSONObject requestBody = new JSONObject();
+        // adding params to json object.
+        requestBody.put("model", "text-davinci-003");
+        String prompt = getString(R.string.named_entity_recognition_prompt) + textChunk + "\n\n[Output]";
+        requestBody.put("prompt", prompt);
+        requestBody.put("temperature", 0);
+        requestBody.put("max_tokens", 1500);
+        requestBody.put("top_p", 1);
+        requestBody.put("frequency_penalty", 0.0);
+        requestBody.put("presence_penalty", 0.0);
+
+
+        // Request a string response from the provided URL.
+        JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.POST, openai_completions_endpoint, requestBody,
+                new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        textFileContentView.setText("Response: " + response.toString());
+                    }
+                }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                textFileContentView.setText("Response Error: " + error.toString());
+            }
+        }
+
+
+        ) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Content-Type", " application/json");
+                params.put("Authorization", "Bearer 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");
+                return params;
+            }
+        };
+
+        // Add the request to the RequestQueue.
+        jsonRequest.setTag(requestTag);
+        jsonRequest.setRetryPolicy(new DefaultRetryPolicy(50000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        RequestQueueSingleton.getInstance(context).addToRequestQueue(jsonRequest);
+    }
 
     @Override
     public void onDestroyView()
     {
         super.onDestroyView();
+        RequestQueueSingleton.getInstance(this.getActivity()).getRequestQueue().cancelAll(requestTag);
         binding = null;
     }
-
-
 }
