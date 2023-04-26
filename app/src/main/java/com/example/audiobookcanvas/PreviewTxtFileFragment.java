@@ -24,6 +24,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentResultListener;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.android.volley.AuthFailureError;
@@ -59,7 +60,7 @@ import org.json.JSONObject;
 
 import com.example.audiobookcanvas.RequestQueueSingleton;
 
-public class PreviewTxtFileFragment extends Fragment {
+public class PreviewTxtFileFragment extends Fragment{
 
     TextView textFileContentView;
     EditText editProjectName;
@@ -68,9 +69,12 @@ public class PreviewTxtFileFragment extends Fragment {
     ActivityResultLauncher<Intent> filePicker;
     private FragmentPreviewTextFileBinding binding;
     private ArrayList<String> contentChunks;
-    private int maxChunkSize = 1800;
+    private int maxChunkSize = 2000;
     String openai_completions_endpoint = "https://api.openai.com/v1/completions";
     public static final String requestTag = "NamedEntityRecognitionRequest";
+
+    private Uri textFileURI;
+    private Uri projectFileURI;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -84,13 +88,17 @@ public class PreviewTxtFileFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         appActivityContext = this.getActivity();
+        //setup the fragment result listener
+
 
         btnCancel = view.findViewById(R.id.btnCancelFilePreview);
         btnListCharacters = view.findViewById(R.id.btnInvokeAPI);
         btnListCharacters.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+
+                chunkInputFile(appActivityContext, textFileURI);
                 createProjectXML(editProjectName.getText().toString() + ".xml", appActivityContext);
-                int testChunk = 150;
+                int testChunk = 11;
                 try {
                     getCompletion(contentChunks.get(testChunk), appActivityContext);
                 } catch (JSONException e) {
@@ -104,36 +112,13 @@ public class PreviewTxtFileFragment extends Fragment {
 
         editProjectName = view.findViewById(R.id.editProjectName);
 
-        selectFileFromStorage();
-    }
+        String textFilePath = PreviewTxtFileFragmentArgs.fromBundle(getArguments()).getTxtFilePath();
+        String projectFilePath = PreviewTxtFileFragmentArgs.fromBundle(getArguments()).getProjFilePath();
+        textFileURI = Uri.parse(textFilePath);
+        projectFileURI = Uri.parse(projectFilePath);
 
-    private void selectFileFromStorage()
-    {
-        filePicker = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == Activity.RESULT_OK)
-                {
-                    Intent intent1 = result.getData();
-                    Uri uri = intent1.getData();
-                    chunkInputFile(this.getActivity(), uri);
-                    textFileContentView.setText(contentChunks.get(0));
-                }
-            });
+        textFileContentView.setText("Slected file: " + textFileURI.toString());
 
-
-        try
-        {
-            Intent fileIntent = new Intent(Intent.ACTION_GET_CONTENT);
-            fileIntent.addCategory(Intent.CATEGORY_OPENABLE);
-            fileIntent.setType("text/*");
-            filePicker.launch(fileIntent);
-        }
-        catch (Exception ex)
-        {
-            Log.e("Error", ex.getMessage());
-            Toast.makeText(this.getActivity(), ex.getMessage().toString(), Toast.LENGTH_LONG).show();
-        }
     }
 
     private void chunkInputFile(Context context, Uri uri) {
@@ -198,11 +183,7 @@ public class PreviewTxtFileFragment extends Fragment {
         File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         try
         {
-            //   /storage/emulated/0/Android/data/com.example.audiobookcanvas/files/newProject.xml
-
-
             FileOutputStream fileOutputStream = new FileOutputStream (new File(path, fileName));
-
 
             xmlSerializer.setOutput(writer);
             xmlSerializer.startDocument("UTF-8", true);
@@ -305,4 +286,6 @@ public class PreviewTxtFileFragment extends Fragment {
         RequestQueueSingleton.getInstance(this.getActivity()).getRequestQueue().cancelAll(requestTag);
         binding = null;
     }
+
+
 }

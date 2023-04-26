@@ -10,10 +10,12 @@
         android:name="com.example.audiobookcanvas.WelcomeFragment"
         android:label="@string/welcome_fragment_label"
         tools:layout="@layout/fragment_welcome">
-
         <action
-            android:id="@+id/action_WelcomeFragment_to_PreviewTxtFragment"
+            android:id="@+id/actionTextFileSelected"
             app:destination="@id/PreviewTxtFileFragment" />
+
+
+
     </fragment>
     <fragment
         android:id="@+id/PreviewTxtFileFragment"
@@ -22,8 +24,15 @@
         tools:layout="@layout/fragment_preview_text_file">
 
         <action
-            android:id="@+id/action_PreviewTxtFragment_to_WelcomeFragment"
+            android:id="@+id/actionCancelProject"
             app:destination="@id/WelcomeFragment" />
+        <argument
+            android:name="txtFilePath"
+            app:argType="string" />
+        <argument
+            android:name="projFilePath"
+            app:argType="string" />
+
     </fragment>
     <fragment
         android:id="@+id/SettingsFragment"

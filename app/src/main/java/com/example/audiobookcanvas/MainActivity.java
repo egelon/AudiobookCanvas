@@ -1,18 +1,24 @@
 package com.example.audiobookcanvas;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 
+import com.example.audiobookcanvas.WelcomeFragmentDirections;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 
-import androidx.core.app.ActivityCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -28,7 +34,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration appBarConfiguration;
 
@@ -37,7 +43,9 @@ public class MainActivity extends AppCompatActivity{
     Animation rotateOpenAnim, rotateCloseAnim, fromBottomAnim, toBottomAnim;
     private boolean isFABMenuOpen = false;
     private String[] permissions = new String[] {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
+    // Request code for selecting a TXT document.
+    private static final int PICK_TXT_FILE = 2;
+    ActivityResultLauncher<Intent> filePickerLauncher;
     private ActivityMainBinding binding;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +60,11 @@ public class MainActivity extends AppCompatActivity{
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
+        filePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    onTextFileSelected(result);
+                });
 
         setupFABMenu();
     }
@@ -79,14 +92,50 @@ public class MainActivity extends AppCompatActivity{
         isFABMenuOpen = !isFABMenuOpen;
     }
 
+    private void onTextFileSelected(ActivityResult result)
+    {
+        if (result.getResultCode() == Activity.RESULT_OK)
+        {
+
+            Intent intent1 = result.getData();
+            Uri uri = intent1.getData();
+            Toast.makeText(getApplicationContext(), "File: " + uri.getPath().toString(), Toast.LENGTH_SHORT).show();
+
+            String txtFilePath = uri.toString();
+            String projFilePath = "newProj.xml";
+            WelcomeFragmentDirections.ActionTextFileSelected action = WelcomeFragmentDirections.actionTextFileSelected(txtFilePath, projFilePath);
+            Navigation.findNavController(this, R.id.nav_host_main_content_area).navigate(action);
+        }
+        else
+        {
+            //someting went wrong or the user decided not to select a file
+
+            //show the FAB menu
+            toggleFABMenuVisibility(true);
+        }
+    }
+
     public void onOpenTxtFileClicked(View view)
     {
-        Toast.makeText(getApplicationContext(), "Open new text file", Toast.LENGTH_SHORT).show();
-        //navigate to the preview screen
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_main_content_area);
-        navController.navigate(R.id.action_WelcomeFragment_to_PreviewTxtFragment);
-        // Hide the floating action button
-        toggleFABMenuVisibility(false);
+        try
+        {
+            //start picking a file
+            Intent fileIntent = new Intent(Intent.ACTION_GET_CONTENT);
+            fileIntent.addCategory(Intent.CATEGORY_OPENABLE);
+            fileIntent.setType("text/plain");
+            filePickerLauncher.launch(fileIntent);
+
+            // Hide the floating action button
+            toggleFABMenuVisibility(false);
+        }
+        catch (Exception ex)
+        {
+            Log.e("Error", ex.getMessage());
+            Toast.makeText(getApplicationContext(), ex.getMessage().toString(), Toast.LENGTH_LONG).show();
+
+            // Show the floating action button
+            toggleFABMenuVisibility(true);
+        }
     }
 
     public void onEditProjectClicked(View view)
@@ -194,5 +243,4 @@ public class MainActivity extends AppCompatActivity{
         // Show the floating action button
         toggleFABMenuVisibility(true);
     }
-
 }
