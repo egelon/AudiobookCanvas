@@ -6,21 +6,24 @@
     android:layout_height="match_parent"
     tools:context=".WelcomeFragment">
 
+
     <ImageView
         android:id="@+id/appLogoStartScreen"
-        android:layout_width="170dp"
-        android:layout_height="138dp"
-        android:layout_marginTop="100dp"
-        android:background="#00668A"
+        android:layout_width="360dp"
+        android:layout_height="360dp"
+        android:layout_marginTop="64dp"
+        android:contentDescription="@string/welcome_text"
+        android:src="@drawable/app_image"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:src="@android:drawable/sym_def_app_icon" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:layout_width="372dp"
-        android:layout_height="86dp"
-        android:layout_marginTop="32dp"
+        android:id="@+id/textView"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:contentDescription="@string/welcome_text"
         android:fontFamily="sans-serif-light"
         android:text="@string/welcome_text"
         android:textAlignment="center"
@@ -28,6 +31,7 @@
         android:textSize="14sp"
         android:typeface="sans"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/appLogoStartScreen" />
 </androidx.constraintlayout.widget.ConstraintLayout>
