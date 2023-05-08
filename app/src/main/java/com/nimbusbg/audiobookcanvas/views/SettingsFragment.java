@@ -1,10 +1,12 @@
-package com.example.audiobookcanvas;
+package com.nimbusbg.audiobookcanvas.views;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
+
+import com.nimbusbg.audiobookcanvas.R;
 
 public class SettingsFragment extends PreferenceFragmentCompat
 {

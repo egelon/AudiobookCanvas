@@ -1,12 +1,10 @@
-package com.example.audiobookcanvas;
+package com.nimbusbg.audiobookcanvas.views;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.util.Xml;
@@ -19,28 +17,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContract;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentResultListener;
-import androidx.navigation.fragment.NavHostFragment;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
-import com.android.volley.toolbox.StringRequest;
-import com.example.audiobookcanvas.databinding.FragmentPreviewTextFileBinding;
+import com.nimbusbg.audiobookcanvas.R;
+import com.nimbusbg.audiobookcanvas.databinding.FragmentPreviewTextFileBinding;
 
 import org.json.JSONException;
 import org.xmlpull.v1.XmlSerializer;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -50,15 +41,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
+
 import org.json.JSONObject;
 
-import com.example.audiobookcanvas.RequestQueueSingleton;
+import com.nimbusbg.audiobookcanvas.models.RequestQueueSingleton;
 
 public class PreviewTxtFileFragment extends Fragment{
 
@@ -112,7 +101,7 @@ public class PreviewTxtFileFragment extends Fragment{
 
         editProjectName = view.findViewById(R.id.editProjectName);
 
-        String textFilePath = PreviewTxtFileFragmentArgs.fromBundle(getArguments()).getTxtFilePath();
+        String textFilePath = com.nimbusbg.audiobookcanvas.views.PreviewTxtFileFragmentArgs.fromBundle(getArguments()).getTxtFilePath();
         String projectFilePath = PreviewTxtFileFragmentArgs.fromBundle(getArguments()).getProjFilePath();
         textFileURI = Uri.parse(textFilePath);
         projectFileURI = Uri.parse(projectFilePath);

@@ -1,4 +1,4 @@
-package com.example.audiobookcanvas;
+package com.nimbusbg.audiobookcanvas.views;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -7,9 +7,8 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.fragment.NavHostFragment;
 
-import com.example.audiobookcanvas.databinding.FragmentWelcomeBinding;
+import com.nimbusbg.audiobookcanvas.databinding.FragmentWelcomeBinding;
 
 public class WelcomeFragment extends Fragment {
 

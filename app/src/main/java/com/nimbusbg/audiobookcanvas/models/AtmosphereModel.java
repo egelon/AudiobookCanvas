@@ -1,4 +1,4 @@
-package com.example.audiobookcanvas;
+package com.nimbusbg.audiobookcanvas.models;
 
 enum Atmosphere
 {

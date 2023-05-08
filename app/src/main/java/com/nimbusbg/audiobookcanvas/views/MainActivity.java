@@ -1,4 +1,4 @@
-package com.example.audiobookcanvas;
+package com.nimbusbg.audiobookcanvas.views;
 
 import android.Manifest;
 import android.app.Activity;
@@ -6,11 +6,10 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
-import com.example.audiobookcanvas.WelcomeFragmentDirections;
+import com.nimbusbg.audiobookcanvas.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,7 +23,7 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import com.example.audiobookcanvas.databinding.ActivityMainBinding;
+import com.nimbusbg.audiobookcanvas.databinding.ActivityMainBinding;
 
 import android.view.Menu;
 import android.view.MenuItem;

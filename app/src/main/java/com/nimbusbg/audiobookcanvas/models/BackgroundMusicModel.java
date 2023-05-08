@@ -1,4 +1,4 @@
-package com.example.audiobookcanvas;
+package com.nimbusbg.audiobookcanvas.models;
 
 public class BackgroundMusicModel {
     private int trackId;

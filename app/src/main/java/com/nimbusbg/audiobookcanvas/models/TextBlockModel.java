@@ -1,4 +1,4 @@
-package com.example.audiobookcanvas;
+package com.nimbusbg.audiobookcanvas.models;
 
 import java.util.List;
 import java.util.Stack;

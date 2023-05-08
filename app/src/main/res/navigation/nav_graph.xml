@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/WelcomeFragment"
-        android:name="com.example.audiobookcanvas.WelcomeFragment"
+        android:name="com.nimbusbg.audiobookcanvas.views.WelcomeFragment"
         android:label="@string/welcome_fragment_label"
         tools:layout="@layout/fragment_welcome">
         <action
@@ -19,7 +19,7 @@
     </fragment>
     <fragment
         android:id="@+id/PreviewTxtFileFragment"
-        android:name="com.example.audiobookcanvas.PreviewTxtFileFragment"
+        android:name="com.nimbusbg.audiobookcanvas.views.PreviewTxtFileFragment"
         android:label="@string/preview_txt_fragment_label"
         tools:layout="@layout/fragment_preview_text_file">
 
@@ -36,6 +36,6 @@
     </fragment>
     <fragment
         android:id="@+id/SettingsFragment"
-        android:name="com.example.audiobookcanvas.SettingsFragment"
+        android:name="com.nimbusbg.audiobookcanvas.views.SettingsFragment"
         android:label="@string/settings_fragment_label" />
 </navigation>
