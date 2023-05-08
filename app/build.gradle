@@ -39,19 +39,21 @@ android {
 dependencies {
     def lifecycle_version = "2.6.1"
     def arch_version = "2.2.0"
+    def room_version = "2.5.1"
+    def appcompat_version = "1.6.1"
 
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version" // ViewModel
     implementation "androidx.lifecycle:lifecycle-livedata:$lifecycle_version" // LiveData
     testImplementation "androidx.arch.core:core-testing:$arch_version" // optional - Test helpers for LiveData
     annotationProcessor "androidx.lifecycle:lifecycle-compiler:$lifecycle_version" // Annotation processor
-
-    def room_version = "2.5.1"
-
+    
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
 
     implementation 'com.android.volley:volley:1.2.1'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
+
+    implementation "androidx.appcompat:appcompat:$appcompat_version"
+
     implementation 'com.google.android.material:material:1.8.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.navigation:navigation-fragment:2.5.3'
