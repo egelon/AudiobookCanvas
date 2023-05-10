@@ -6,6 +6,8 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
+import com.nimbusbg.audiobookcanvas.entities.Project;
+
 @Entity(tableName = "content",
         foreignKeys = @ForeignKey(entity = Project.class,
                 parentColumns = "id",

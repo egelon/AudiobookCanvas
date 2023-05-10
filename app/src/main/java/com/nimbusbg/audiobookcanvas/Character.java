@@ -5,18 +5,10 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "character",
-        foreignKeys = @ForeignKey(entity = Content.class,
-                parentColumns = "project_id",
-                childColumns = "content_id",
-                onDelete = ForeignKey.CASCADE))
+@Entity(tableName = "Character")
 public class Character {
-    @PrimaryKey(autoGenerate = true)
-    public int id;
-
-    public int content_id;
-
     @NonNull
+    @PrimaryKey(autoGenerate = false)
     public String name;
 
     public String gender;
