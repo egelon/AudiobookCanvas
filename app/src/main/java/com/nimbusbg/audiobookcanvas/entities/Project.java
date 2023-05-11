@@ -8,32 +8,16 @@ import androidx.room.PrimaryKey;
 
 import java.util.Date;
 
-@Entity(tableName = "Project",
-        foreignKeys = {
-            @ForeignKey(entity = AppInfo.class,
-                        parentColumns = "id",
-                        childColumns = "id",
-                        onDelete = ForeignKey.CASCADE),
-            @ForeignKey(entity = AudiobookData.class,
-                        parentColumns = "id",
-                    childColumns = "id",
-                    onDelete = ForeignKey.CASCADE)
-        }
-       )
-
-
+@Entity(tableName = "Project")
 public class Project {
+    public int getId() {
+        return id;
+    }
+
     @NonNull
+    @ColumnInfo(name = "id")
     @PrimaryKey(autoGenerate = true)
-    public int id;
-
-    @NonNull
-    @ColumnInfo(name = "app_info_id")
-    public int appInfoId;
-
-    @NonNull
-    @ColumnInfo(name = "audiobook_data_id")
-    public int audiobookDataId;
+    private int id;
 
     @NonNull
     @ColumnInfo(name = "project_version")
@@ -50,10 +34,15 @@ public class Project {
     @NonNull
     @ColumnInfo(name = "name")
     public String projectName;
+
     @ColumnInfo(name = "input_file_path")
     public String inputFilePath;
+
     @ColumnInfo(name = "output_XML_file_path")
     public String outputXMLFilePath;
+
+    @ColumnInfo(name = "output_audiobook_path")
+    public String output_audiobook_path;
 
     @NonNull
     @ColumnInfo(name = "created_on")
@@ -63,10 +52,8 @@ public class Project {
     @ColumnInfo(name = "last_modified")
     public Date lastModified;
 
-    public Project(final int id, final int appInfoId, final int audiobookDataId, @NonNull String projectVersion, @NonNull Boolean isCompleted, final int lastProcessedBlockId, @NonNull String projectName, @NonNull Date createdOn, @NonNull Date lastModified) {
+    public Project(final int id, @NonNull String projectVersion, @NonNull Boolean isCompleted, final int lastProcessedBlockId, @NonNull String projectName, @NonNull Date createdOn, @NonNull Date lastModified) {
         this.id = id;
-        this.appInfoId = appInfoId;
-        this.audiobookDataId = audiobookDataId;
         this.projectVersion = projectVersion;
         this.isCompleted = isCompleted;
         this.lastProcessedBlockId = lastProcessedBlockId;
