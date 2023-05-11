@@ -1,11 +1,14 @@
-package com.nimbusbg.audiobookcanvas.entities;
+package com.nimbusbg.audiobookcanvas.data.local.entities;
 
 import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "Audiobook_Data",
-        foreignKeys = @ForeignKey(entity = Project.class,
+
+@Entity(tableName = "audiobookData",
+        foreignKeys = @ForeignKey(entity = AudiobookProject.class,
                 parentColumns = "id",
                 childColumns = "project_id",
                 onDelete = ForeignKey.CASCADE))
@@ -33,9 +36,12 @@ public class AudiobookData {
     @ColumnInfo(name = "description")
     private String description;
 
-    public AudiobookData(final int project_id, @NonNull String language) {
+    public AudiobookData(int project_id, String bookTitle, String author, @NonNull String language, String description) {
         this.project_id = project_id;
+        this.bookTitle = bookTitle;
+        this.author = author;
         this.language = language;
+        this.description = description;
     }
 
     public int getId() {

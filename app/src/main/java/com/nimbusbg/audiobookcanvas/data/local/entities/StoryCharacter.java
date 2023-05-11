@@ -1,15 +1,12 @@
-package com.nimbusbg.audiobookcanvas.entities;
+package com.nimbusbg.audiobookcanvas.data.local.entities;
 
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
-import java.util.Date;
-
-@Entity(tableName = "Character")
-public class Character {
+@Entity(tableName = "storyCharacter")
+public class StoryCharacter {
     @NonNull
     @ColumnInfo(name = "name")
     @PrimaryKey(autoGenerate = false)
@@ -23,8 +20,7 @@ public class Character {
     @ColumnInfo(name = "voice")
     private String voice;
 
-    public Character(String name, String gender, String voice) {
-        Name = name;
+    public StoryCharacter(String gender, String voice) {
         this.gender = gender;
         this.voice = voice;
     }

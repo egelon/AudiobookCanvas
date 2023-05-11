@@ -1,16 +1,19 @@
-package com.nimbusbg.audiobookcanvas.entities;
+package com.nimbusbg.audiobookcanvas.data.local.entities;
 
 import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "Character_Line",
+
+@Entity(tableName = "characterLine",
         foreignKeys = {
                 @ForeignKey(entity = TextBlock.class,
                         parentColumns = "id",
                         childColumns = "text_block_id",
                         onDelete = ForeignKey.CASCADE),
-                @ForeignKey(entity = Character.class,
+                @ForeignKey(entity = StoryCharacter.class,
                         parentColumns = "name",
                         childColumns = "character_name",
                         onDelete = ForeignKey.CASCADE)

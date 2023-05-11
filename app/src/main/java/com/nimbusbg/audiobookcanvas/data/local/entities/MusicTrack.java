@@ -1,12 +1,15 @@
-package com.nimbusbg.audiobookcanvas.entities;
+package com.nimbusbg.audiobookcanvas.data.local.entities;
 
 import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Fts4;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "Music_Track")
+
+@Entity(tableName = "musicTrack")
 public class MusicTrack {
-    @NonNUll
+    @NonNull
     @ColumnInfo(name = "id")
     @PrimaryKey(autoGenerate = true)
     private int id;

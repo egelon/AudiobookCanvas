@@ -1,15 +1,15 @@
-package com.nimbusbg.audiobookcanvas.entities;
+package com.nimbusbg.audiobookcanvas.data.local.entities;
 
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
 import java.util.Date;
 
-@Entity(tableName = "Project")
-public class Project {
+
+@Entity(tableName = "audiobookProject")
+public class AudiobookProject {
     @NonNull
     @ColumnInfo(name = "id")
     @PrimaryKey(autoGenerate = true)
@@ -48,11 +48,14 @@ public class Project {
     @ColumnInfo(name = "last_modified")
     private Date lastModified;
 
-    public Project(@NonNull String projectVersion, @NonNull Boolean isCompleted, final int lastProcessedBlockId, @NonNull String projectName, @NonNull Date createdOn, @NonNull Date lastModified) {
+    public AudiobookProject(@NonNull String projectVersion, @NonNull Boolean isCompleted, int lastProcessedBlockId, @NonNull String projectName, String inputFilePath, String outputXMLFilePath, String output_audiobook_path, @NonNull Date createdOn, @NonNull Date lastModified) {
         this.projectVersion = projectVersion;
         this.isCompleted = isCompleted;
         this.lastProcessedBlockId = lastProcessedBlockId;
         this.projectName = projectName;
+        this.inputFilePath = inputFilePath;
+        this.outputXMLFilePath = outputXMLFilePath;
+        this.output_audiobook_path = output_audiobook_path;
         this.createdOn = createdOn;
         this.lastModified = lastModified;
     }
