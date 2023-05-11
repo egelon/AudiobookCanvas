@@ -21,11 +21,11 @@ public class EditHistory {
 
     @NonNull
     @ColumnInfo(name = "start_index")
-    public int startIndex;
+    private int startIndex;
 
     @NonNull
     @ColumnInfo(name = "character_name")
-    public String characterName;
+    private String characterName;
 
     public EditHistory(int id, int lineId, int startIndex, String characterName) {
         this.id = id;
@@ -36,5 +36,33 @@ public class EditHistory {
 
     public int getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getLineId() {
+        return lineId;
+    }
+
+    public void setLineId(int lineId) {
+        this.lineId = lineId;
+    }
+
+    public int getStartIndex() {
+        return startIndex;
+    }
+
+    public void setStartIndex(int startIndex) {
+        this.startIndex = startIndex;
+    }
+
+    public String getCharacterName() {
+        return characterName;
+    }
+
+    public void setCharacterName(String characterName) {
+        this.characterName = characterName;
     }
 }

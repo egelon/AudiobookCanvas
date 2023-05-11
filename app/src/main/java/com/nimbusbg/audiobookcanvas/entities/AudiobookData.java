@@ -18,20 +18,20 @@ public class AudiobookData {
 
     @NonNull
     @ColumnInfo(name = "project_id")
-    public int project_id;
+    private int project_id;
 
     @ColumnInfo(name = "book_title")
-    public String bookTitle;
+    private String bookTitle;
 
     @ColumnInfo(name = "author")
-    public String author;
+    private String author;
 
     @NonNull
     @ColumnInfo(name = "book_language")
-    public String language;
+    private String language;
 
     @ColumnInfo(name = "description")
-    public String description;
+    private String description;
 
     public AudiobookData(final int id, final int project_id, @NonNull String language) {
         this.id = id;
@@ -41,5 +41,49 @@ public class AudiobookData {
 
     public int getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getProject_id() {
+        return project_id;
+    }
+
+    public void setProject_id(int project_id) {
+        this.project_id = project_id;
+    }
+
+    public String getBookTitle() {
+        return bookTitle;
+    }
+
+    public void setBookTitle(String bookTitle) {
+        this.bookTitle = bookTitle;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

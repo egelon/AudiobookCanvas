@@ -23,21 +23,21 @@ public class TextBlock {
 
     @NonNull
     @ColumnInfo(name = "project_id")
-    public int projectId;
+    private int projectId;
 
     @ColumnInfo(name = "background_track_id")
-    public Integer backgroundTrackId; // Nullable, so use Integer instead of int
+    private Integer backgroundTrackId; // Nullable, so use Integer instead of int
 
     @ColumnInfo(name = "background_track_volume")
-    public int backgroundTrackVolume;
+    private int backgroundTrackVolume;
 
     @NonNull
     @ColumnInfo(name = "generated_audio_path")
-    public String generatedAudioPath;
+    private String generatedAudioPath;
 
     @NonNull
     @ColumnInfo(name = "text")
-    public String text;
+    private String text;
 
     public TextBlock(final int id, final int projectId, String generatedAudioPath, String text) {
         this.id = id;
@@ -46,9 +46,51 @@ public class TextBlock {
         this.text = text;
     }
 
-    // Add constructor, getters, and setters here
-
     public int getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(int projectId) {
+        this.projectId = projectId;
+    }
+
+    public Integer getBackgroundTrackId() {
+        return backgroundTrackId;
+    }
+
+    public void setBackgroundTrackId(Integer backgroundTrackId) {
+        this.backgroundTrackId = backgroundTrackId;
+    }
+
+    public int getBackgroundTrackVolume() {
+        return backgroundTrackVolume;
+    }
+
+    public void setBackgroundTrackVolume(int backgroundTrackVolume) {
+        this.backgroundTrackVolume = backgroundTrackVolume;
+    }
+
+    public String getGeneratedAudioPath() {
+        return generatedAudioPath;
+    }
+
+    public void setGeneratedAudioPath(String generatedAudioPath) {
+        this.generatedAudioPath = generatedAudioPath;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
     }
 }

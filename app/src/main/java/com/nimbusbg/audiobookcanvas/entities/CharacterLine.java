@@ -23,15 +23,15 @@ public class CharacterLine {
 
     @NonNull
     @ColumnInfo(name = "text_block_id")
-    public int textBlockId;
+    private int textBlockId;
 
     @NonNull
     @ColumnInfo(name = "start_index")
-    public int startIndex;
+    private int startIndex;
 
     @NonNull
     @ColumnInfo(name = "character_name")
-    public String characterName;
+    private String characterName;
 
     public CharacterLine(int id, int textBlockId, int startIndex, String characterName) {
         this.id = id;
@@ -40,8 +40,35 @@ public class CharacterLine {
         this.characterName = characterName;
     }
 
-    // Add constructor, getters, and setters here
     public int getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getTextBlockId() {
+        return textBlockId;
+    }
+
+    public void setTextBlockId(int textBlockId) {
+        this.textBlockId = textBlockId;
+    }
+
+    public int getStartIndex() {
+        return startIndex;
+    }
+
+    public void setStartIndex(int startIndex) {
+        this.startIndex = startIndex;
+    }
+
+    public String getCharacterName() {
+        return characterName;
+    }
+
+    public void setCharacterName(String characterName) {
+        this.characterName = characterName;
     }
 }

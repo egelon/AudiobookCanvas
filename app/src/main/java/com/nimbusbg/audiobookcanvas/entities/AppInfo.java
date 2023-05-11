@@ -19,17 +19,17 @@ public class AppInfo {
 
     @NonNull
     @ColumnInfo(name = "project_id")
-    public int project_id;
+    private int project_id;
 
     @NonNull
     @ColumnInfo(name = "app_version")
-    public String appVersion;
+    private String appVersion;
 
     @ColumnInfo(name = "android_version")
-    public String osVersion;
+    private String osVersion;
 
     @ColumnInfo(name = "device_type")
-    public String deviceType;
+    private String deviceType;
 
     public AppInfo(final int id, final int project_id, @NonNull String appVersion) {
         this.id = id;
@@ -39,5 +39,41 @@ public class AppInfo {
 
     public int getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getProject_id() {
+        return project_id;
+    }
+
+    public void setProject_id(int project_id) {
+        this.project_id = project_id;
+    }
+
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+    public void setAppVersion(String appVersion) {
+        this.appVersion = appVersion;
+    }
+
+    public String getOsVersion() {
+        return osVersion;
+    }
+
+    public void setOsVersion(String osVersion) {
+        this.osVersion = osVersion;
+    }
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
     }
 }

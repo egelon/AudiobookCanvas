@@ -13,15 +13,15 @@ public class MusicTrack {
 
     @NonNull
     @ColumnInfo(name = "primary_atmosphere")
-    public String primaryAtmosphere;
+    private String primaryAtmosphere;
 
     @NonNull
     @ColumnInfo(name = "secondary_atmosphere")
-    public String secondaryAtmosphere;
+    private String secondaryAtmosphere;
 
     @NonNull
     @ColumnInfo(name = "music_path")
-    public String musicPath;
+    private String musicPath;
 
     public MusicTrack(int id, String primaryAtmosphere, String secondaryAtmosphere, String musicPath) {
         this.id = id;
@@ -32,5 +32,33 @@ public class MusicTrack {
 
     public int getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getPrimaryAtmosphere() {
+        return primaryAtmosphere;
+    }
+
+    public void setPrimaryAtmosphere(String primaryAtmosphere) {
+        this.primaryAtmosphere = primaryAtmosphere;
+    }
+
+    public String getSecondaryAtmosphere() {
+        return secondaryAtmosphere;
+    }
+
+    public void setSecondaryAtmosphere(String secondaryAtmosphere) {
+        this.secondaryAtmosphere = secondaryAtmosphere;
+    }
+
+    public String getMusicPath() {
+        return musicPath;
+    }
+
+    public void setMusicPath(String musicPath) {
+        this.musicPath = musicPath;
     }
 }
