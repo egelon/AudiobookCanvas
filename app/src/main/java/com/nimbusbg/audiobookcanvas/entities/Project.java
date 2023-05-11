@@ -48,8 +48,7 @@ public class Project {
     @ColumnInfo(name = "last_modified")
     private Date lastModified;
 
-    public Project(final int id, @NonNull String projectVersion, @NonNull Boolean isCompleted, final int lastProcessedBlockId, @NonNull String projectName, @NonNull Date createdOn, @NonNull Date lastModified) {
-        this.id = id;
+    public Project(@NonNull String projectVersion, @NonNull Boolean isCompleted, final int lastProcessedBlockId, @NonNull String projectName, @NonNull Date createdOn, @NonNull Date lastModified) {
         this.projectVersion = projectVersion;
         this.isCompleted = isCompleted;
         this.lastProcessedBlockId = lastProcessedBlockId;

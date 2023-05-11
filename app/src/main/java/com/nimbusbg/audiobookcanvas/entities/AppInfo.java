@@ -31,8 +31,7 @@ public class AppInfo {
     @ColumnInfo(name = "device_type")
     private String deviceType;
 
-    public AppInfo(final int id, final int project_id, @NonNull String appVersion) {
-        this.id = id;
+    public AppInfo(final int project_id, @NonNull String appVersion) {
         this.project_id = project_id;
         this.appVersion = appVersion;
     }

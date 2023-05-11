@@ -33,8 +33,7 @@ public class CharacterLine {
     @ColumnInfo(name = "character_name")
     private String characterName;
 
-    public CharacterLine(int id, int textBlockId, int startIndex, String characterName) {
-        this.id = id;
+    public CharacterLine(int textBlockId, int startIndex, String characterName) {
         this.textBlockId = textBlockId;
         this.startIndex = startIndex;
         this.characterName = characterName;

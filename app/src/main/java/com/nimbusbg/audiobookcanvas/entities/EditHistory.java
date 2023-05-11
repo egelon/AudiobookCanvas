@@ -27,8 +27,7 @@ public class EditHistory {
     @ColumnInfo(name = "character_name")
     private String characterName;
 
-    public EditHistory(int id, int lineId, int startIndex, String characterName) {
-        this.id = id;
+    public EditHistory(int lineId, int startIndex, String characterName) {
         this.lineId = lineId;
         this.startIndex = startIndex;
         this.characterName = characterName;

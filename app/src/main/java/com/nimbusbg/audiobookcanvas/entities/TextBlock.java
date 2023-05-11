@@ -39,8 +39,7 @@ public class TextBlock {
     @ColumnInfo(name = "text")
     private String text;
 
-    public TextBlock(final int id, final int projectId, String generatedAudioPath, String text) {
-        this.id = id;
+    public TextBlock(final int projectId, String generatedAudioPath, String text) {
         this.projectId = projectId;
         this.generatedAudioPath = generatedAudioPath;
         this.text = text;

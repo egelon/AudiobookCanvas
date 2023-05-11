@@ -33,8 +33,7 @@ public class AudiobookData {
     @ColumnInfo(name = "description")
     private String description;
 
-    public AudiobookData(final int id, final int project_id, @NonNull String language) {
-        this.id = id;
+    public AudiobookData(final int project_id, @NonNull String language) {
         this.project_id = project_id;
         this.language = language;
     }

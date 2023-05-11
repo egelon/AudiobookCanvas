@@ -23,8 +23,7 @@ public class MusicTrack {
     @ColumnInfo(name = "music_path")
     private String musicPath;
 
-    public MusicTrack(int id, String primaryAtmosphere, String secondaryAtmosphere, String musicPath) {
-        this.id = id;
+    public MusicTrack(String primaryAtmosphere, String secondaryAtmosphere, String musicPath) {
         this.primaryAtmosphere = primaryAtmosphere;
         this.secondaryAtmosphere = secondaryAtmosphere;
         this.musicPath = musicPath;
