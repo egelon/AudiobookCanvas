@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "character_line",
+@Entity(tableName = "Character_Line",
         foreignKeys = {
                 @ForeignKey(entity = TextBlock.class,
                         parentColumns = "id",
