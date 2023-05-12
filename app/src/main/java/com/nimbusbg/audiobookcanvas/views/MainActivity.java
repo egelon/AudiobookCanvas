@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import com.nimbusbg.audiobookcanvas.MyAudiobookCanvasApplication;
 import com.nimbusbg.audiobookcanvas.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -143,8 +144,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void onEditProjectClicked(View view)
     {
-        AudiobookRepository repository = new AudiobookRepository(this.getApplication());
-        repository.insert(new AudiobookProject("1.0.0",
+        MyAudiobookCanvasApplication appReference = (MyAudiobookCanvasApplication) this.getApplication();
+        AudiobookRepository repository = new AudiobookRepository(appReference, appReference.getExecutorService());
+        AudiobookProject testInsert = new AudiobookProject("1.0.0",
                 false,
                 0,
                 "testProject",
@@ -152,10 +154,17 @@ public class MainActivity extends AppCompatActivity {
                 "output.xml",
                 "audiobook.mp3",
                 new Date(2012, 5, 12),
-                new Date(2023, 11, 27)));
+                new Date(2023, 11, 27));
 
+
+        //repository.deleteAllProjects();
+
+        repository.insert(testInsert);
+
+
+
+        //Toast.makeText(getApplicationContext(), "Added Project ID " + repository.getLastInsertedProjectId() , Toast.LENGTH_SHORT).show();
         /*
-        Toast.makeText(getApplicationContext(), "Edit project", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT, MediaStore.Downloads.EXTERNAL_CONTENT_URI);
         intent.setType("text/plain");
         this.startActivity(intent);

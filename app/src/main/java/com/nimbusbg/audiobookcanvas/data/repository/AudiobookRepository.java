@@ -6,83 +6,78 @@ import androidx.lifecycle.LiveData;
 
 import com.nimbusbg.audiobookcanvas.data.local.AudiobookProjectDatabase;
 import com.nimbusbg.audiobookcanvas.data.local.dao.ProjectDao;
+import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class AudiobookRepository
 {
+    private final Executor executor;
     private ProjectDao projectDao;
-    private List<AudiobookProject> allProjects;
+    private AppInfo appInfoDao;
+    private LiveData<List<AudiobookProject>> allProjects;
+    private long lastInsertedProjectId;
+    private long[] lastInsertedProjectIds;
+    private int affectedEntities;
 
-    public AudiobookRepository(Application application)
+    public AudiobookRepository(Application application, Executor executor)
     {
         AudiobookProjectDatabase database = AudiobookProjectDatabase.getInstance(application);
+        this.executor = executor;
         projectDao = database.projectDao();
-        allProjects = projectDao.getAllEntities().getValue();
+        allProjects = projectDao.getAllProjects();
     }
 
     public void insert(AudiobookProject audiobookProject)
     {
-        //new InsertProjectAsyncTask(projectDao).execute(audiobookProject);
-
-        ExecutorService insertProjectService = Executors.newSingleThreadExecutor();
-        insertProjectService.execute(
-                new Runnable() {
+        executor.execute(new Runnable() {
                     @Override
-                    public void run()
-                    {
-                        long result = projectDao.insert(audiobookProject);
-                    }
-                }
-        );
+                    public void run() {
+                        lastInsertedProjectId = projectDao.insert(audiobookProject);
+                    }});
+    }
+
+    public void insert(List<AudiobookProject> audiobookProjectList)
+    {
+        executor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        lastInsertedProjectIds = projectDao.insert(audiobookProjectList);
+                    }});
     }
 
     public void update(AudiobookProject audiobookProject)
     {
-        ExecutorService updateProjectService = Executors.newSingleThreadExecutor();
-        updateProjectService.execute(
-                new Runnable() {
+        executor.execute(new Runnable() {
                     @Override
-                    public void run()
-                    {
+                    public void run() {
                         projectDao.update(audiobookProject);
-                    }
-                }
-        );
+                    }});
     }
 
     public void delete(AudiobookProject audiobookProject)
     {
-        ExecutorService deleteProjectService = Executors.newSingleThreadExecutor();
-        deleteProjectService.execute(
-                new Runnable() {
+        executor.execute(new Runnable() {
                     @Override
-                    public void run()
-                    {
+                    public void run() {
                         projectDao.delete(audiobookProject);
-                    }
-                }
-        );
+                    }});
     }
 
     public void deleteAllProjects()
     {
-        ExecutorService deleteAllProjectService = Executors.newSingleThreadExecutor();
-        deleteAllProjectService.execute(
-                new Runnable() {
+        executor.execute(new Runnable() {
                     @Override
-                    public void run()
-                    {
-                        projectDao.deleteAll();
-                    }
-                }
-        );
+                    public void run() {
+                        affectedEntities = projectDao.deleteAllProjects();
+                    }});
     }
 
-    public List<AudiobookProject> getAllProjects()
+    public LiveData<List<AudiobookProject>> getAllProjectsLiveData()
     {
         return allProjects;
     }
