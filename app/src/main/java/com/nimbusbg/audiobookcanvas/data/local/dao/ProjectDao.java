@@ -12,22 +12,12 @@ import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
 import java.util.List;
 
 @Dao
-public interface ProjectDao {
-    @Insert
-    void insert(AudiobookProject audiobookProject);
+public abstract class ProjectDao extends BaseDao<AudiobookProject> {
+    public ProjectDao() {
+        super("audiobookProject", AudiobookProject.class);
+    }
 
-    @Update
-    void update(AudiobookProject audiobookProject);
+    @Query("SELECT * FROM AudiobookProject ORDER BY last_modified DESC")
+    abstract LiveData<List<AudiobookProject>> getAllProjectsNewestToOldest();
 
-    @Delete
-    void delete(AudiobookProject audiobookProject);
-
-    @Query("DELETE FROM AudiobookProject")
-    void deleteAllProjects();
-
-    @Query("SELECT * FROM AudiobookProject ORDER BY id DESC")
-    LiveData<List<AudiobookProject>> getAllProjects();
-
-    @Query("SELECT * FROM AudiobookProject WHERE id =:requestedID LIMIT 1")
-    LiveData<AudiobookProject> getProjectById(int requestedID);
 }

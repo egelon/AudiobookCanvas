@@ -15,13 +15,13 @@ import java.util.concurrent.Executors;
 public class AudiobookRepository
 {
     private ProjectDao projectDao;
-    private LiveData<List<AudiobookProject>> allProjects;
+    private List<AudiobookProject> allProjects;
 
     public AudiobookRepository(Application application)
     {
         AudiobookProjectDatabase database = AudiobookProjectDatabase.getInstance(application);
         projectDao = database.projectDao();
-        allProjects = projectDao.getAllProjects();
+        allProjects = projectDao.getAllEntities().getValue();
     }
 
     public void insert(AudiobookProject audiobookProject)
@@ -34,7 +34,7 @@ public class AudiobookRepository
                     @Override
                     public void run()
                     {
-                        projectDao.insert(audiobookProject);
+                        long result = projectDao.insert(audiobookProject);
                     }
                 }
         );
@@ -76,13 +76,13 @@ public class AudiobookRepository
                     @Override
                     public void run()
                     {
-                        projectDao.deleteAllProjects();
+                        projectDao.deleteAll();
                     }
                 }
         );
     }
 
-    public LiveData<List<AudiobookProject>> getAllProjects()
+    public List<AudiobookProject> getAllProjects()
     {
         return allProjects;
     }

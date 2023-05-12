@@ -23,6 +23,8 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
+import com.nimbusbg.audiobookcanvas.data.repository.AudiobookRepository;
 import com.nimbusbg.audiobookcanvas.databinding.ActivityMainBinding;
 
 import android.view.Menu;
@@ -31,6 +33,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.Date;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -139,10 +143,23 @@ public class MainActivity extends AppCompatActivity {
 
     public void onEditProjectClicked(View view)
     {
+        AudiobookRepository repository = new AudiobookRepository(this.getApplication());
+        repository.insert(new AudiobookProject("1.0.0",
+                false,
+                0,
+                "testProject",
+                "inpt.txt",
+                "output.xml",
+                "audiobook.mp3",
+                new Date(2012, 5, 12),
+                new Date(2023, 11, 27)));
+
+        /*
         Toast.makeText(getApplicationContext(), "Edit project", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT, MediaStore.Downloads.EXTERNAL_CONTENT_URI);
         intent.setType("text/plain");
         this.startActivity(intent);
+         */
     }
 
     private void setAnimation(boolean isMenuClosed) {

@@ -7,13 +7,13 @@ import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
 
-public class ProjectMetadata {
+public class ProjectWithMetadata {
     @Embedded
     AudiobookProject audiobookProject;
 
-    @Relation(parentColumn = "id", entityColumn = "id")
+    @Relation(parentColumn = "id", entityColumn = "project_id")
     AppInfo appInfo;
 
-    @Relation(parentColumn = "id", entityColumn = "id")
+    @Relation(parentColumn = "id", entityColumn = "project_id")
     AudiobookData audiobookData;
 }

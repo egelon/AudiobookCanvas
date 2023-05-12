@@ -5,8 +5,6 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Update;
 
-import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectMetadata;
-
 @Dao
 public interface ProjectWithMetadataDao {
     //@Insert
