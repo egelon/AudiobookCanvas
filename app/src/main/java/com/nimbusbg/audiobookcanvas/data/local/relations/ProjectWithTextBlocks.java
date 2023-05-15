@@ -4,16 +4,16 @@ import androidx.room.Embedded;
 import androidx.room.Relation;
 
 import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
-import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
+import com.nimbusbg.audiobookcanvas.data.local.entities.TextBlock;
 
-public class ProjectWithMetadata {
+import java.util.List;
+
+public class ProjectWithTextBlocks {
     @Embedded
     public AudiobookProject project;
 
-    @Relation(parentColumn = "id", entityColumn = "project_id")
-    public AppInfo appInfo;
-
-    @Relation(parentColumn = "id", entityColumn = "project_id")
-    public AudiobookData audiobookData;
+    @Relation(parentColumn = "id",
+              entityColumn = "project_id")
+    public List<TextBlock> textBlocks;
 }

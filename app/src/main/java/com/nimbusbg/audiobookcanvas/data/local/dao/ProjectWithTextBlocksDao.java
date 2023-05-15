@@ -8,25 +8,25 @@ import androidx.room.Query;
 import androidx.room.Transaction;
 
 import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
-import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
-import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
+import com.nimbusbg.audiobookcanvas.data.local.entities.TextBlock;
+import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithTextBlocks;
 
 import java.util.List;
 
 @Dao
-public interface ProjectWithMetadataDao {
+public interface ProjectWithTextBlocksDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     long insertProject(AudiobookProject project);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long insertAppInfo(AppInfo appInfo);
+    long insertTextBlock(TextBlock textBlock);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long insertAudiobookData(AudiobookData audiobookData);
+    long[] insertTextBlocks(List<TextBlock> textBlocks);
 
     @Transaction
     @Query("Select * FROM audiobookProject WHERE id = :id")
-    LiveData<List<ProjectWithMetadata>> getProjectWithMetadataById(int id);
+    LiveData<List<ProjectWithTextBlocks>> getProjectWithTextBlocksById(int id);
 }

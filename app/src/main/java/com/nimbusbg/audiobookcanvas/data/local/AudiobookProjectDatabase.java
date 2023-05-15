@@ -9,7 +9,10 @@ import androidx.room.TypeConverters;
 
 
 import com.nimbusbg.audiobookcanvas.data.local.dao.AppInfoDao;
+import com.nimbusbg.audiobookcanvas.data.local.dao.AudiobookDataDao;
 import com.nimbusbg.audiobookcanvas.data.local.dao.ProjectDao;
+import com.nimbusbg.audiobookcanvas.data.local.dao.ProjectWithMetadataDao;
+import com.nimbusbg.audiobookcanvas.data.local.dao.ProjectWithTextBlocksDao;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
@@ -36,7 +39,10 @@ public abstract class AudiobookProjectDatabase extends RoomDatabase {
 
     public abstract ProjectDao projectDao();
     public abstract AppInfoDao appInfoDao();
-    //public abstract ProjectWithMetadataDao projectWithMetadataDao();
+    public abstract AudiobookDataDao audiobookDataDao();
+
+    public abstract ProjectWithMetadataDao projectWithMetadataDao();
+    public abstract ProjectWithTextBlocksDao projectWithTextBlocksDao();
     //TODO: add the other DAOs here!
 
     public static synchronized AudiobookProjectDatabase getInstance(Context context)

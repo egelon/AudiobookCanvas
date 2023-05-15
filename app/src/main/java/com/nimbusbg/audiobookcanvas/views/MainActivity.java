@@ -24,6 +24,8 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
+import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
 import com.nimbusbg.audiobookcanvas.data.repository.AudiobookRepository;
 import com.nimbusbg.audiobookcanvas.databinding.ActivityMainBinding;
@@ -146,7 +148,9 @@ public class MainActivity extends AppCompatActivity {
     {
         MyAudiobookCanvasApplication appReference = (MyAudiobookCanvasApplication) this.getApplication();
         AudiobookRepository repository = new AudiobookRepository(appReference, appReference.getExecutorService());
-        AudiobookProject testInsert = new AudiobookProject("1.0.0",
+
+        //repository.deleteAllProjects();
+        AudiobookProject testProject = new AudiobookProject("1.0.0",
                 false,
                 0,
                 "testProject",
@@ -156,14 +160,16 @@ public class MainActivity extends AppCompatActivity {
                 new Date(2012, 5, 12),
                 new Date(2023, 11, 27));
 
+        long rowID = repository.insert(testProject);
+        AppInfo testAppInfo = new AppInfo((int) rowID, "1.0.1", "14_Pie", "Galaxy S22");
+        repository.insert(testAppInfo);
+        AudiobookData testData = new AudiobookData((int) rowID, "audiobookName_1", "secret", "en-us", "no description");
+        repository.insert(testData);
 
-        //repository.deleteAllProjects();
-
-        repository.insert(testInsert);
+        //repository.insertProjectWithMetadata(testProject, testAppInfo, testData);
 
 
-
-        //Toast.makeText(getApplicationContext(), "Added Project ID " + repository.getLastInsertedProjectId() , Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "Added Project RowID " + rowID , Toast.LENGTH_SHORT).show();
         /*
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT, MediaStore.Downloads.EXTERNAL_CONTENT_URI);
         intent.setType("text/plain");
