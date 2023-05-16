@@ -29,4 +29,8 @@ public interface ProjectWithMetadataDao {
     @Transaction
     @Query("Select * FROM audiobookProject WHERE id = :id")
     LiveData<List<ProjectWithMetadata>> getProjectWithMetadataById(int id);
+
+    @Transaction
+    @Query("Select * FROM audiobookProject ORDER BY id ASC")
+    LiveData<List<ProjectWithMetadata>> getAllProjectWithMetadata();
 }

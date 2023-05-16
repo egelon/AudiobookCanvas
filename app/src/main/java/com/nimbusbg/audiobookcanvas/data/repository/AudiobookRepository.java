@@ -37,7 +37,7 @@ public class AudiobookRepository
 
 
 
-    private LiveData<List<AudiobookProject>> allProjects;
+    private LiveData<List<ProjectWithMetadata>> allProjects;
     private long lastInsertedProjectId;
     private long[] lastInsertedProjectIds;
     private int affectedEntities;
@@ -54,7 +54,7 @@ public class AudiobookRepository
         projectWithMetadataDao = database.projectWithMetadataDao();
         projectWithTextBlocksDao = database.projectWithTextBlocksDao();
 
-        allProjects = projectDao.getAllProjects();
+        allProjects = projectWithMetadataDao.getAllProjectWithMetadata();
     }
 
     //public void insert(AudiobookProject audiobookProject)
@@ -202,7 +202,7 @@ public class AudiobookRepository
          */
     }
 
-    public LiveData<List<AudiobookProject>> getAllProjectsLiveData()
+    public LiveData<List<ProjectWithMetadata>> getAllProjectsWithMetadata()
     {
         return allProjects;
     }

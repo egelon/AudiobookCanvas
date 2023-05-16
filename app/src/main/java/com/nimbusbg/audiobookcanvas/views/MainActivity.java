@@ -39,10 +39,14 @@ import android.widget.Toast;
 
 import java.util.Date;
 
+import sun.jvm.hotspot.utilities.Observer;
+
 
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration appBarConfiguration;
+
+    private ProjectWithMetadataViewModel projectWithMetadataViewModel;
 
     private FloatingActionButton fabMenu, btnOpen, btnEdit;
     private TextView openLabel, editLabel;
@@ -65,6 +69,16 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_main_content_area);
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+
+        //attatch ViewModel
+        projectWithMetadataViewModel = ViewModelProviders.of(this).get(ProjectWithMetadataViewModel);
+        projectWithMetadataViewModel.getAllProjectsWithMetadata().observe(this, new Observer(List<ProjectWithMetadata> projects) {
+            @Override
+            public void onChanged(@Nullable List<ProjectWithMetadata> projects) {
+                //update our recycler view
+                Toast.makeText(getApplicationContext(), "Latest project ID: " + projects[0].project.getId() , Toast.LENGTH_SHORT).show();
+            }
+        });
 
         filePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
