@@ -13,12 +13,15 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -27,8 +30,10 @@ import androidx.navigation.ui.NavigationUI;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
+import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
 import com.nimbusbg.audiobookcanvas.data.repository.AudiobookRepository;
 import com.nimbusbg.audiobookcanvas.databinding.ActivityMainBinding;
+import com.nimbusbg.audiobookcanvas.viewmodels.ProjectWithMetadataViewModel;
 
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,8 +43,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Date;
-
-import sun.jvm.hotspot.utilities.Observer;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -71,14 +75,8 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
         //attatch ViewModel
-        projectWithMetadataViewModel = ViewModelProviders.of(this).get(ProjectWithMetadataViewModel);
-        projectWithMetadataViewModel.getAllProjectsWithMetadata().observe(this, new Observer(List<ProjectWithMetadata> projects) {
-            @Override
-            public void onChanged(@Nullable List<ProjectWithMetadata> projects) {
-                //update our recycler view
-                Toast.makeText(getApplicationContext(), "Latest project ID: " + projects[0].project.getId() , Toast.LENGTH_SHORT).show();
-            }
-        });
+        projectWithMetadataViewModel = new ViewModelProvider(this).get(ProjectWithMetadataViewModel.class);
+
 
         filePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -137,6 +135,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void onOpenTxtFileClicked(View view)
     {
+        int affectedRows = projectWithMetadataViewModel.deleteAllProjectsWithMetadata();
+        Toast.makeText(getApplicationContext(), "Cleared database, affected rows: " + affectedRows, Toast.LENGTH_SHORT).show();
+
+        /*
         try
         {
             //start picking a file
@@ -156,34 +158,37 @@ public class MainActivity extends AppCompatActivity {
             // Show the floating action button
             toggleFABMenuVisibility(true);
         }
+
+         */
     }
 
     public void onEditProjectClicked(View view)
     {
-        MyAudiobookCanvasApplication appReference = (MyAudiobookCanvasApplication) this.getApplication();
-        AudiobookRepository repository = new AudiobookRepository(appReference, appReference.getExecutorService());
-
-        //repository.deleteAllProjects();
         AudiobookProject testProject = new AudiobookProject("1.0.0",
                 false,
-                0,
-                "testProject",
-                "inpt.txt",
-                "output.xml",
-                "audiobook.mp3",
+                17,
+                "testProject2",
+                "input.txt",
+                "output2.xml",
+                "audiobook2.mp3",
                 new Date(2012, 5, 12),
-                new Date(2023, 11, 27));
+                new Date(2023, 12, 29));
+        AppInfo testAppInfo = new AppInfo(0,"1.0.2", "14.02_Pie", "Galaxy S22");
+        AudiobookData testData = new AudiobookData(0,"audiobookName_2", "secret", "en-us", "no description");
 
-        long rowID = repository.insert(testProject);
-        AppInfo testAppInfo = new AppInfo((int) rowID, "1.0.1", "14_Pie", "Galaxy S22");
-        repository.insert(testAppInfo);
-        AudiobookData testData = new AudiobookData((int) rowID, "audiobookName_1", "secret", "en-us", "no description");
-        repository.insert(testData);
+        projectWithMetadataViewModel.insertProjectWithMetadata(testProject, testAppInfo, testData);
 
-        //repository.insertProjectWithMetadata(testProject, testAppInfo, testData);
+        projectWithMetadataViewModel.getAllProjectsWithMetadata().observe(this,
+                new Observer<List<ProjectWithMetadata>>() {
+                    @Override
+                    public void onChanged(@Nullable List<ProjectWithMetadata> projects) {
+                        //update our recycler view
+                        if(!projects.isEmpty()) {
+                            Toast.makeText(getApplicationContext(), "Latest project ID: " + projects.get(0).project.getId(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
 
-
-        Toast.makeText(getApplicationContext(), "Added Project RowID " + rowID , Toast.LENGTH_SHORT).show();
         /*
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT, MediaStore.Downloads.EXTERNAL_CONTENT_URI);
         intent.setType("text/plain");

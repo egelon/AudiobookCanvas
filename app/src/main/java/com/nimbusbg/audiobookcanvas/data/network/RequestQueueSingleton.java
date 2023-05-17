@@ -1,4 +1,4 @@
-package com.nimbusbg.audiobookcanvas.models;
+package com.nimbusbg.audiobookcanvas.data.network;
 
 import android.content.Context;
 

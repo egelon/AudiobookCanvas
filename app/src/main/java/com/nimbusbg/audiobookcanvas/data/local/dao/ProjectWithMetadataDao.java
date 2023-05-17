@@ -2,6 +2,7 @@ package com.nimbusbg.audiobookcanvas.data.local.dao;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
@@ -31,6 +32,14 @@ public interface ProjectWithMetadataDao {
     LiveData<List<ProjectWithMetadata>> getProjectWithMetadataById(int id);
 
     @Transaction
-    @Query("Select * FROM audiobookProject ORDER BY id ASC")
+    @Query("Select * FROM audiobookProject ORDER BY id DESC")
     LiveData<List<ProjectWithMetadata>> getAllProjectWithMetadata();
+
+    @Transaction
+    @Query("SELECT id FROM audiobookProject WHERE rowid = :rowId")
+    int getProjectIdByRowId(long rowId);
+
+    @Transaction
+    @Query("DELETE FROM audiobookProject")
+    int deleteAllProjectsWithMetadata();
 }

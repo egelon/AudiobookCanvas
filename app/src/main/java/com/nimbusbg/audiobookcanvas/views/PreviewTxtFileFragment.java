@@ -47,7 +47,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONObject;
 
-import com.nimbusbg.audiobookcanvas.models.RequestQueueSingleton;
+import com.nimbusbg.audiobookcanvas.data.network.RequestQueueSingleton;
 
 public class PreviewTxtFileFragment extends Fragment{
 

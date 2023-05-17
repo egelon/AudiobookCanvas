@@ -95,49 +95,62 @@ public class AudiobookRepository
 
     public void insertProjectWithMetadata(AudiobookProject project, AppInfo appInfo, AudiobookData audiobookData)
     {
-
-
-
-
-
-
-        /*
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                projectWithMetadataDao.insertProject(project);
-            }});
-
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                projectWithMetadataDao.insertAppInfo(appInfo);
-            }});
-
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                projectWithMetadataDao.insertAudiobookData(audiobookData);
-            }});
-        */
+        int id = insert(project);
+        appInfo.setProject_id(id);
+        audiobookData.setProject_id(id);
+        insert(appInfo);
+        insert(audiobookData);
     }
 
 
-
-    public long insert(AudiobookProject audiobookProject)
+    private <T> T getFuture(Callable<T> callable)
     {
-        Callable<Long> insertCallable = () -> projectWithMetadataDao.insertProject(audiobookProject);
-        long rowId = 0;
-
-        Future<Long> future = executorService.submit(insertCallable);
+        T result = null;
+        Future<T> future = executorService.submit(callable);
         try {
-            rowId = future.get();
+            result = future.get();
         } catch (InterruptedException e1) {
             e1.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
-        return rowId;
+        return result;
+    }
+
+
+
+
+    public int insert(AudiobookProject audiobookProject)
+    {
+        Callable<Long> insertCallable = () -> projectWithMetadataDao.insertProject(audiobookProject);
+
+        /*
+
+        Future<Long> insertProjectFuture = executorService.submit(insertCallable);
+        try {
+            rowId = insertProjectFuture.get();
+        } catch (InterruptedException e1) {
+            e1.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+         */
+
+        long finalRowId = getFuture(insertCallable);
+        Callable<Integer> fetchIdCallable = () -> projectWithMetadataDao.getProjectIdByRowId(finalRowId);
+        int project_id = getFuture(fetchIdCallable);
+/*
+        Future<Integer> queryIdFuture = executorService.submit(fetchIdCallable);
+        try {
+            project_id = queryIdFuture.get();
+        } catch (InterruptedException e1) {
+            e1.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+ */
+        return project_id;
     }
 
 
@@ -190,16 +203,11 @@ public class AudiobookRepository
          */
     }
 
-    public void deleteAllProjects()
+    public int deleteAllProjectsWithMetadata()
     {
-        /*
-        executor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        affectedEntities = projectDao.deleteAllProjects();
-                    }});
-
-         */
+        Callable<Integer> deleteAllCallable = () -> projectWithMetadataDao.deleteAllProjectsWithMetadata();
+        int affectedRows = getFuture(deleteAllCallable);
+        return affectedRows;
     }
 
     public LiveData<List<ProjectWithMetadata>> getAllProjectsWithMetadata()
