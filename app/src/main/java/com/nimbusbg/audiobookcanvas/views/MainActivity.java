@@ -26,6 +26,8 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
@@ -41,6 +43,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import java.util.Date;
 import java.util.List;
@@ -49,9 +52,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration appBarConfiguration;
-
     private ProjectWithMetadataViewModel projectWithMetadataViewModel;
-
     private FloatingActionButton fabMenu, btnOpen, btnEdit;
     private TextView openLabel, editLabel;
     Animation rotateOpenAnim, rotateCloseAnim, fromBottomAnim, toBottomAnim;
@@ -61,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int PICK_TXT_FILE = 2;
     ActivityResultLauncher<Intent> filePickerLauncher;
     private ActivityMainBinding binding;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,8 +77,25 @@ public class MainActivity extends AppCompatActivity {
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
+        RecyclerView projectRecyclerView = findViewById(R.id.projects_recycler_view);
+        projectRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        projectRecyclerView.setHasFixedSize(true);
+
+        final ProjectAdapter projectAdapter = new ProjectAdapter();
+        projectRecyclerView.setAdapter(projectAdapter);
+
         //attatch ViewModel
         projectWithMetadataViewModel = new ViewModelProvider(this).get(ProjectWithMetadataViewModel.class);
+
+        //load all projects into the recycler view
+        projectWithMetadataViewModel.getAllProjectsWithMetadata().observe(this,
+                new Observer<List<ProjectWithMetadata>>() {
+                    @Override
+                    public void onChanged(@Nullable List<ProjectWithMetadata> projects) {
+                        //update our recycler view
+                        projectAdapter.setProjects(projects);
+                    }
+                });
 
 
         filePickerLauncher = registerForActivityResult(
@@ -178,16 +198,7 @@ public class MainActivity extends AppCompatActivity {
 
         projectWithMetadataViewModel.insertProjectWithMetadata(testProject, testAppInfo, testData);
 
-        projectWithMetadataViewModel.getAllProjectsWithMetadata().observe(this,
-                new Observer<List<ProjectWithMetadata>>() {
-                    @Override
-                    public void onChanged(@Nullable List<ProjectWithMetadata> projects) {
-                        //update our recycler view
-                        if(!projects.isEmpty()) {
-                            Toast.makeText(getApplicationContext(), "Latest project ID: " + projects.get(0).project.getId(), Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+
 
         /*
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT, MediaStore.Downloads.EXTERNAL_CONTENT_URI);
