@@ -23,6 +23,8 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectH
     @Override
     public ProjectHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
+        //This is where we inflate the layout (where we set how the rows are going to look like)
+        //we use our project_item.xml for this
         View projectView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.project_item, parent, false);
 
@@ -32,6 +34,7 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectH
     @Override
     public void onBindViewHolder(@NonNull ProjectHolder holder, int position)
     {
+        //here we set the values to each recycler view item
         ProjectWithMetadata currentProject = projects.get(position);
         holder.projId.setText(String.valueOf(currentProject.project.getId()));
         holder.projName.setText(currentProject.project.getProjectName());
@@ -62,11 +65,13 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectH
     @Override
     public int getItemCount()
     {
+        //how many items do we want to display
         return projects.size();
     }
 
     public void setProjects(List<ProjectWithMetadata> projects)
     {
+        //update our items when the LiveData has updated
         this.projects = projects;
         notifyDataSetChanged();
     }
@@ -80,6 +85,7 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectH
 
         public ProjectHolder(@NonNull View itemView)
         {
+            //binds views from our item layout xml to variables, so we can use them in onBindViewHolder
             super(itemView);
             projId = itemView.findViewById(R.id.project_item_proj_id);
             projName = itemView.findViewById(R.id.project_item_proj_name);

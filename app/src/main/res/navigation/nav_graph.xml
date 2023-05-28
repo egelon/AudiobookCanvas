@@ -3,37 +3,31 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/WelcomeFragment">
+    app:startDestination="@id/ProjectListFragment">
 
     <fragment
-        android:id="@+id/WelcomeFragment"
-        android:name="com.nimbusbg.audiobookcanvas.views.WelcomeFragment"
-        android:label="@string/welcome_fragment_label"
-        tools:layout="@layout/fragment_welcome">
+        android:id="@+id/ProjectListFragment"
+        android:name="com.nimbusbg.audiobookcanvas.views.ProjectListFragment"
+        android:label="@string/project_list_fragment_label"
+        tools:layout="@layout/project_list_fragment">
         <action
-            android:id="@+id/actionTextFileSelected"
-            app:destination="@id/PreviewTxtFileFragment" />
-
-
-
+            android:id="@+id/actionProjectAdded"
+            app:destination="@id/ProjectSetupFragment" />
+        <action
+            android:id="@+id/actionProjectSelected"
+            app:destination="@id/ProjectSetupFragment" />
     </fragment>
+
     <fragment
-        android:id="@+id/PreviewTxtFileFragment"
-        android:name="com.nimbusbg.audiobookcanvas.views.PreviewTxtFileFragment"
-        android:label="@string/preview_txt_fragment_label"
-        tools:layout="@layout/fragment_preview_text_file">
-
+        android:id="@+id/ProjectSetupFragment"
+        android:name="com.nimbusbg.audiobookcanvas.views.ProjectSetupFragment"
+        android:label="@string/project_setup_fragment_label"
+        tools:layout="@layout/project_setup_fragment">
         <action
-            android:id="@+id/actionCancelProject"
-            app:destination="@id/WelcomeFragment" />
-        <argument
-            android:name="txtFilePath"
-            app:argType="string" />
-        <argument
-            android:name="projFilePath"
-            app:argType="string" />
-
+            android:id="@+id/actionCancelProjectSetup"
+            app:destination="@id/ProjectListFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/SettingsFragment"
         android:name="com.nimbusbg.audiobookcanvas.views.SettingsFragment"

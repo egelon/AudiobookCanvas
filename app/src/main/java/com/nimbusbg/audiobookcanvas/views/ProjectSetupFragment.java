@@ -24,7 +24,7 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.nimbusbg.audiobookcanvas.R;
-import com.nimbusbg.audiobookcanvas.databinding.FragmentPreviewTextFileBinding;
+import com.nimbusbg.audiobookcanvas.databinding.ProjectSetupFragmentBinding;
 
 import org.json.JSONException;
 import org.xmlpull.v1.XmlSerializer;
@@ -49,16 +49,16 @@ import org.json.JSONObject;
 
 import com.nimbusbg.audiobookcanvas.data.network.RequestQueueSingleton;
 
-public class PreviewTxtFileFragment extends Fragment{
+public class ProjectSetupFragment extends Fragment{
 
     TextView textFileContentView;
     EditText editProjectName;
     Context appActivityContext;
     Button btnListCharacters, btnCancel;
     ActivityResultLauncher<Intent> filePicker;
-    private FragmentPreviewTextFileBinding binding;
+    private ProjectSetupFragmentBinding binding;
     private ArrayList<String> contentChunks;
-    private int maxChunkSize = 2000;
+    private int maxChunkSize = 1400;
     String openai_completions_endpoint = "https://api.openai.com/v1/completions";
     public static final String requestTag = "NamedEntityRecognitionRequest";
 
@@ -68,7 +68,7 @@ public class PreviewTxtFileFragment extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        binding = FragmentPreviewTextFileBinding.inflate(inflater, container, false);
+        binding = ProjectSetupFragmentBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
@@ -80,6 +80,7 @@ public class PreviewTxtFileFragment extends Fragment{
         //setup the fragment result listener
 
 
+        /*
         btnCancel = view.findViewById(R.id.btnCancelFilePreview);
         btnListCharacters = view.findViewById(R.id.btnInvokeAPI);
         btnListCharacters.setOnClickListener(new View.OnClickListener() {
@@ -96,21 +97,24 @@ public class PreviewTxtFileFragment extends Fragment{
             }
         });
 
-        textFileContentView = view.findViewById(R.id.textFileContent);
-        textFileContentView.setMovementMethod(new ScrollingMovementMethod());
+         */
 
-        editProjectName = view.findViewById(R.id.editProjectName);
+        //textFileContentView = view.findViewById(R.id.textFileContent);
+        //textFileContentView.setMovementMethod(new ScrollingMovementMethod());
 
-        String textFilePath = com.nimbusbg.audiobookcanvas.views.PreviewTxtFileFragmentArgs.fromBundle(getArguments()).getTxtFilePath();
-        String projectFilePath = PreviewTxtFileFragmentArgs.fromBundle(getArguments()).getProjFilePath();
-        textFileURI = Uri.parse(textFilePath);
-        projectFileURI = Uri.parse(projectFilePath);
+        //editProjectName = view.findViewById(R.id.editProjectName);
 
-        textFileContentView.setText("Slected file: " + textFileURI.toString());
+        //String textFilePath = com.nimbusbg.audiobookcanvas.views.PreviewTxtFileFragmentArgs.fromBundle(getArguments()).getTxtFilePath();
+        //String projectFilePath = PreviewTxtFileFragmentArgs.fromBundle(getArguments()).getProjFilePath();
+        //textFileURI = Uri.parse(textFilePath);
+        //projectFileURI = Uri.parse(projectFilePath);
+
+        //textFileContentView.setText("Slected file: " + textFileURI.toString());
 
     }
 
     private void chunkInputFile(Context context, Uri uri) {
+
         InputStream inputStream = null;
         contentChunks = new ArrayList<String>();
         StringBuilder text = new StringBuilder();
