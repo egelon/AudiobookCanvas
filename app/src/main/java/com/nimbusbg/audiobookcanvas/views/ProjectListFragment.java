@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
+import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -66,6 +68,16 @@ public class ProjectListFragment extends Fragment {
 
         final ProjectAdapter projectAdapter = new ProjectAdapter();
         projectRecyclerView.setAdapter(projectAdapter);
+
+        projectAdapter.setOnProjectClickListener(new ProjectAdapter.OnProjectClickListener() {
+            @Override
+            public void onProjectClicked(ProjectWithMetadata project) {
+                NavDirections action = ProjectListFragmentDirections.actionProjectSelected();
+                navController.navigate(action);
+                Toast.makeText(getActivity(), "Project ID: " + String.valueOf(project.project.getId()), Toast.LENGTH_SHORT).show();
+
+            }
+        });
 
         //load all projects into the recycler view
         projectWithMetadataViewModel.getAllProjectsWithMetadata().observe(this,

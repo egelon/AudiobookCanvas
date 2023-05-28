@@ -19,6 +19,7 @@ import java.util.List;
 public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectHolder>
 {
     private List<ProjectWithMetadata> projects = new ArrayList<ProjectWithMetadata>();
+    private OnProjectClickListener listener;
     @NonNull
     @Override
     public ProjectHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
@@ -29,6 +30,16 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectH
                 .inflate(R.layout.project_item, parent, false);
 
         return new ProjectHolder(projectView);
+    }
+
+    public interface OnProjectClickListener
+    {
+        void onProjectClicked(ProjectWithMetadata project);
+    }
+
+    public void setOnProjectClickListener(OnProjectClickListener listener)
+    {
+        this.listener = listener;
     }
 
     @Override
@@ -91,6 +102,15 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectH
             projName = itemView.findViewById(R.id.project_item_proj_name);
             completedText = itemView.findViewById(R.id.project_item_proj_completed);
             completedTelltale = itemView.findViewById(R.id.project_item_proj_completed_telltale);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position = getAdapterPosition();
+                    if(listener != null && position != RecyclerView.NO_POSITION) {
+                        listener.onProjectClicked(projects.get(position));
+                    }
+                }
+            });
         }
     }
 }
