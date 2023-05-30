@@ -215,6 +215,11 @@ public class AudiobookRepository
         return allProjects;
     }
 
+    public void updateProjectWithMetadata(AudiobookProject project, AppInfo appInfo, AudiobookData audiobookData)
+    {
+        //TODO: finish me
+    }
+
     /*
     private static class InsertProjectAsyncTask extends AsyncTask<AudiobookProject, Void, Void>
     {

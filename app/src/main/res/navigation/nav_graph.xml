@@ -26,6 +26,9 @@
         <action
             android:id="@+id/actionCancelProjectSetup"
             app:destination="@id/ProjectListFragment" />
+        <action
+            android:id="@+id/actionProjectSaved"
+            app:destination="@id/ProjectListFragment" />
     </fragment>
 
     <fragment

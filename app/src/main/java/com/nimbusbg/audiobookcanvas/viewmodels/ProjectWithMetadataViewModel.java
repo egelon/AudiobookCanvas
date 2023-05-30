@@ -56,6 +56,12 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel {
         repository.insertProjectWithMetadata(project, appInfo, audiobookData);
     }
 
+    public void updateProjectWithMetadata(int id, String projectNameStr, String audiobookNameStr, String bookNameStr, String authorNameStr, String projectDescriptionStr, String xmlFileNameStr)
+    {
+
+        //repository.updateProjectWithMetadata(project, appInfo, audiobookData);
+    }
+
     public void insertNewEmptyProject()
     {
         Date currentTime = Calendar.getInstance().getTime();

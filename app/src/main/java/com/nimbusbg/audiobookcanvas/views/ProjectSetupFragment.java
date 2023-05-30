@@ -23,9 +23,15 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavBackStackEntry;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
+
 import com.nimbusbg.audiobookcanvas.R;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
 import com.nimbusbg.audiobookcanvas.databinding.ProjectSetupFragmentBinding;
+import com.nimbusbg.audiobookcanvas.viewmodels.ProjectWithMetadataViewModel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -37,6 +43,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ProjectSetupFragment extends Fragment{
+    private ProjectSetupFragmentBinding binding;
+    Context appActivityContext;
+
+    int projectID;
     EditText projectName;
     EditText audiobookName;
     EditText bookName;
@@ -52,21 +62,10 @@ public class ProjectSetupFragment extends Fragment{
     TextView percentProcessed;
 
     ActivityResultLauncher<Intent> filePickerLauncher;
-
-
-
-
-    Context appActivityContext;
-    Button btnListCharacters, btnCancel;
-    ActivityResultLauncher<Intent> filePicker;
-    private ProjectSetupFragmentBinding binding;
     private ArrayList<String> contentChunks;
     private int maxChunkSize = 1400;
     String openai_completions_endpoint = "https://api.openai.com/v1/completions";
     public static final String requestTag = "NamedEntityRecognitionRequest";
-
-    private Uri textFileURI;
-    private Uri projectFileURI;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -80,6 +79,7 @@ public class ProjectSetupFragment extends Fragment{
         setHasOptionsMenu(true);
         super.onCreate(savedInstanceState);
 
+        //TODO: Move to a repository!
         filePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -124,7 +124,16 @@ public class ProjectSetupFragment extends Fragment{
             //return false;
         }
 
+        // The ViewModel is scoped to the `nav_graph` Navigation graph
+        NavController navController = NavHostFragment.findNavController(this);
+        NavBackStackEntry backStackEntry = navController.getBackStackEntry(R.id.nav_graph);
+        ProjectWithMetadataViewModel projectWithMetadataViewModel = new ViewModelProvider(backStackEntry).get(ProjectWithMetadataViewModel.class);
+
+        //TODO: finish this function
+        projectWithMetadataViewModel.updateProjectWithMetadata(projectID, projectNameStr, audiobookNameStr, bookNameStr, authorNameStr, projectDescriptionStr, xmlFileNameStr);
+
         Toast.makeText(this.getActivity(), "Project Saved", Toast.LENGTH_SHORT).show();
+        navController.navigate(R.id.actionProjectSaved);
 
         return true;
     }
@@ -220,6 +229,8 @@ public class ProjectSetupFragment extends Fragment{
     private void setProjectValues()
     {
         ProjectWithMetadata selectedProject = (ProjectWithMetadata) getArguments().getSerializable("projectWithMetadata");
+
+        projectID = selectedProject.project.getId();
 
         projectName.setText(selectedProject.project.getProjectName());
         audiobookName.setText(selectedProject.project.getProjectName());
