@@ -1,40 +1,31 @@
 package com.nimbusbg.audiobookcanvas.views;
 
-import android.icu.util.Calendar;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
-import androidx.navigation.NavDirections;
-import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.nimbusbg.audiobookcanvas.BuildConfig;
 import com.nimbusbg.audiobookcanvas.R;
-import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
-import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
-import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
 import com.nimbusbg.audiobookcanvas.databinding.ProjectListFragmentBinding;
 import com.nimbusbg.audiobookcanvas.viewmodels.ProjectWithMetadataViewModel;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class ProjectListFragment extends Fragment {
 
@@ -51,6 +42,37 @@ public class ProjectListFragment extends Fragment {
         binding = ProjectListFragmentBinding.inflate(inflater, container, false);
         return binding.getRoot();
 
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        inflater.inflate(R.menu.settings_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int optionItemID = item.getItemId();
+        switch (optionItemID) {
+            case R.id.action_settings:
+                ((MainActivity)this.getActivity()).getNavController().navigate(R.id.SettingsFragment);
+                return true;
+            case R.id.action_about:
+                ((MainActivity)this.getActivity()).getNavController().navigate(R.id.AboutFragment);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
@@ -72,15 +94,14 @@ public class ProjectListFragment extends Fragment {
         projectAdapter.setOnProjectClickListener(new ProjectAdapter.OnProjectClickListener() {
             @Override
             public void onProjectClicked(ProjectWithMetadata project) {
-                NavDirections action = ProjectListFragmentDirections.actionProjectSelected();
-                navController.navigate(action);
-                Toast.makeText(getActivity(), "Project ID: " + String.valueOf(project.project.getId()), Toast.LENGTH_SHORT).show();
-
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("projectWithMetadata", project);
+                navController.navigate(R.id.actionProjectSelected, bundle);
             }
         });
 
         //load all projects into the recycler view
-        projectWithMetadataViewModel.getAllProjectsWithMetadata().observe(this,
+        projectWithMetadataViewModel.getAllProjectsWithMetadata().observe(getViewLifecycleOwner(),
                 new Observer<List<ProjectWithMetadata>>() {
                     @Override
                     public void onChanged(@Nullable List<ProjectWithMetadata> projects) {
@@ -95,7 +116,7 @@ public class ProjectListFragment extends Fragment {
             @Override
             public void onClick(View view)
             {
-                onAddProjectClicked(view);
+                projectWithMetadataViewModel.insertNewEmptyProject();
             }});
     }
 
@@ -103,40 +124,5 @@ public class ProjectListFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
-    }
-
-    public String getAndroidVersion() {
-        String release = Build.VERSION.RELEASE;
-        int sdkVersion = Build.VERSION.SDK_INT;
-        return "Android SDK: " + sdkVersion + " (" + release +")";
-    }
-
-    public String getDeviceName() {
-        String manufacturer = Build.MANUFACTURER;
-        String model = Build.MODEL;
-        if (model.startsWith(manufacturer)) {
-            return model;
-        } else {
-            return (manufacturer + " " + model);
-        }
-    }
-
-    public void onAddProjectClicked(View view) {
-
-        Date currentTime = Calendar.getInstance().getTime();
-
-        AudiobookProject testProject = new AudiobookProject(getString(R.string.xmlProjectFileVersion),
-                false,
-                0,
-                getString(R.string.defaultAudiobookProjName),
-                "",
-                getString(R.string.defaultAudiobookProjName) + ".xml",
-                getString(R.string.defaultAudiobookTitle) + ".mp3",
-                currentTime,
-                currentTime);
-        AppInfo testAppInfo = new AppInfo(0, BuildConfig.VERSION_NAME, getAndroidVersion(), getDeviceName());
-        AudiobookData testData = new AudiobookData(0,getString(R.string.defaultAudiobookTitle), "", Locale.getDefault().toLanguageTag(), "");
-
-        projectWithMetadataViewModel.insertProjectWithMetadata(testProject, testAppInfo, testData);
     }
 }

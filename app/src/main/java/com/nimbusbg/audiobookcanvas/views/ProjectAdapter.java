@@ -105,7 +105,7 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectH
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    int position = getAdapterPosition();
+                    int position = getBindingAdapterPosition();
                     if(listener != null && position != RecyclerView.NO_POSITION) {
                         listener.onProjectClicked(projects.get(position));
                     }

@@ -32,4 +32,9 @@
         android:id="@+id/SettingsFragment"
         android:name="com.nimbusbg.audiobookcanvas.views.SettingsFragment"
         android:label="@string/settings_fragment_label" />
+    <fragment
+        android:id="@+id/AboutFragment"
+        android:name="com.nimbusbg.audiobookcanvas.views.AboutFragment"
+        android:label="@string/menu_item_about"
+        tools:layout="@layout/about_fragment" />
 </navigation>

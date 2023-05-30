@@ -7,7 +7,9 @@ import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
 
-public class ProjectWithMetadata {
+import java.io.Serializable;
+
+public class ProjectWithMetadata implements Serializable {
     @Embedded
     public AudiobookProject project;
 
