@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.android.volley.AuthFailureError;
@@ -51,9 +52,35 @@ import org.json.JSONObject;
 import com.nimbusbg.audiobookcanvas.data.network.RequestQueueSingleton;
 
 public class ProjectSetupFragment extends Fragment{
+    EditText projectName;
+    EditText audiobookName;
+    EditText bookName;
+    EditText authorName;
+    EditText projectDescription;
+    EditText xmlFileName;
+    Button selectTxtFileBtn;
+    Button exportAsXMLBtn;
+    Button processChunkBtn;
+    TextView textFileName;
+    TextView lastEditedOn;
+    TextView lastProcessedTxtBlock;
+    TextView percentProcessed;
 
-    TextView textFileContentView;
-    EditText editProjectName;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     Context appActivityContext;
     Button btnListCharacters, btnCancel;
     ActivityResultLauncher<Intent> filePicker;
@@ -75,11 +102,32 @@ public class ProjectSetupFragment extends Fragment{
 
 
 
+
+
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
 
         appActivityContext = this.getActivity();
+
+        projectName = binding.projName;
+        audiobookName = binding.audiobookName;
+        bookName = binding.bookName;
+        authorName = binding.authorName;
+        projectDescription = binding.descriptionText;
+        xmlFileName = binding.xmlFile;
+        selectTxtFileBtn = binding.textFileBtn;
+        exportAsXMLBtn = binding.exportAsXMLBtn;
+        processChunkBtn = binding.processTxtBlockBtn;
+        textFileName = binding.textFilePath;
+        lastEditedOn = binding.lastEditedOn;
+        lastProcessedTxtBlock = binding.lastProcessedBlock;
+        percentProcessed = binding.percentCompleted;
+
+        //this.getActivity().setTitle(R.string.edit_project_title);
+        ((MainActivity)this.getActivity()).setProjectActionBar();
+
+
         //setup the fragment result listener
 
 
@@ -116,6 +164,10 @@ public class ProjectSetupFragment extends Fragment{
 
     }
 
+
+
+
+    /*
     private void chunkInputFile(Context context, Uri uri) {
 
         InputStream inputStream = null;
@@ -275,11 +327,13 @@ public class ProjectSetupFragment extends Fragment{
         RequestQueueSingleton.getInstance(context).addToRequestQueue(jsonRequest);
     }
 
+     */
+
     @Override
     public void onDestroyView()
     {
         super.onDestroyView();
-        RequestQueueSingleton.getInstance(this.getActivity()).getRequestQueue().cancelAll(requestTag);
+        //RequestQueueSingleton.getInstance(this.getActivity()).getRequestQueue().cancelAll(requestTag);
         binding = null;
     }
 

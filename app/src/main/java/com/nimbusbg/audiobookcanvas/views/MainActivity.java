@@ -21,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.view.View;
 
+import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
         return navController;
     }
 
+    Toolbar mainToolbar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,7 +76,8 @@ public class MainActivity extends AppCompatActivity {
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
 
         //set our activity's main_toolbar to be used as the navigation AppBar
-        setSupportActionBar(binding.mainToolbar);
+        mainToolbar = binding.mainToolbar;
+        setSupportActionBar(mainToolbar);
         //create an AppBar configuration object and set it with the root of the NavGraph
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
         // Make sure actions in the ActionBar get propagated to the NavController
@@ -86,6 +89,20 @@ public class MainActivity extends AppCompatActivity {
                 result -> {
                     onTextFileSelected(result);
                 });
+    }
+
+    public void setProjectActionBar()
+    {
+        mainToolbar.setTitle(R.string.edit_project_title);
+        mainToolbar.getMenu().clear();
+        mainToolbar.inflateMenu(R.menu.save_project_menu);
+        //getMenuInflater().inflate(R.menu.save_project_menu, mainToolbar.getMenu());
+
+    }
+
+    public void resetActionBar()
+    {
+
     }
 
     private void onTextFileSelected(ActivityResult result)
@@ -145,7 +162,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+
         getMenuInflater().inflate(R.menu.settings_menu, menu);
+
         return true;
     }
 

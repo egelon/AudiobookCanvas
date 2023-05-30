@@ -35,5 +35,21 @@
     <string name="xmlProjectFileVersion">1.0.0</string>
     <string name="defaultAudiobookProjName">New Project</string>
     <string name="defaultAudiobookTitle">New Audiobook</string>
+    <string name="action_save_project">Save</string>
+    <string name="project_name_label">Project name:</string>
+    <string name="audiobook_name_label">Audiobook Name:</string>
+    <string name="no_text_file_selected_label">No Text File Selected</string>
+    <string name="select_file_btn_label">Select txt file</string>
+    <string name="book_name_label">Book Name:</string>
+    <string name="author_name_label">Author Name:</string>
+    <string name="project_description_label">Description:</string>
+    <string name="export_as_xml_file_label">Export as XML file:</string>
+    <string name="last_edited_on_label">Last edited on:</string>
+    <string name="last_processed_block_label">Last processed text block:</string>
+    <string name="percent_completed_label">Percent of book text processed:</string>
+    <string name="export_as_xml_btn_label">Export as XML</string>
+    <string name="start_processing_btn_label">Start Processing</string>
+    <string name="continue_processing_btn_label">Continue processing</string>
+    <string name="edit_project_title">Edit Project</string>
 
 </resources>

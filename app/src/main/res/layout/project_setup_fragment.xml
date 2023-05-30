@@ -35,7 +35,7 @@
                     android:layout_centerInParent="true"
                     android:layout_marginStart="5dp"
                     android:layout_toStartOf="@+id/projName"
-                    android:text="Project Name:" />
+                    android:text="@string/project_name_label" />
 
                 <EditText
                     android:id="@+id/projName"
@@ -45,11 +45,11 @@
                     android:layout_marginEnd="5dp"
                     android:ems="10"
                     android:inputType="text"
-                    android:text="New Project" />
+                    android:text="" />
             </RelativeLayout>
 
             <View
-                android:id="@+id/divider2"
+                android:id="@+id/divider1"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="?android:attr/listDivider" />
@@ -67,7 +67,7 @@
                     android:layout_centerInParent="true"
                     android:layout_marginStart="5dp"
                     android:layout_toStartOf="@+id/audiobookName"
-                    android:text="Audiobook Name:" />
+                    android:text="@string/audiobook_name_label" />
 
                 <EditText
                     android:id="@+id/audiobookName"
@@ -77,15 +77,291 @@
                     android:layout_marginEnd="5dp"
                     android:ems="10"
                     android:inputType="text"
-                    android:text="New Audiobook" />
+                    android:text="" />
             </RelativeLayout>
 
             <View
-                android:id="@+id/divider"
+                android:id="@+id/divider2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/textFilePath"
+                    android:layout_width="250dp"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginStart="5dp"
+                    android:layout_toStartOf="@+id/textFileBtn"
+                    android:clickable="false"
+                    android:contextClickable="false"
+                    android:cursorVisible="false"
+                    android:focusable="false"
+                    android:text="@string/no_text_file_selected_label"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+                <Button
+                    android:id="@+id/textFileBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="5dp"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:text="@string/select_file_btn_label" />
+            </RelativeLayout>
+
+            <View
+                android:id="@+id/divider3"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/bookNameLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginStart="5dp"
+                    android:layout_toStartOf="@+id/bookName"
+                    android:text="@string/book_name_label" />
+
+                <EditText
+                    android:id="@+id/bookName"
+                    android:layout_width="250dp"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="5dp"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:text="" />
+            </RelativeLayout>
+
+            <View
+                android:id="@+id/divider4"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider" />
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/authorNameLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginStart="5dp"
+                    android:layout_toStartOf="@+id/authorName"
+                    android:text="@string/author_name_label" />
+
+                <EditText
+                    android:id="@+id/authorName"
+                    android:layout_width="250dp"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="5dp"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:text="" />
+            </RelativeLayout>
+
+            <View
+                android:id="@+id/divider5"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/descriptionTextLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginStart="5dp"
+                    android:layout_toStartOf="@+id/descriptionText"
+                    android:text="@string/project_description_label" />
+
+                <EditText
+                    android:id="@+id/descriptionText"
+                    android:layout_width="250dp"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="5dp"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:text="" />
+            </RelativeLayout>
+
+            <View
+                android:id="@+id/divider6"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/xmlFileLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginStart="5dp"
+                    android:layout_toStartOf="@+id/xmlFile"
+                    android:text="@string/export_as_xml_file_label" />
+
+                <EditText
+                    android:id="@+id/xmlFile"
+                    android:layout_width="250dp"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="5dp"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:text="" />
+            </RelativeLayout>
+
+            <View
+                android:id="@+id/divider7"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/lastEditedOnLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginStart="5dp"
+                    android:layout_toStartOf="@+id/lastEditedOn"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:text="@string/last_edited_on_label" />
+
+                <TextView
+                    android:id="@+id/lastEditedOn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="5dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:text="" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/lastProcessedBlockLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginStart="5dp"
+                    android:layout_toStartOf="@+id/lastProcessedBlock"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:text="@string/last_processed_block_label" />
+
+                <TextView
+                    android:id="@+id/lastProcessedBlock"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="5dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:text="0" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/percentCompletedLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginStart="5dp"
+                    android:layout_toStartOf="@+id/percentCompleted"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:text="@string/percent_completed_label" />
+
+                <TextView
+                    android:id="@+id/percentCompleted"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="5dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:text="0%" />
+            </RelativeLayout>
+
+
+
+
+            <View
+                android:id="@+id/divider8"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="?android:attr/listDivider" />
 
         </LinearLayout>
     </ScrollView>
+
+    <Button
+        android:id="@+id/exportAsXMLBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/export_as_xml_btn_label"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/processTxtBlockBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/start_processing_btn_label"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
