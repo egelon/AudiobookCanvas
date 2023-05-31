@@ -6,6 +6,8 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
+
 
 @Entity(tableName = "characterLine",
         foreignKeys = {
@@ -18,7 +20,7 @@ import androidx.room.PrimaryKey;
                         childColumns = "character_name",
                         onDelete = ForeignKey.CASCADE)
         })
-public class CharacterLine {
+public class CharacterLine implements Serializable {
     @NonNull
     @ColumnInfo(name = "id")
     @PrimaryKey(autoGenerate = true)

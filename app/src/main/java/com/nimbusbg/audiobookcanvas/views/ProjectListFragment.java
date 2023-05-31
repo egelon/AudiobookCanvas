@@ -95,7 +95,8 @@ public class ProjectListFragment extends Fragment {
             @Override
             public void onProjectClicked(ProjectWithMetadata project) {
                 Bundle bundle = new Bundle();
-                bundle.putSerializable("projectWithMetadata", project);
+                //bundle.putSerializable("projectWithMetadata", project);
+                bundle.putInt("projectID", project.project.getId());
                 navController.navigate(R.id.actionProjectSelected, bundle);
             }
         });

@@ -1,6 +1,7 @@
 package com.nimbusbg.audiobookcanvas.data.repository;
 
 import android.app.Application;
+import android.net.Uri;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Insert;
@@ -16,7 +17,10 @@ import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
+import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithTextBlocks;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -117,9 +121,6 @@ public class AudiobookRepository
         return result;
     }
 
-
-
-
     public int insert(AudiobookProject audiobookProject)
     {
         Callable<Long> insertCallable = () -> projectWithMetadataDao.insertProject(audiobookProject);
@@ -152,20 +153,6 @@ public class AudiobookRepository
  */
         return project_id;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     public void insert(List<AudiobookProject> audiobookProjectList)
     {
@@ -218,6 +205,43 @@ public class AudiobookRepository
     public void updateProjectWithMetadata(AudiobookProject project, AppInfo appInfo, AudiobookData audiobookData)
     {
         //TODO: finish me
+    }
+
+    public  LiveData<ProjectWithTextBlocks> getProjectWithTextBlocksById(int id)
+    {
+        return projectWithTextBlocksDao.getProjectWithTextBlocksById(id);
+    }
+
+    public void readTxtFile(Uri fileUri)
+    {
+        /*
+        Callable<Long> insertCallable = () -> projectWithMetadataDao.insertProject(audiobookProject);
+
+        long finalRowId = getFuture(insertCallable);
+         */
+
+        /*
+        executorService.execute(new Runnable() {
+            @Override
+            public void run()
+            {
+                try {
+
+                    InputStream inputStream = context.getContentResolver().openInputStream(fileUri);
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                    StringBuilder builder = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        builder.append(line);
+                    }
+                    // Store or process the read data...
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+         */
     }
 
     /*

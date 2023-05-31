@@ -5,11 +5,12 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
 import java.util.Date;
 
 
 @Entity(tableName = "audiobookProject")
-public class AudiobookProject {
+public class AudiobookProject implements Serializable {
     @NonNull
     @ColumnInfo(name = "id")
     @PrimaryKey(autoGenerate = true)

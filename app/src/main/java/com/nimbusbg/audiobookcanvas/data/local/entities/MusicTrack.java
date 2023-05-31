@@ -6,9 +6,11 @@ import androidx.room.Entity;
 import androidx.room.Fts4;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
+
 
 @Entity(tableName = "musicTrack")
-public class MusicTrack {
+public class MusicTrack  implements Serializable {
     @NonNull
     @ColumnInfo(name = "id")
     @PrimaryKey(autoGenerate = true)

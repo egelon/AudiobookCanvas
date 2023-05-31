@@ -28,5 +28,5 @@ public interface ProjectWithTextBlocksDao {
 
     @Transaction
     @Query("Select * FROM audiobookProject WHERE id = :id")
-    LiveData<List<ProjectWithTextBlocks>> getProjectWithTextBlocksById(int id);
+    LiveData<ProjectWithTextBlocks> getProjectWithTextBlocksById(int id);
 }

@@ -6,13 +6,15 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
+
 
 @Entity(tableName = "audiobookData",
         foreignKeys = @ForeignKey(entity = AudiobookProject.class,
                 parentColumns = "id",
                 childColumns = "project_id",
                 onDelete = ForeignKey.CASCADE))
-public class AudiobookData {
+public class AudiobookData implements Serializable {
 
     @NonNull
     @ColumnInfo(name = "id")

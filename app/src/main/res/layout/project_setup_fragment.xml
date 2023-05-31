@@ -39,7 +39,7 @@
 
                 <EditText
                     android:id="@+id/projName"
-                    android:layout_width="250dp"
+                    android:layout_width="300dp"
                     android:layout_height="match_parent"
                     android:layout_alignParentEnd="true"
                     android:layout_marginEnd="5dp"
@@ -59,25 +59,27 @@
                 android:layout_height="match_parent">
 
                 <TextView
-                    android:id="@+id/audiobookNameLabel"
+                    android:id="@+id/projFileVersionLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_alignParentBottom="true"
                     android:layout_centerInParent="true"
                     android:layout_marginStart="5dp"
-                    android:layout_toStartOf="@+id/audiobookName"
-                    android:text="@string/audiobook_name_label" />
+                    android:layout_toStartOf="@+id/projFileVersion"
+                    android:text="@string/proj_file_version_label"
+                    android:textAlignment="viewStart" />
 
-                <EditText
-                    android:id="@+id/audiobookName"
+                <TextView
+                    android:id="@+id/projFileVersion"
                     android:layout_width="250dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
+                    android:layout_centerInParent="true"
                     android:layout_marginEnd="5dp"
-                    android:ems="10"
-                    android:inputType="text"
-                    android:text="" />
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:textAlignment="textEnd"
+                    android:text="1.0"/>
             </RelativeLayout>
 
             <View
@@ -140,11 +142,12 @@
 
                 <EditText
                     android:id="@+id/bookName"
-                    android:layout_width="250dp"
+                    android:layout_width="300dp"
                     android:layout_height="match_parent"
                     android:layout_alignParentEnd="true"
                     android:layout_marginEnd="5dp"
                     android:ems="10"
+                    android:hint="@string/book_name_hint"
                     android:inputType="text"
                     android:text="" />
             </RelativeLayout>
@@ -173,11 +176,12 @@
 
                 <EditText
                     android:id="@+id/authorName"
-                    android:layout_width="250dp"
+                    android:layout_width="300dp"
                     android:layout_height="match_parent"
                     android:layout_alignParentEnd="true"
                     android:layout_marginEnd="5dp"
                     android:ems="10"
+                    android:hint="@string/author_name_hint"
                     android:inputType="text"
                     android:text="" />
             </RelativeLayout>
@@ -205,11 +209,12 @@
 
                 <EditText
                     android:id="@+id/descriptionText"
-                    android:layout_width="250dp"
+                    android:layout_width="300dp"
                     android:layout_height="match_parent"
                     android:layout_alignParentEnd="true"
                     android:layout_marginEnd="5dp"
                     android:ems="10"
+                    android:hint="@string/description_hint"
                     android:inputType="text"
                     android:text="" />
             </RelativeLayout>
@@ -233,7 +238,9 @@
                     android:layout_centerInParent="true"
                     android:layout_marginStart="5dp"
                     android:layout_toStartOf="@+id/xmlFile"
-                    android:text="@string/export_as_xml_file_label" />
+                    android:text="@string/export_as_xml_file_label"
+                    android:visibility="invisible"
+                    tools:visibility="gone" />
 
                 <EditText
                     android:id="@+id/xmlFile"
@@ -243,7 +250,8 @@
                     android:layout_marginEnd="5dp"
                     android:ems="10"
                     android:inputType="text"
-                    android:text="" />
+                    android:text=""
+                    android:visibility="gone" />
             </RelativeLayout>
 
             <View
@@ -257,27 +265,20 @@
                 android:layout_height="match_parent">
 
                 <TextView
-                    android:id="@+id/lastEditedOnLabel"
+                    android:id="@+id/projectInfoLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
+                    android:layout_alignParentEnd="true"
                     android:layout_alignParentBottom="true"
                     android:layout_centerInParent="true"
                     android:layout_marginStart="5dp"
-                    android:layout_toStartOf="@+id/lastEditedOn"
-                    android:text="@string/last_edited_on_label"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
-
-                <TextView
-                    android:id="@+id/lastEditedOn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerInParent="true"
-                    android:layout_marginEnd="5dp"
-                    android:text=""
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+                    android:text="@string/project_info_label"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
             </RelativeLayout>
+
+
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -333,9 +334,171 @@
                     android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
             </RelativeLayout>
 
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/createdOnLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginStart="5dp"
+                    android:layout_toStartOf="@+id/createdOn"
+                    android:text="@string/created_on_label"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+                <TextView
+                    android:id="@+id/createdOn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginEnd="5dp"
+                    android:text=""
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/lastEditedOnLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginStart="5dp"
+                    android:layout_toStartOf="@+id/lastEditedOn"
+                    android:text="@string/last_edited_on_label"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+                <TextView
+                    android:id="@+id/lastEditedOn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginEnd="5dp"
+                    android:text=""
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+            </RelativeLayout>
+
 
             <View
                 android:id="@+id/divider8"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider" />
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/deviceInfoLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginStart="5dp"
+                    android:text="@string/device_info_label"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/appVersionLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginStart="5dp"
+                    android:layout_toStartOf="@+id/appVersion"
+                    android:text="@string/app_version_label"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+                <TextView
+                    android:id="@+id/appVersion"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginEnd="5dp"
+                    android:text=""
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/osVersionLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginStart="5dp"
+                    android:layout_toStartOf="@+id/osVersion"
+                    android:text="@string/os_version_label"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+                <TextView
+                    android:id="@+id/osVersion"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginEnd="5dp"
+                    android:text=""
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/deviceNameLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginStart="5dp"
+                    android:layout_toStartOf="@+id/deviceName"
+                    android:text="@string/device_name_label"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+                <TextView
+                    android:id="@+id/deviceName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginEnd="5dp"
+                    android:text=""
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+            </RelativeLayout>
+
+
+
+            <View
+                android:id="@+id/divider9"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="?android:attr/listDivider" />
@@ -363,6 +526,7 @@
                     android:layout_marginEnd="8dp"
                     android:layout_marginBottom="16dp"
                     android:text="@string/export_as_xml_btn_label"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/processTxtBlockBtn" />

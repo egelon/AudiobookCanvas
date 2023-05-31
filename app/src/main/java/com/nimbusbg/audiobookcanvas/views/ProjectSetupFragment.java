@@ -18,19 +18,29 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.nimbusbg.audiobookcanvas.R;
+import com.nimbusbg.audiobookcanvas.data.local.AudiobookProjectDatabase_Impl;
+import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
+import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
+import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
+import com.nimbusbg.audiobookcanvas.data.local.entities.TextBlock;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
+import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithTextBlocks;
 import com.nimbusbg.audiobookcanvas.databinding.ProjectSetupFragmentBinding;
+import com.nimbusbg.audiobookcanvas.viewmodels.ProjectSetupViewModel;
 import com.nimbusbg.audiobookcanvas.viewmodels.ProjectWithMetadataViewModel;
 
 import java.io.ByteArrayOutputStream;
@@ -39,6 +49,7 @@ import java.io.InputStream;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,7 +59,7 @@ public class ProjectSetupFragment extends Fragment{
 
     int projectID;
     EditText projectName;
-    EditText audiobookName;
+    TextView projFileVersion;
     EditText bookName;
     EditText authorName;
     EditText projectDescription;
@@ -57,9 +68,19 @@ public class ProjectSetupFragment extends Fragment{
     Button exportAsXMLBtn;
     Button processChunkBtn;
     TextView textFileName;
-    TextView lastEditedOn;
+
     TextView lastProcessedTxtBlock;
     TextView percentProcessed;
+    TextView createdOn;
+    TextView lastEditedOn;
+
+    TextView appVersion;
+    TextView osVersion;
+    TextView deviceName;
+
+    ProjectSetupViewModel projectSetupViewModel;
+
+
 
     ActivityResultLauncher<Intent> filePickerLauncher;
     private ArrayList<String> contentChunks;
@@ -111,7 +132,7 @@ public class ProjectSetupFragment extends Fragment{
     private boolean isProjectSavedSuccessfully()
     {
         String projectNameStr = projectName.getText().toString();
-        String audiobookNameStr = audiobookName.getText().toString();
+        String audiobookNameStr = projFileVersion.getText().toString();
         String bookNameStr = bookName.getText().toString();
         String authorNameStr = authorName.getText().toString();
         String projectDescriptionStr = projectDescription.getText().toString();
@@ -144,8 +165,15 @@ public class ProjectSetupFragment extends Fragment{
 
         appActivityContext = this.getActivity();
 
+        NavController navController = NavHostFragment.findNavController(this);
+        NavBackStackEntry backStackEntry = navController.getBackStackEntry(R.id.nav_graph);
+
+        // The ViewModel is scoped to the `nav_graph` Navigation graph
+        projectSetupViewModel = new ViewModelProvider(backStackEntry).get(ProjectSetupViewModel.class);
+
+
         projectName = binding.projName;
-        audiobookName = binding.audiobookName;
+        projFileVersion = binding.projFileVersion;
         bookName = binding.bookName;
         authorName = binding.authorName;
         projectDescription = binding.descriptionText;
@@ -179,9 +207,16 @@ public class ProjectSetupFragment extends Fragment{
             }});
 
         textFileName = binding.textFilePath;
-        lastEditedOn = binding.lastEditedOn;
+
         lastProcessedTxtBlock = binding.lastProcessedBlock;
         percentProcessed = binding.percentCompleted;
+        createdOn = binding.createdOn;
+        lastEditedOn = binding.lastEditedOn;
+
+        appVersion = binding.appVersion;
+        osVersion = binding.osVersion;
+        deviceName = binding.deviceName;
+
 
         setProjectValues();
 
@@ -228,20 +263,78 @@ public class ProjectSetupFragment extends Fragment{
 
     private void setProjectValues()
     {
-        ProjectWithMetadata selectedProject = (ProjectWithMetadata) getArguments().getSerializable("projectWithMetadata");
+        //ProjectWithMetadata selectedProject = (ProjectWithMetadata) getArguments().getSerializable("projectWithMetadata");
 
-        projectID = selectedProject.project.getId();
+        //projectID = selectedProject.project.getId();
+        projectID = getArguments().getInt("projectID");
 
+        projectSetupViewModel.fetchProjectWithTextBlocksById(projectID);
+        projectSetupViewModel.getProjectWithTextBlocks().observe(getViewLifecycleOwner(), new Observer<ProjectWithTextBlocks>() {
+            @Override
+            public void onChanged(@Nullable ProjectWithTextBlocks fetchedProjectData) {
+                // Update your UI here.
+                AudiobookProject project = fetchedProjectData.project;
+                AudiobookData audiobookData = fetchedProjectData.audiobookData;
+                AppInfo appInfo = fetchedProjectData.appInfo;
+                List<TextBlock> textBlocks = fetchedProjectData.textBlocks;
+
+                projectName.setText(project.getProjectName());
+                projFileVersion.setText(project.getProjectVersion());
+                bookName.setText(audiobookData.getBookTitle());
+                authorName.setText(audiobookData.getAuthor());
+                projectDescription.setText(audiobookData.getDescription());
+                xmlFileName.setText(project.getOutputXMLFilePath());
+                textFileName.setText(project.getInputFilePath());
+
+                int lastBlockID = project.getLastProcessedBlockId();
+                lastProcessedTxtBlock.setText(String.valueOf(lastBlockID));
+
+                if(lastBlockID == 0)
+                {
+                    processChunkBtn.setText(R.string.start_processing_btn_label);
+                }
+                else
+                {
+                    processChunkBtn.setText(R.string.continue_processing_btn_label);
+                }
+
+                if(project.getCompleted())
+                {
+                    percentProcessed.setText("100%");
+                }
+                else
+                {
+                    calculateBookCompletion(lastBlockID);
+                }
+
+                Date lastModifiedDate = project.getLastModified();
+                lastEditedOn.setText(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(lastModifiedDate));
+
+                Date createdOnDate = project.getCreatedOn();
+                createdOn.setText(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(createdOnDate));
+
+                appVersion.setText(appInfo.getAppVersion());
+                osVersion.setText(appInfo.getOsVersion());
+                deviceName.setText(appInfo.getDeviceType());
+
+
+
+            }
+        });
+
+
+
+
+
+
+/*
         projectName.setText(selectedProject.project.getProjectName());
-        audiobookName.setText(selectedProject.project.getProjectName());
+        projFileVersion.setText(selectedProject.project.getProjectVersion());
         bookName.setText(selectedProject.audiobookData.getBookTitle());
         authorName.setText(selectedProject.audiobookData.getAuthor());
         projectDescription.setText(selectedProject.audiobookData.getDescription());
         xmlFileName.setText(selectedProject.project.getOutputXMLFilePath());
         textFileName.setText(selectedProject.project.getInputFilePath());
-
-        Date lastModifiedDate = selectedProject.project.getLastModified();
-        lastEditedOn.setText(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(lastModifiedDate));
 
         int lastBlockID = selectedProject.project.getLastProcessedBlockId();
         lastProcessedTxtBlock.setText(String.valueOf(lastBlockID));
@@ -264,6 +357,19 @@ public class ProjectSetupFragment extends Fragment{
             calculateBookCompletion(lastBlockID);
         }
 
+        Date lastModifiedDate = selectedProject.project.getLastModified();
+        lastEditedOn.setText(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(lastModifiedDate));
+
+        Date createdOnDate = selectedProject.project.getCreatedOn();
+        createdOn.setText(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(createdOnDate));
+
+        appVersion.setText(selectedProject.appInfo.getAppVersion());
+        osVersion.setText(selectedProject.appInfo.getOsVersion());
+        deviceName.setText(selectedProject.appInfo.getDeviceType());
+
+
+ */
+
     }
 
     private void calculateBookCompletion(int lastBlockID)
@@ -280,8 +386,29 @@ public class ProjectSetupFragment extends Fragment{
 
     }
 
+    ActivityResultLauncher<String> mGetContent = registerForActivityResult(new ActivityResultContracts.GetContent(),
+            new ActivityResultCallback<Uri>() {
+                @Override
+                public void onActivityResult(Uri uri) {
+                    updateTextFileURI(uri);
+                }
+            });
+
+    private void updateTextFileURI(Uri uri)
+    {
+        // Handle the returned Uri
+        if (uri != null)
+        {
+            textFileName.setText(uri.toString());
+            //viewModel.readFile(uri);
+        }
+    }
+
     public void onSelectTxtFileClicked(View view)
     {
+        mGetContent.launch("text/*");
+
+        /*
         //TODO: THIS MUST BE IN A REPOSITORY!
         try
         {
@@ -296,6 +423,8 @@ public class ProjectSetupFragment extends Fragment{
             Log.e("Error", ex.getMessage());
             Toast.makeText(this.getActivity(), ex.getMessage().toString(), Toast.LENGTH_LONG).show();
         }
+
+         */
     }
 
     public void onExportAsXMLClicked(View view)

@@ -6,6 +6,8 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
+
 
 @Entity(tableName = "textBlock",
         foreignKeys = {
@@ -18,7 +20,7 @@ import androidx.room.PrimaryKey;
                         childColumns = "background_track_id",
                         onDelete = ForeignKey.SET_NULL)
         })
-public class TextBlock {
+public class TextBlock  implements Serializable {
     @NonNull
     @ColumnInfo(name = "id")
     @PrimaryKey(autoGenerate = true)

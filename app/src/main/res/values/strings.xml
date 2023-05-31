@@ -37,13 +37,13 @@
     <string name="defaultAudiobookTitle">New Audiobook</string>
     <string name="action_save_project">Save</string>
     <string name="project_name_label">Project name:</string>
-    <string name="audiobook_name_label">Audiobook Name:</string>
+    <string name="proj_file_version_label">Project file version:</string>
     <string name="no_text_file_selected_label">No Text File Selected</string>
     <string name="select_file_btn_label">Select txt file</string>
     <string name="book_name_label">Book Name:</string>
     <string name="author_name_label">Author Name:</string>
     <string name="project_description_label">Description:</string>
-    <string name="export_as_xml_file_label">Export as XML file:</string>
+    <string name="export_as_xml_file_label">XML file name for export:</string>
     <string name="last_edited_on_label">Last edited on:</string>
     <string name="last_processed_block_label">Last processed text block:</string>
     <string name="percent_completed_label">Percent of book text processed:</string>
@@ -56,5 +56,14 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="about_text">Audiobook Canvas\nVersion 1.0.0</string>
+    <string name="project_info_label">Project information</string>
+    <string name="created_on_label">Project created on:</string>
+    <string name="device_info_label">Device information</string>
+    <string name="app_version_label">Application version:</string>
+    <string name="os_version_label">Android version:</string>
+    <string name="device_name_label">Device name:</string>
+    <string name="book_name_hint">Read at start of audiobook</string>
+    <string name="author_name_hint">Read at start of audiobook</string>
+    <string name="description_hint">You can add a description</string>
 
 </resources>

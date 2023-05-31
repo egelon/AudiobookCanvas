@@ -41,6 +41,7 @@
             android:layout_alignParentLeft="false"
             android:layout_alignParentRight="false"
             android:layout_toEndOf="@id/project_item_proj_completed_telltale"
+            android:layout_marginStart="8dp"
             android:text="Completed: true" />
 
         <ImageView

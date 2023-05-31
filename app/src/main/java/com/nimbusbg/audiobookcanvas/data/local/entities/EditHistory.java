@@ -7,13 +7,15 @@ import androidx.room.ForeignKey;
 import androidx.room.Fts4;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
+
 
 @Entity(tableName = "editHistory",
         foreignKeys = @ForeignKey(entity = CharacterLine.class,
                 parentColumns = "id",
                 childColumns = "line_id",
                 onDelete = ForeignKey.CASCADE))
-public class EditHistory {
+public class EditHistory  implements Serializable {
     @NonNull
     @ColumnInfo(name = "id")
     @PrimaryKey(autoGenerate = true)
