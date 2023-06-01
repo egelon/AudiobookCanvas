@@ -194,3 +194,20 @@ private void createProjectXML(String fileName, Context context)
 
         return contentChunks.size();
     }
+
+
+
+btnListCharacters = view.findViewById(R.id.btnInvokeAPI);
+        btnListCharacters.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+                chunkInputFile(appActivityContext, textFileURI);
+                createProjectXML(editProjectName.getText().toString() + ".xml", appActivityContext);
+                int testChunk = 11;
+                try {
+                    getCompletion(contentChunks.get(testChunk), appActivityContext);
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
