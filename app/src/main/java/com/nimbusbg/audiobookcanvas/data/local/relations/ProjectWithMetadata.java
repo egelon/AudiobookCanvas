@@ -14,8 +14,8 @@ public class ProjectWithMetadata implements Serializable {
     public AudiobookProject project;
 
     @Relation(parentColumn = "id", entityColumn = "project_id")
-    public AppInfo appInfo;
+    public AudiobookData audiobookData;
 
     @Relation(parentColumn = "id", entityColumn = "project_id")
-    public AudiobookData audiobookData;
+    public AppInfo appInfo;
 }

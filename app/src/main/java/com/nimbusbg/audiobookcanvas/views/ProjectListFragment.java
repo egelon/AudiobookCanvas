@@ -31,17 +31,14 @@ public class ProjectListFragment extends Fragment {
 
     private ProjectListFragmentBinding binding;
     private ProjectWithMetadataViewModel projectWithMetadataViewModel;
-    private FloatingActionButton addProjectFAB;
 
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState
     ) {
-
         binding = ProjectListFragmentBinding.inflate(inflater, container, false);
         return binding.getRoot();
-
     }
 
     @Override
@@ -57,6 +54,11 @@ public class ProjectListFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
     }
 
+
+
+
+
+    //TODO: Can't I use Fragment.findNavController() here?
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -65,21 +67,39 @@ public class ProjectListFragment extends Fragment {
         int optionItemID = item.getItemId();
         switch (optionItemID) {
             case R.id.action_settings:
-                ((MainActivity)this.getActivity()).getNavController().navigate(R.id.SettingsFragment);
+                Fragment.findNavController(this).navigate(R.id.SettingsFragment);
+                //((MainActivity)this.getActivity()).getNavController().navigate(R.id.SettingsFragment);
                 return true;
             case R.id.action_about:
-                ((MainActivity)this.getActivity()).getNavController().navigate(R.id.AboutFragment);
+                Fragment.findNavController(this).navigate(R.id.AboutFragment);
+                //((MainActivity)this.getActivity()).getNavController().navigate(R.id.AboutFragment);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+
+
+
+
+
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+
+
+        //TODO: TEST IF THIS WORKS
+        //NavController navController = Fragment.findNavController(this);
         NavController navController = NavHostFragment.findNavController(this);
         NavBackStackEntry backStackEntry = navController.getBackStackEntry(R.id.nav_graph);
+
+        //TODO: TRY THE FOLLOWING:
+        /*
+            ViewmodelStore store = Fragment.findNavController(this).getViewModelStore(R.id.order_selection_nav_graph);
+            projectWithMetadataViewModel = new ViewModelProvider(store);
+         */
+
 
         // The ViewModel is scoped to the `nav_graph` Navigation graph
         projectWithMetadataViewModel = new ViewModelProvider(backStackEntry).get(ProjectWithMetadataViewModel.class);
@@ -95,8 +115,9 @@ public class ProjectListFragment extends Fragment {
             @Override
             public void onProjectClicked(ProjectWithMetadata project) {
                 Bundle bundle = new Bundle();
-                //bundle.putSerializable("projectWithMetadata", project);
                 bundle.putInt("projectID", project.project.getId());
+
+                //TODO: TRY USING Fragment.findNavController(this);
                 navController.navigate(R.id.actionProjectSelected, bundle);
             }
         });
@@ -111,12 +132,13 @@ public class ProjectListFragment extends Fragment {
                     }
                 });
 
-        addProjectFAB = binding.fabAddProject;
-        addProjectFAB.setOnClickListener(new View.OnClickListener()
+        binding.fabAddProject.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View view)
             {
+                //TODO: Just navigate to the ProjectSetup Fragment and create your project there...
+                //call projectWithMetadataViewModel.getEmptyProject()
                 projectWithMetadataViewModel.insertNewEmptyProject();
             }});
     }

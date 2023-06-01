@@ -10,12 +10,7 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-
-import com.nimbusbg.audiobookcanvas.data.local.dao.AppInfoDao;
-import com.nimbusbg.audiobookcanvas.data.local.dao.AudiobookDataDao;
-import com.nimbusbg.audiobookcanvas.data.local.dao.ProjectDao;
-import com.nimbusbg.audiobookcanvas.data.local.dao.ProjectWithMetadataDao;
-import com.nimbusbg.audiobookcanvas.data.local.dao.ProjectWithTextBlocksDao;
+import com.nimbusbg.audiobookcanvas.data.local.dao.ProjectWithMetadata;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
@@ -42,12 +37,7 @@ import java.util.Date;
 public abstract class AudiobookProjectDatabase extends RoomDatabase {
     private static AudiobookProjectDatabase instance;
 
-    public abstract ProjectDao projectDao();
-    public abstract AppInfoDao appInfoDao();
-    public abstract AudiobookDataDao audiobookDataDao();
-
-    public abstract ProjectWithMetadataDao projectWithMetadataDao();
-    public abstract ProjectWithTextBlocksDao projectWithTextBlocksDao();
+    public abstract ProjectWithMetadata projectWithMetadataDao();
     //TODO: add the other DAOs here!
 
     public static synchronized AudiobookProjectDatabase getInstance(Context context)
@@ -73,11 +63,12 @@ public abstract class AudiobookProjectDatabase extends RoomDatabase {
 
     private static class PopulateDbAsyncTask extends AsyncTask <Void, Void, Void>
     {
-        private ProjectWithMetadataDao projectWithMetadataDao;
+        private ProjectWithMetadata projectWithMetadataDao;
         private PopulateDbAsyncTask(AudiobookProjectDatabase db)
         {
             projectWithMetadataDao = db.projectWithMetadataDao();
         }
+        
         @Override
         protected Void doInBackground(Void... voids)
         {
@@ -97,7 +88,6 @@ public abstract class AudiobookProjectDatabase extends RoomDatabase {
             testData.setProject_id(projId);
             projectWithMetadataDao.insertAppInfo(testAppInfo);
             projectWithMetadataDao.insertAudiobookData(testData);
-
 
 
             testProject = new AudiobookProject("1.0.0", false, 2,
@@ -134,9 +124,7 @@ public abstract class AudiobookProjectDatabase extends RoomDatabase {
             testData.setProject_id(projId);
             projectWithMetadataDao.insertAppInfo(testAppInfo);
             projectWithMetadataDao.insertAudiobookData(testData);
-
-
-
+            
             return null;
         }
     }

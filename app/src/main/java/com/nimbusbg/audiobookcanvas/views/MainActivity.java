@@ -50,7 +50,6 @@ import android.widget.Toast;
 import java.util.Date;
 import java.util.List;
 
-
 public class MainActivity extends AppCompatActivity {
     private String[] permissions = new String[] {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
     // Request code for selecting a TXT document.
@@ -63,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
         return navController;
     }
 
-    Toolbar mainToolbar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,30 +74,21 @@ public class MainActivity extends AppCompatActivity {
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
 
         //set our activity's main_toolbar to be used as the navigation AppBar
-        mainToolbar = binding.mainToolbar;
-        setSupportActionBar(mainToolbar);
+        setSupportActionBar(binding.mainToolbar);
         //create an AppBar configuration object and set it with the root of the NavGraph
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
         // Make sure actions in the ActionBar get propagated to the NavController
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-
-
     }
-
-
-
-
-
 
     @Override
     public boolean onSupportNavigateUp() {
-        return NavigationUI.navigateUp(navController, appBarConfiguration)
-                || super.onSupportNavigateUp();
+        //TODO: can't I just call NavigationUI.navigateUp() here? Check
+        return NavigationUI.navigateUp(navController, appBarConfiguration) || super.onSupportNavigateUp();
     }
 
     @Override
     public void onBackPressed() {
-        // Show the floating action button when the back button is pressed and the previous fragment is displayed
         super.onBackPressed();
     }
 }

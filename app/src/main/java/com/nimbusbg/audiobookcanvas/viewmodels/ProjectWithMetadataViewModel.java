@@ -25,13 +25,11 @@ import java.util.Locale;
 public class ProjectWithMetadataViewModel extends AndroidViewModel {
 
     private AudiobookRepository repository;
-    private LiveData<List<ProjectWithMetadata>> allProjects;
 
     public ProjectWithMetadataViewModel(@NonNull Application application) {
         super(application);
 
         repository = new AudiobookRepository(application, ((MyAudiobookCanvasApplication)application).getExecutorService());
-        allProjects = repository.getAllProjectsWithMetadata();
     }
 
     public String getAndroidVersion() {
@@ -56,10 +54,30 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel {
         repository.insertProjectWithMetadata(project, appInfo, audiobookData);
     }
 
-    public void updateProjectWithMetadata(int id, String projectNameStr, String audiobookNameStr, String bookNameStr, String authorNameStr, String projectDescriptionStr, String xmlFileNameStr)
+    public void updateProjectWithMetadata(int id, String projectNameStr, String audiobookNameStr, String bookNameStr, String authorNameStr, String projectDescriptionStr)
     {
 
         //repository.updateProjectWithMetadata(project, appInfo, audiobookData);
+    }
+
+    public ProjectWithMetadata getEmptyProject()
+    {
+        ProjectWithMetadata newEmptyProject;
+
+        Date currentTime = Calendar.getInstance().getTime();
+        newEmptyProject.project = new AudiobookProject(getResourceString(R.string.xmlProjectFileVersion),
+                false,
+                0,
+                getResourceString(R.string.defaultAudiobookProjName),
+                "",
+                getResourceString(R.string.defaultAudiobookProjName) + ".xml",
+                getResourceString(R.string.defaultAudiobookTitle) + ".mp3",
+                currentTime,
+                currentTime);
+        newEmptyProject.appInfo = new AppInfo(0, BuildConfig.VERSION_NAME, getAndroidVersion(), getDeviceName());
+        newEmptyProject.audiobookData = new AudiobookData(0, getResourceString(R.string.defaultAudiobookTitle), "", Locale.getDefault().toLanguageTag(), "");
+
+        return newEmptyProject;
     }
 
     public void insertNewEmptyProject()
@@ -94,14 +112,12 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel {
 
     public LiveData<List<ProjectWithMetadata>> getAllProjectsWithMetadata()
     {
-        return allProjects;
+        return repository.getAllProjectsWithMetadata();
     }
 
-    public ProjectWithMetadata getProjectByID(int id)
+    public LiveData<ProjectWithMetadata> getProjectWithMetadataById(int id)
     {
-        return allProjects.getValue().get(id);
+        return repository.getProjectWithMetadataById(id);
     }
-
-
 }
 

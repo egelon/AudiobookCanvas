@@ -28,18 +28,23 @@ public interface ProjectWithMetadataDao {
     long insertAudiobookData(AudiobookData audiobookData);
 
     @Transaction
+    @Query("SELECT id FROM audiobookProject WHERE rowid = :rowId")
+    int getProjectIdByRowId(long rowId);
+
+    @Transaction
     @Query("Select * FROM audiobookProject WHERE id = :id")
-    LiveData<List<ProjectWithMetadata>> getProjectWithMetadataById(int id);
+    LiveData<ProjectWithMetadata> getProjectWithMetadataById(int id);
 
     @Transaction
     @Query("Select * FROM audiobookProject ORDER BY id DESC")
     LiveData<List<ProjectWithMetadata>> getAllProjectWithMetadata();
 
     @Transaction
-    @Query("SELECT id FROM audiobookProject WHERE rowid = :rowId")
-    int getProjectIdByRowId(long rowId);
+    @Query("DELETE * FROM audiobookProject WHERE id = :id")
+    void deleteProjectWithMetadataById(int id);
 
     @Transaction
     @Query("DELETE FROM audiobookProject")
-    int deleteAllProjectsWithMetadata();
+    void deleteAllProjectsWithMetadata();
+
 }

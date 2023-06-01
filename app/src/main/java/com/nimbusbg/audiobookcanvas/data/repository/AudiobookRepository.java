@@ -8,16 +8,11 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 
 import com.nimbusbg.audiobookcanvas.data.local.AudiobookProjectDatabase;
-import com.nimbusbg.audiobookcanvas.data.local.dao.AppInfoDao;
-import com.nimbusbg.audiobookcanvas.data.local.dao.AudiobookDataDao;
-import com.nimbusbg.audiobookcanvas.data.local.dao.ProjectDao;
 import com.nimbusbg.audiobookcanvas.data.local.dao.ProjectWithMetadataDao;
-import com.nimbusbg.audiobookcanvas.data.local.dao.ProjectWithTextBlocksDao;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
-import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithTextBlocks;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -32,80 +27,15 @@ import java.util.concurrent.Future;
 public class AudiobookRepository
 {
     private final ExecutorService executorService;
-    private ProjectDao projectDao;
-    private AppInfoDao appInfoDao;
-    private AudiobookDataDao audiobookDataDao;
-
     private ProjectWithMetadataDao projectWithMetadataDao;
-    private ProjectWithTextBlocksDao projectWithTextBlocksDao;
-
-
-
     private LiveData<List<ProjectWithMetadata>> allProjects;
-    private long lastInsertedProjectId;
-    private long[] lastInsertedProjectIds;
-    private int affectedEntities;
-
-    private ProjectWithMetadata fullProjectInfo;
 
     public AudiobookRepository(Application application, ExecutorService executorService)
     {
         AudiobookProjectDatabase database = AudiobookProjectDatabase.getInstance(application);
         this.executorService = executorService;
-        projectDao = database.projectDao();
-        appInfoDao = database.appInfoDao();
-        audiobookDataDao = database.audiobookDataDao();
         projectWithMetadataDao = database.projectWithMetadataDao();
-        projectWithTextBlocksDao = database.projectWithTextBlocksDao();
-
-        allProjects = projectWithMetadataDao.getAllProjectWithMetadata();
     }
-
-    //public void insert(AudiobookProject audiobookProject)
-   // {
-        /*
-        executor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        projectWithMetadataDao.insertProject(audiobookProject);
-                    }});
-
-         */
-   // }
-
-    public void insert(AppInfo appInfo)
-    {
-
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                projectWithMetadataDao.insertAppInfo(appInfo);
-            }});
-
-
-    }
-
-    public void insert(AudiobookData audiobookData)
-    {
-
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                projectWithMetadataDao.insertAudiobookData(audiobookData);
-            }});
-
-
-    }
-
-    public void insertProjectWithMetadata(AudiobookProject project, AppInfo appInfo, AudiobookData audiobookData)
-    {
-        int id = insert(project);
-        appInfo.setProject_id(id);
-        audiobookData.setProject_id(id);
-        insert(appInfo);
-        insert(audiobookData);
-    }
-
 
     private <T> T getFuture(Callable<T> callable)
     {
@@ -121,105 +51,57 @@ public class AudiobookRepository
         return result;
     }
 
-    public int insert(AudiobookProject audiobookProject)
+    //TODO: THIS DOESN'T NEED TO BE SYNCRONOUS! Remove this call from the FAB button! Add this as async to the Save Button! Or better yet, remove the Save button and make it save when the user moves forward and we chunk the file!
+    public int insertProjectWithMetadata(AudiobookProject project, AppInfo appInfo, AudiobookData audiobookData)
     {
         Callable<Long> insertCallable = () -> projectWithMetadataDao.insertProject(audiobookProject);
-
-        /*
-
-        Future<Long> insertProjectFuture = executorService.submit(insertCallable);
-        try {
-            rowId = insertProjectFuture.get();
-        } catch (InterruptedException e1) {
-            e1.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-
-         */
-
         long finalRowId = getFuture(insertCallable);
         Callable<Integer> fetchIdCallable = () -> projectWithMetadataDao.getProjectIdByRowId(finalRowId);
         int project_id = getFuture(fetchIdCallable);
-/*
-        Future<Integer> queryIdFuture = executorService.submit(fetchIdCallable);
-        try {
-            project_id = queryIdFuture.get();
-        } catch (InterruptedException e1) {
-            e1.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
- */
+
+        appInfo.setProject_id(project_id);
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                projectWithMetadataDao.insertAppInfo(appInfo);
+            }});
+
+        audiobookData.setProject_id(project_id);
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                projectWithMetadataDao.insertAudiobookData(audiobookData);
+            }});
+
         return project_id;
     }
 
-    public void insert(List<AudiobookProject> audiobookProjectList)
+    public void deleteProjectWithMetadataById(int id)
     {
-        /*
-        executor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        lastInsertedProjectIds = projectDao.insert(audiobookProjectList);
-                    }});
-
-         */
+        projectWithMetadataDao.deleteProjectWithMetadataById(id);
     }
 
-    public void update(AudiobookProject audiobookProject)
+    public void deleteAllProjectsWithMetadata()
     {
-        /*
-        executor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        projectDao.update(audiobookProject);
-                    }});
-
-         */
+        projectWithMetadataDao.deleteAllProjectsWithMetadata();
     }
 
-    public void delete(AudiobookProject audiobookProject)
+    public  LiveData<ProjectWithMetadata> getProjectWithMetadataById(int id)
     {
-        /*
-        executor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        projectDao.delete(audiobookProject);
-                    }});
-
-         */
-    }
-
-    public int deleteAllProjectsWithMetadata()
-    {
-        Callable<Integer> deleteAllCallable = () -> projectWithMetadataDao.deleteAllProjectsWithMetadata();
-        int affectedRows = getFuture(deleteAllCallable);
-        return affectedRows;
+        return projectWithMetadataDao.getProjectWithMetadataById(id);
     }
 
     public LiveData<List<ProjectWithMetadata>> getAllProjectsWithMetadata()
     {
-        return allProjects;
+        return projectWithMetadataDao.getAllProjectWithMetadata();
     }
 
     public void updateProjectWithMetadata(AudiobookProject project, AppInfo appInfo, AudiobookData audiobookData)
     {
-        //TODO: finish me
-    }
-
-    public  LiveData<ProjectWithTextBlocks> getProjectWithTextBlocksById(int id)
-    {
-        return projectWithTextBlocksDao.getProjectWithTextBlocksById(id);
     }
 
     public void readTxtFile(Uri fileUri)
     {
-        /*
-        Callable<Long> insertCallable = () -> projectWithMetadataDao.insertProject(audiobookProject);
-
-        long finalRowId = getFuture(insertCallable);
-         */
-
         /*
         executorService.execute(new Runnable() {
             @Override
@@ -240,26 +122,6 @@ public class AudiobookRepository
                 }
             }
         });
-
          */
     }
-
-    /*
-    private static class InsertProjectAsyncTask extends AsyncTask<AudiobookProject, Void, Void>
-    {
-        private ProjectDao projectDao;
-
-        private InsertProjectAsyncTask(ProjectDao projectDao)
-        {
-            this.projectDao = projectDao;
-        }
-
-        @Override
-        protected Void doInBackground(AudiobookProject... projects)
-        {
-            projectDao.insert(projects[0]);
-            return null;
-        }
-    }
-    */
 }
