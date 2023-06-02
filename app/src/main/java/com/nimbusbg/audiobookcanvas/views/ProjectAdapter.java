@@ -50,7 +50,7 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectH
         holder.projId.setText(String.valueOf(currentProject.project.getId()));
         holder.projName.setText(currentProject.project.getProjectName());
         boolean isCompleted = currentProject.project.getCompleted();
-        holder.completedText.setText("Completed: " + String.valueOf(isCompleted));
+        holder.completedText.setText("Completed: " + isCompleted);
         int completedColor;
         if(isCompleted)
         {
@@ -89,10 +89,10 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectH
 
     class ProjectHolder extends RecyclerView.ViewHolder
     {
-        private TextView projId;
-        private TextView projName;
-        private TextView completedText;
-        private ImageView completedTelltale;
+        private final TextView projId;
+        private final TextView projName;
+        private final TextView completedText;
+        private final ImageView completedTelltale;
 
         public ProjectHolder(@NonNull View itemView)
         {

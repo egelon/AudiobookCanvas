@@ -7,12 +7,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MyAudiobookCanvasApplication extends Application {
-    ExecutorService executorService = Executors.newFixedThreadPool(8);
-
-    public ExecutorService getExecutorService() {
-        return executorService;
-    }
-
     // Called when the application is starting, before any other application objects have been created.
     // Overriding this method is totally optional!
     @Override

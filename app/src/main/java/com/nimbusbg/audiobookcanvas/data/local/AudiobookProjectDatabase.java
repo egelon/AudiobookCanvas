@@ -10,7 +10,7 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-import com.nimbusbg.audiobookcanvas.data.local.dao.ProjectWithMetadata;
+import com.nimbusbg.audiobookcanvas.data.local.dao.ProjectWithMetadataDao;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
@@ -22,6 +22,8 @@ import com.nimbusbg.audiobookcanvas.data.local.entities.TextBlock;
 import com.nimbusbg.audiobookcanvas.data.repository.Converters;
 
 import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Database(entities = {
         AppInfo.class,
@@ -32,17 +34,23 @@ import java.util.Date;
         EditHistory.class,
         MusicTrack.class,
         TextBlock.class
-        }, version = 1, exportSchema = false)
+}, version = 1, exportSchema = false)
+
 @TypeConverters({Converters.class})
-public abstract class AudiobookProjectDatabase extends RoomDatabase {
+
+public abstract class AudiobookProjectDatabase extends RoomDatabase
+{
     private static AudiobookProjectDatabase instance;
-
-    public abstract ProjectWithMetadata projectWithMetadataDao();
+    
+    private static final int NUMBER_OF_THREADS = 8;
+    public static final ExecutorService databaseWriteExecutor = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
+    
+    public abstract ProjectWithMetadataDao projectWithMetadataDao();
     //TODO: add the other DAOs here!
-
+    
     public static synchronized AudiobookProjectDatabase getInstance(Context context)
     {
-        if(instance == null)
+        if (instance == null)
         {
             instance = Room.databaseBuilder(context.getApplicationContext(), AudiobookProjectDatabase.class, "Audiobook_Projects")
                     .fallbackToDestructiveMigration()
@@ -51,19 +59,21 @@ public abstract class AudiobookProjectDatabase extends RoomDatabase {
         }
         return instance;
     }
-
-    private static RoomDatabase.Callback roomCallback = new RoomDatabase.Callback()
+    
+    private static final RoomDatabase.Callback roomCallback = new RoomDatabase.Callback()
     {
         @Override
-        public void onCreate(@NonNull SupportSQLiteDatabase db) {
+        public void onCreate(@NonNull SupportSQLiteDatabase db)
+        {
             super.onCreate(db);
             new PopulateDbAsyncTask(instance).execute();
         }
     };
-
-    private static class PopulateDbAsyncTask extends AsyncTask <Void, Void, Void>
+    
+    private static class PopulateDbAsyncTask extends AsyncTask<Void, Void, Void>
     {
-        private ProjectWithMetadata projectWithMetadataDao;
+        private final ProjectWithMetadataDao projectWithMetadataDao;
+        
         private PopulateDbAsyncTask(AudiobookProjectDatabase db)
         {
             projectWithMetadataDao = db.projectWithMetadataDao();
@@ -79,17 +89,17 @@ public abstract class AudiobookProjectDatabase extends RoomDatabase {
                     "audiobook.mp3",
                     new Date(2012, 5, 12),
                     new Date(2023, 10, 29));
-            AppInfo testAppInfo = new AppInfo(0,"1.0.2", "14.02_Pie", "Galaxy S22");
-            AudiobookData testData = new AudiobookData(0,"AudioBookName_1", "secret1", "en-us", "no description");
-
+            AppInfo testAppInfo = new AppInfo(0, "1.0.2", "14.02_Pie", "Galaxy S22");
+            AudiobookData testData = new AudiobookData(0, "AudioBookName_1", "secret1", "en-us", "no description");
+            
             long rowId = projectWithMetadataDao.insertProject(testProject);
             int projId = projectWithMetadataDao.getProjectIdByRowId(rowId);
             testAppInfo.setProject_id(projId);
             testData.setProject_id(projId);
             projectWithMetadataDao.insertAppInfo(testAppInfo);
             projectWithMetadataDao.insertAudiobookData(testData);
-
-
+            
+            
             testProject = new AudiobookProject("1.0.0", false, 2,
                     "MyAudioBookProject_2",
                     "input_2.txt",
@@ -97,17 +107,17 @@ public abstract class AudiobookProjectDatabase extends RoomDatabase {
                     "audiobook2.mp3",
                     new Date(2012, 6, 13),
                     new Date(2023, 11, 30));
-            testAppInfo = new AppInfo(0,"1.0.2", "14.02_Pie", "Galaxy S22");
-            testData = new AudiobookData(0,"AudioBookName_2", "secret2", "en-us", "Maybe description");
-
+            testAppInfo = new AppInfo(0, "1.0.2", "14.02_Pie", "Galaxy S22");
+            testData = new AudiobookData(0, "AudioBookName_2", "secret2", "en-us", "Maybe description");
+            
             rowId = projectWithMetadataDao.insertProject(testProject);
             projId = projectWithMetadataDao.getProjectIdByRowId(rowId);
             testAppInfo.setProject_id(projId);
             testData.setProject_id(projId);
             projectWithMetadataDao.insertAppInfo(testAppInfo);
             projectWithMetadataDao.insertAudiobookData(testData);
-
-
+            
+            
             testProject = new AudiobookProject("1.0.0", true, 5,
                     "MyAudioBookProject_3",
                     "input_3.txt",
@@ -115,9 +125,9 @@ public abstract class AudiobookProjectDatabase extends RoomDatabase {
                     "audiobook3.mp3",
                     new Date(2012, 7, 14),
                     new Date(2023, 12, 31));
-            testAppInfo = new AppInfo(0,"1.0.2", "14.02_Pie", "Galaxy S22");
-            testData = new AudiobookData(0,"AudioBookName_3", "secret3", "en-us", "A full audiobook description");
-
+            testAppInfo = new AppInfo(0, "1.0.2", "14.02_Pie", "Galaxy S22");
+            testData = new AudiobookData(0, "AudioBookName_3", "secret3", "en-us", "A full audiobook description");
+            
             rowId = projectWithMetadataDao.insertProject(testProject);
             projId = projectWithMetadataDao.getProjectIdByRowId(rowId);
             testAppInfo.setProject_id(projId);

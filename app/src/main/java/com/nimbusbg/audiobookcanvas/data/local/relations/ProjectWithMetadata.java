@@ -9,13 +9,14 @@ import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
 
 import java.io.Serializable;
 
-public class ProjectWithMetadata implements Serializable {
+public class ProjectWithMetadata implements Serializable
+{
     @Embedded
     public AudiobookProject project;
-
+    
     @Relation(parentColumn = "id", entityColumn = "project_id")
     public AudiobookData audiobookData;
-
+    
     @Relation(parentColumn = "id", entityColumn = "project_id")
     public AppInfo appInfo;
 }
