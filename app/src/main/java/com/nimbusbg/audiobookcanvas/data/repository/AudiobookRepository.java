@@ -15,13 +15,15 @@ import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class AudiobookRepository
 {
     private final ProjectWithMetadataDao projectWithMetadataDao;
     private LiveData<List<ProjectWithMetadata>> allProjects;
+    private long lastInsertedRowID;
+    private int lastInsertedProjID;
     
     public AudiobookRepository(Application application)
     {
@@ -32,11 +34,11 @@ public class AudiobookRepository
     public void insertProjectWithMetadata(AudiobookProject project, AppInfo appInfo, AudiobookData audiobookData)
     {
         AudiobookProjectDatabase.databaseWriteExecutor.execute(() -> {
-            long rowID = projectWithMetadataDao.insertProject(project);
-            int projID = projectWithMetadataDao.getProjectIdByRowId(rowID);
-            appInfo.setProject_id(projID);
+            lastInsertedRowID = projectWithMetadataDao.insertProject(project);
+            lastInsertedProjID = projectWithMetadataDao.getProjectIdByRowId(lastInsertedRowID);
+            appInfo.setProject_id(lastInsertedProjID);
             projectWithMetadataDao.insertAppInfo(appInfo);
-            audiobookData.setProject_id(projID);
+            audiobookData.setProject_id(lastInsertedProjID);
             projectWithMetadataDao.insertAudiobookData(audiobookData);
         });
     }
@@ -62,6 +64,20 @@ public class AudiobookRepository
     public LiveData<List<ProjectWithMetadata>> getAllProjectsWithMetadata()
     {
         return projectWithMetadataDao.getAllProjectWithMetadata();
+    }
+    
+    public int getLastInsertedProjectID() throws ExecutionException, InterruptedException
+    {
+        Future<Integer> idCallable =  AudiobookProjectDatabase
+                .databaseWriteExecutor.submit(new Callable<Integer>() {
+                    @Override
+                    public Integer call()  {
+                        return projectWithMetadataDao.getProjectIdByRowId(lastInsertedRowID);
+                    }
+                });
+        //GET SHOULD WAIT UNTIL WE GET WHAT WE WANT
+        Integer projID = idCallable.get();
+        return projID.intValue();
     }
     
     public void updateProjectWithMetadata(AudiobookProject project, AppInfo appInfo, AudiobookData audiobookData)

@@ -20,6 +20,7 @@ import com.nimbusbg.audiobookcanvas.data.repository.AudiobookRepository;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 public class ProjectWithMetadataViewModel extends AndroidViewModel
 {
@@ -130,6 +131,11 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel
     public LiveData<ProjectWithMetadata> getProjectWithMetadataById(int id)
     {
         return repository.getProjectWithMetadataById(id);
+    }
+    
+    public int getLastInsertedProjectID() throws ExecutionException, InterruptedException
+    {
+        return repository.getLastInsertedProjectID();
     }
 }
 

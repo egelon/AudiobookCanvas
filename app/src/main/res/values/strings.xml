@@ -1,26 +1,26 @@
 <resources>
     <string name="app_name">Audiobook Canvas</string>
-
+    
     <!-- 3 Dot menu item names -->
     <string name="action_settings">Settings</string>
     <string name="action_about">About</string>
-
+    
     <!-- Floating action button menu -->
     <string name="action_import">Import new text file</string>
     <string name="action_edit_proj">Edit audiobook</string>
-
+    
     <!-- Fragment labels -->
     <string name="project_list_fragment_label">Audiobook Projects</string>
     <string name="project_setup_fragment_label">Project Setup</string>
     <string name="settings_fragment_label">Settings</string>
-
+    
     <!-- Get Started screen UI element labels -->
     <string name="welcome_text">Create a new audio book audiobookProject from a .txt file with the text of your book, or edit an already created audiobookProject</string>
-
-
+    
+    
     <!-- Preference Titles -->
     <string name="app_preferences_header">App preferences</string>
-
+    
     <!-- Application Preferences -->
     <string name="skip_get_started_title">Skip the \"Get Started\" screen</string>
     <string name="skip_get_started_summary_off">The \"Get Started\" screen will be shown on application start</string>
@@ -65,5 +65,8 @@
     <string name="book_name_hint">Read at start of audiobook</string>
     <string name="author_name_hint">Read at start of audiobook</string>
     <string name="description_hint">You can add a description</string>
+    <string name="new_project_fragment_label">New Audiobook</string>
+    <string name="text_preparation_fragment_title">Preparing Text File</string>
+    <string name="change_txt_file_btn_label">Change file</string>
 
 </resources>

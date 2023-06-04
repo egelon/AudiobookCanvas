@@ -141,11 +141,7 @@ public class ProjectListFragment extends Fragment
             @Override
             public void onClick(View view)
             {
-                Bundle bundle = new Bundle();
-                bundle.putInt(bundleKey_projID, 0);
-                bundle.putBoolean(bundleKey_isNewProj, true);
-                
-                Navigation.findNavController(getView()).navigate(R.id.actionProjectAdded, bundle);
+                Navigation.findNavController(getView()).navigate(R.id.actionProjectAdded);
             }
         });
     }

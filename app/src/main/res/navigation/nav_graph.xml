@@ -12,7 +12,7 @@
         tools:layout="@layout/project_list_fragment">
         <action
             android:id="@+id/actionProjectAdded"
-            app:destination="@id/ProjectSetupFragment" />
+            app:destination="@id/NewProjectFragment" />
         <action
             android:id="@+id/actionProjectSelected"
             app:destination="@id/ProjectSetupFragment" />
@@ -29,6 +29,9 @@
         <action
             android:id="@+id/actionProjectSaved"
             app:destination="@id/ProjectListFragment" />
+        <action
+            android:id="@+id/actionContinueProcessing"
+            app:destination="@id/TextPreparationFragment" />
     </fragment>
 
     <fragment
@@ -40,4 +43,21 @@
         android:name="com.nimbusbg.audiobookcanvas.views.AboutFragment"
         android:label="@string/menu_item_about"
         tools:layout="@layout/about_fragment" />
+    <fragment
+        android:id="@+id/NewProjectFragment"
+        android:name="com.nimbusbg.audiobookcanvas.views.NewProjectFragment"
+        android:label="@string/new_project_fragment_label"
+        tools:layout="@layout/new_project_fragment" >
+        <action
+            android:id="@+id/actionCancelNewProject"
+            app:destination="@id/ProjectListFragment" />
+        <action
+            android:id="@+id/actionStartProcessing"
+            app:destination="@id/TextPreparationFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/TextPreparationFragment"
+        android:name="com.nimbusbg.audiobookcanvas.views.TextPreparationFragment"
+        android:label="text_preparation_fragment"
+        tools:layout="@layout/text_preparation_fragment" />
 </navigation>
