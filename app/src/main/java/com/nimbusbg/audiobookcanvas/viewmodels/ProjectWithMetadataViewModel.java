@@ -9,18 +9,18 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
 import com.nimbusbg.audiobookcanvas.BuildConfig;
-import com.nimbusbg.audiobookcanvas.MyAudiobookCanvasApplication;
 import com.nimbusbg.audiobookcanvas.R;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
 import com.nimbusbg.audiobookcanvas.data.repository.AudiobookRepository;
+import com.nimbusbg.audiobookcanvas.data.repository.DeletedItemListener;
+import com.nimbusbg.audiobookcanvas.data.repository.InsertedItemListener;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
 
 public class ProjectWithMetadataViewModel extends AndroidViewModel
 {
@@ -94,6 +94,18 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel
         repository.insertProjectWithMetadata(emptyProject.project, emptyProject.appInfo, emptyProject.audiobookData);
     }
     
+    public void insertNewProject(String projName, String title, String author, String descr, String uri, InsertedItemListener onInsertListener)
+    {
+        createEmptyProject();
+        emptyProject.project.setProjectName(projName);
+        emptyProject.project.setInputFilePath(uri);
+        emptyProject.audiobookData.setBookTitle(title);
+        emptyProject.audiobookData.setAuthor(author);
+        emptyProject.audiobookData.setDescription(descr);
+        
+        repository.insertProjectWithMetadata(emptyProject.project, emptyProject.appInfo, emptyProject.audiobookData, onInsertListener);
+    }
+    
     public void insertNewProject(String projName, String title, String author, String descr, String uri)
     {
         createEmptyProject();
@@ -121,6 +133,11 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel
         repository.deleteProjectWithMetadataById(id);
     }
     
+    public void deleteProjectWithMetadataById(int id, DeletedItemListener onDeleteListener)
+    {
+        repository.deleteProjectWithMetadataById(id, onDeleteListener);
+    }
+    
     //TODO: do the same for the other methods of the repository
     
     public LiveData<List<ProjectWithMetadata>> getAllProjectsWithMetadata()
@@ -133,9 +150,9 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel
         return repository.getProjectWithMetadataById(id);
     }
     
-    public int getLastInsertedProjectID() throws ExecutionException, InterruptedException
+    public LiveData<ProjectWithMetadata> getProjectWithMetadataByRowId(int row_id)
     {
-        return repository.getLastInsertedProjectID();
+        return repository.getProjectWithMetadataByRowId(row_id);
     }
 }
 

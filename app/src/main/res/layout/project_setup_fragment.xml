@@ -107,16 +107,6 @@
                     android:focusable="false"
                     android:text="@string/no_text_file_selected_label"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
-
-                <Button
-                    android:id="@+id/textFileBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginEnd="5dp"
-                    android:ems="10"
-                    android:inputType="text"
-                    android:text="@string/select_file_btn_label" />
             </RelativeLayout>
 
             <View
@@ -517,6 +507,19 @@
                     android:text="@string/continue_processing_btn_label"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
+    
+                <Button
+                    android:id="@+id/openAudiobookBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="16dp"
+                    android:text="@string/open_audiobook_btn_label"
+                    android:visibility="visible"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/processTxtBlockBtn" />
 
                 <Button
                     android:id="@+id/exportAsXMLBtn"

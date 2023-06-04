@@ -19,10 +19,12 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.nimbusbg.audiobookcanvas.R;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
+import com.nimbusbg.audiobookcanvas.data.repository.DeletedItemListener;
 import com.nimbusbg.audiobookcanvas.databinding.ProjectSetupFragmentBinding;
 import com.nimbusbg.audiobookcanvas.viewmodels.ProjectWithMetadataViewModel;
 
@@ -33,20 +35,8 @@ public class ProjectSetupFragment extends Fragment
 {
     private ProjectSetupFragmentBinding binding;
     Context appActivityContext;
-    private Boolean isNewProject;
     
     private ProjectWithMetadataViewModel projectWithMetadataViewModel;
-    
-    //TODO: try moving this inside the onclick function of the text select button
-    ActivityResultLauncher<String> mGetContent = registerForActivityResult(new ActivityResultContracts.GetContent(),
-            new ActivityResultCallback<Uri>()
-            {
-                @Override
-                public void onActivityResult(Uri uri)
-                {
-                    updateTextFileURI(uri);
-                }
-            });
     
     /*
         private ArrayList<String> contentChunks;
@@ -74,6 +64,7 @@ public class ProjectSetupFragment extends Fragment
         // Inflate the menu; this adds items to the action bar if it is present.
         inflater.inflate(R.menu.save_project_menu, menu);
         super.onCreateOptionsMenu(menu, inflater);
+        
     }
     
     @Override
@@ -87,48 +78,29 @@ public class ProjectSetupFragment extends Fragment
         {
             return isProjectSavedSuccessfully();
         }
+        else if (optionItemID == R.id.action_delete_project)
+        {
+            deleteProject();
+            return true;
+        }
         return super.onOptionsItemSelected(item);
+    }
+    
+    private void deleteProject()
+    {
+        int projectID = getArguments().getInt("projectID");
+        projectWithMetadataViewModel.deleteProjectWithMetadataById(projectID,
+                () -> requireActivity().runOnUiThread(
+                        () -> Navigation.findNavController(getView()).navigateUp()
+                ));
     }
     
     private boolean isProjectSavedSuccessfully()
     {
+        //the only things we will update are project name, metadata entries
+        Toast.makeText(this.getActivity(), "Project Updated", Toast.LENGTH_SHORT).show();
         
-        //first, check if this is a new project. If it is, insert it into the database
-        if(isNewProject)
-        {
-            //check if there is a text file selected
-            if(binding.textFilePath.getText().toString().isEmpty())
-            {
-                Toast.makeText(this.getActivity(), "No text file selected", Toast.LENGTH_SHORT).show();
-                return false;
-            }
-            else
-            {
-                projectWithMetadataViewModel.insertNewProject(binding.projName.getText().toString(),
-                        binding.bookName.getText().toString(),
-                        binding.authorName.getText().toString(),
-                        binding.descriptionText.getText().toString(),
-                        binding.textFilePath.getText().toString());
-                Toast.makeText(this.getActivity(), "Project '" + binding.projName.getText().toString() +"' Saved", Toast.LENGTH_SHORT).show();
-            }
-        }
-        else
-        {
-            //check if there is a text file selected
-            if(binding.textFilePath.getText().toString().isEmpty())
-            {
-                Toast.makeText(this.getActivity(), "No text file selected", Toast.LENGTH_SHORT).show();
-                return false;
-            }
-            else
-            {
-                Toast.makeText(this.getActivity(), "Project Updated", Toast.LENGTH_SHORT).show();
-            }
-            
-            //the only things we will update are project name, metadata entries
-        }
-        
-        //TODO: finish this function or better yet CHAGE THE VIEWMODEL!!!!!
+        //TODO: finish this function or better yet CHANGE THE VIEWMODEL!!!!!
         //projectWithMetadataViewModel.updateProjectWithMetadata(projectID, projectNameStr, audiobookNameStr, bookNameStr, authorNameStr, projectDescriptionStr);
         
         //navController.navigate(R.id.actionProjectSaved);
@@ -141,18 +113,8 @@ public class ProjectSetupFragment extends Fragment
         super.onViewCreated(view, savedInstanceState);
         
         appActivityContext = this.getActivity();
-        isNewProject = getArguments().getBoolean("isNewProject");
-
-        projectWithMetadataViewModel = new ViewModelProvider(NavHostFragment.findNavController(this).getViewModelStoreOwner(R.id.nav_graph)).get(ProjectWithMetadataViewModel.class);
         
-        binding.textFileBtn.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                onSelectTxtFileClicked(view);
-            }
-        });
+        projectWithMetadataViewModel = new ViewModelProvider(NavHostFragment.findNavController(this).getViewModelStoreOwner(R.id.nav_graph)).get(ProjectWithMetadataViewModel.class);
         
         binding.exportAsXMLBtn.setOnClickListener(new View.OnClickListener()
         {
@@ -171,48 +133,17 @@ public class ProjectSetupFragment extends Fragment
                 onProcessChunkClicked(view);
             }
         });
-        
-        if (isNewProject)
+    
+        binding.openAudiobookBtn.setOnClickListener(new View.OnClickListener()
         {
-            loadDefaultEmptyProject();
-        } else
-        {
-            loadSelectedProject();
-        }
+            @Override
+            public void onClick(View view)
+            {
+                onOpenAudiobookClicked(view);
+            }
+        });
         
-        
-    }
-    
-    private void loadDefaultEmptyProject()
-    {
-        //However, if this is the creation of a brand new project, we need to call insertNewEmptyProject, and fill our fragment with the default data
-        //then we need to save it when the user continues with the text file processing
-        //TODO: move the select file button to a more prominent place! Make it disappear when a file is selected. If we're opening an already created project, then don't show the button at all
-        projectWithMetadataViewModel.createEmptyProject();
-        ProjectWithMetadata defaultProject = projectWithMetadataViewModel.getEmptyProject();
-        
-        binding.projName.setText(defaultProject.project.getProjectName());
-        binding.projFileVersion.setText(defaultProject.project.getProjectVersion());
-        binding.bookName.setText(defaultProject.audiobookData.getBookTitle());
-        binding.authorName.setText(defaultProject.audiobookData.getAuthor());
-        binding.descriptionText.setText(defaultProject.audiobookData.getDescription());
-        binding.textFilePath.setText(defaultProject.project.getInputFilePath());
-        int lastBlockID = defaultProject.project.getLastProcessedBlockId();
-        binding.lastProcessedBlock.setText(String.valueOf(lastBlockID));
-        binding.processTxtBlockBtn.setText(R.string.start_processing_btn_label);
-        
-        //TODO: I should probably get rid of this here - I have no way of calculating it here, and seems to be a bit pointless as information
-        binding.percentCompleted.setText("0%");
-       
-        Date lastModifiedDate = defaultProject.project.getLastModified();
-        binding.lastEditedOn.setText(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(lastModifiedDate));
-    
-        Date createdOnDate = defaultProject.project.getCreatedOn();
-        binding.createdOn.setText(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(createdOnDate));
-    
-        binding.appVersion.setText(defaultProject.appInfo.getAppVersion());
-        binding.osVersion.setText(defaultProject.appInfo.getOsVersion());
-        binding.deviceName.setText(defaultProject.appInfo.getDeviceType());
+        loadSelectedProject();
     }
     
     private void loadSelectedProject()
@@ -224,8 +155,6 @@ public class ProjectSetupFragment extends Fragment
             public void onChanged(@Nullable ProjectWithMetadata projectData)
             {
                 // Update your UI here.
-                
-                
                 binding.projName.setText(projectData.project.getProjectName());
                 binding.projFileVersion.setText(projectData.project.getProjectVersion());
                 binding.bookName.setText(projectData.audiobookData.getBookTitle());
@@ -236,21 +165,35 @@ public class ProjectSetupFragment extends Fragment
                 int lastBlockID = projectData.project.getLastProcessedBlockId();
                 binding.lastProcessedBlock.setText(String.valueOf(lastBlockID));
                 
+                if (projectData.project.getCompleted() || (lastBlockID == 0))
+                {
+                    binding.percentCompletedLabel.setVisibility(View.VISIBLE);
+                    binding.percentCompleted.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    binding.percentCompletedLabel.setVisibility(View.GONE);
+                    binding.percentCompleted.setVisibility(View.GONE);
+                }
+    
                 if (lastBlockID == 0)
                 {
+                    binding.percentCompleted.setText("0%");
+                    binding.processTxtBlockBtn.setVisibility(View.VISIBLE);
                     binding.processTxtBlockBtn.setText(R.string.start_processing_btn_label);
-                } else
-                {
-                    binding.processTxtBlockBtn.setText(R.string.continue_processing_btn_label);
+                    binding.openAudiobookBtn.setVisibility(View.GONE);
                 }
-                
-                //TODO: I should probably get rid of this here - I have no way of calculating it here, and seems to be a bit pointless as information
-                if (projectData.project.getCompleted())
+                else if(projectData.project.getCompleted())
                 {
                     binding.percentCompleted.setText("100%");
-                } else
+                    binding.processTxtBlockBtn.setVisibility(View.GONE);
+                    binding.openAudiobookBtn.setVisibility(View.VISIBLE);
+                }
+                else
                 {
-                    calculateBookCompletion(lastBlockID);
+                    binding.processTxtBlockBtn.setVisibility(View.VISIBLE);
+                    binding.processTxtBlockBtn.setText(R.string.continue_processing_btn_label);
+                    binding.openAudiobookBtn.setVisibility(View.GONE);
                 }
                 
                 Date lastModifiedDate = projectData.project.getLastModified();
@@ -266,55 +209,28 @@ public class ProjectSetupFragment extends Fragment
         });
     }
     
-    //TODO: I'll probably remove this
-    private void calculateBookCompletion(int lastBlockID)
-    {
-        if (lastBlockID == 0)
-        {
-            binding.percentCompleted.setText("0%");
-        } else
-        {
-            //TODO: get the max chunks and calculate it
-            binding.percentCompleted.setText("45%");
-        }
-        
-    }
-    
-    private void updateTextFileURI(Uri uri)
-    {
-        // Handle the returned Uri
-        if (uri != null)
-        {
-            binding.textFilePath.setText(uri.toString());
-            //viewModel.readFile(uri);
-        }
-    }
-    
-    public void onSelectTxtFileClicked(View view)
-    {
-        mGetContent.launch("text/*");
-    }
-    
     public void onExportAsXMLClicked(View view)
     {
         Toast.makeText(this.getActivity(), "Export as XML", Toast.LENGTH_LONG).show();
     }
     
+    private Bundle MakeBundleForTextProcessing()
+    {
+        Bundle bundle = new Bundle();
+        bundle.putInt("projectID", getArguments().getInt("projectID"));
+        bundle.putBoolean("isNewProject", false);
+        bundle.putString("txtFileUri", binding.textFilePath.getText().toString());
+        return bundle;
+    }
+    
     public void onProcessChunkClicked(View view)
     {
-        Toast.makeText(this.getActivity(), "Process chunk", Toast.LENGTH_LONG).show();
-        
-        //TODO: REMOVE!!! FOR TEST ONLY!!!
-        int projectID = getArguments().getInt("projectID");
-        projectWithMetadataViewModel.deleteProjectWithMetadataById(projectID);
-        
-        //WARNING!!! There is a bug here! We will now navigate to the previous fragment. In its onViewCreated, we call rojectWithMetadataViewModel.getAllProjectsWithMetadata().observe
-        //HOWEVER, this will only observe the PREVIOUS change to our LiveData (the one we did when we pressed the save button!)
-        //Initial assumption: This happens, because deleting from the database is asynchronous, and "hasn't happened yet" at the time we call our observe...and we never call observe again
-        //upon further testing, it appears this is incorrect. If we observe the database via the App Inspector, we can verify that the project entry is still there after we navigate away.
-        //maybe this has something to do with the viewModel instance losing scope, thus releasing the repository reference, which would prevent it from calling the database in the first place
-        //at any rate, some weird stuff is happening if we click save AND delete on the same fragment and we immediately navigate up
-        NavHostFragment.findNavController(this).navigateUp();
+        Navigation.findNavController(getView()).navigate(R.id.actionContinueProcessing, MakeBundleForTextProcessing());
+    }
+    
+    public void onOpenAudiobookClicked(View view)
+    {
+        Toast.makeText(this.getActivity(), "Open Audiobook", Toast.LENGTH_LONG).show();
     }
     
     @Override

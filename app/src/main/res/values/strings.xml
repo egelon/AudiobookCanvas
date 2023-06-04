@@ -68,5 +68,7 @@
     <string name="new_project_fragment_label">New Audiobook</string>
     <string name="text_preparation_fragment_title">Preparing Text File</string>
     <string name="change_txt_file_btn_label">Change file</string>
+    <string name="action_delete_project">Delete</string>
+    <string name="open_audiobook_btn_label">Open Audiobook</string>
 
 </resources>

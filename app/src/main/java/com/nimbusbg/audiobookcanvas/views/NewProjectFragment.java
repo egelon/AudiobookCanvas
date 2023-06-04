@@ -2,16 +2,13 @@ package com.nimbusbg.audiobookcanvas.views;
 
 import android.content.Context;
 import android.net.Uri;
-import android.opengl.Visibility;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
@@ -29,16 +26,12 @@ import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
 import com.nimbusbg.audiobookcanvas.databinding.NewProjectFragmentBinding;
 import com.nimbusbg.audiobookcanvas.viewmodels.ProjectWithMetadataViewModel;
 
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-
 public class NewProjectFragment extends Fragment
 {
     private NewProjectFragmentBinding binding;
     Context appActivityContext;
     boolean isProjectSaved;
+    int projectId;
     
     private ProjectWithMetadataViewModel projectWithMetadataViewModel;
     
@@ -49,8 +42,7 @@ public class NewProjectFragment extends Fragment
                 @Override
                 public void onActivityResult(Uri uri)
                 {
-                    updateTextFileURI(uri);
-                    showOtherUIElements();
+                    HandleUIOnTextFileSelection(uri);
                 }
             });
     
@@ -65,16 +57,16 @@ public class NewProjectFragment extends Fragment
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
     {
         // Inflate the menu; this adds items to the action bar if it is present.
+        
         inflater.inflate(R.menu.save_project_menu, menu);
+        menu.removeItem(R.id.action_delete_project);
         super.onCreateOptionsMenu(menu, inflater);
     }
     
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item)
     {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+        // Handle action bar item clicks here.
         int optionItemID = item.getItemId();
         if (optionItemID == R.id.action_save_project)
         {
@@ -95,8 +87,11 @@ public class NewProjectFragment extends Fragment
                 binding.bookName.getText().toString(),
                 binding.authorName.getText().toString(),
                 binding.descriptionText.getText().toString(),
-                binding.textFilePath.getText().toString());
-        Toast.makeText(this.getActivity(), "Project '" + binding.projName.getText().toString() +"' Saved", Toast.LENGTH_SHORT).show();
+                binding.textFilePath.getText().toString(),
+                itemId -> requireActivity().runOnUiThread(() -> {
+                    projectId = itemId;
+                    Toast.makeText(requireActivity(), "Project '" + binding.projName.getText().toString() +"' Saved", Toast.LENGTH_SHORT).show();
+                }));
     }
     
     private boolean isProjectSavedSuccessfully()
@@ -119,6 +114,20 @@ public class NewProjectFragment extends Fragment
     {
         binding = NewProjectFragmentBinding.inflate(inflater, container, false);
         return binding.getRoot();
+    }
+    
+    private void HandleUIOnTextFileSelection(Uri uri)
+    {
+        if (uri != null)
+        {
+            binding.textFilePath.setText(uri.toString());
+            binding.textFileBtn.setText(R.string.change_txt_file_btn_label);
+            binding.projectNameLayout.setVisibility(View.VISIBLE);
+            binding.bookNameLayout.setVisibility(View.VISIBLE);
+            binding.authorLayout.setVisibility(View.VISIBLE);
+            binding.descriptionLayout.setVisibility(View.VISIBLE);
+            binding.processTxtBlockBtn.setVisibility(View.VISIBLE);
+        }
     }
     
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState)
@@ -164,24 +173,12 @@ public class NewProjectFragment extends Fragment
         binding.descriptionText.setText(defaultProject.audiobookData.getDescription());
         binding.textFilePath.setText(defaultProject.project.getInputFilePath());
         binding.processTxtBlockBtn.setText(R.string.start_processing_btn_label);
-    }
     
-    private void updateTextFileURI(Uri uri)
-    {
-        // Handle the returned Uri
-        if (uri != null)
-        {
-            binding.textFilePath.setText(uri.toString());
-            binding.textFileBtn.setText(R.string.change_txt_file_btn_label);
-        }
-    }
-    
-    private void showOtherUIElements()
-    {
-        binding.bookNameLayout.setVisibility(View.VISIBLE);
-        binding.authorLayout.setVisibility(View.VISIBLE);
-        binding.descriptionLayout.setVisibility(View.VISIBLE);
-        binding.processTxtBlockBtn.setVisibility(View.VISIBLE);
+        binding.projectNameLayout.setVisibility(View.GONE);
+        binding.bookNameLayout.setVisibility(View.GONE);
+        binding.authorLayout.setVisibility(View.GONE);
+        binding.descriptionLayout.setVisibility(View.GONE);
+        binding.processTxtBlockBtn.setVisibility(View.GONE);
     }
     
     public void onSelectTxtFileClicked(View view)
@@ -189,29 +186,38 @@ public class NewProjectFragment extends Fragment
         mGetContent.launch("text/*");
     }
     
+    private Bundle MakeBundleForTextProcessing()
+    {
+        Bundle bundle = new Bundle();
+        bundle.putInt("projectID", projectId);
+        bundle.putBoolean("isNewProject", true);
+        bundle.putString("txtFileUri", binding.textFilePath.getText().toString());
+        return bundle;
+    }
+    
     public void onProcessChunkClicked(View view)
     {
         if(!isProjectSaved)
         {
-            SaveProject();
+            projectWithMetadataViewModel.insertNewProject(
+                binding.projName.getText().toString(),
+                binding.bookName.getText().toString(),
+                binding.authorName.getText().toString(),
+                binding.descriptionText.getText().toString(),
+                binding.textFilePath.getText().toString(),
+                    itemId -> requireActivity().runOnUiThread(() -> {
+                        projectId = itemId;
+                        Toast.makeText(requireActivity(), "Project '" + binding.projName.getText().toString() + "' created", Toast.LENGTH_SHORT).show();
+                        Navigation.findNavController(getView()).navigate(R.id.actionStartProcessing, MakeBundleForTextProcessing());
+                    }));
         }
-        int newProjID = 0;
-        try
+        else
         {
-            newProjID = projectWithMetadataViewModel.getLastInsertedProjectID();
-        } catch (ExecutionException e)
-        {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e)
-        {
-            throw new RuntimeException(e);
+            Navigation.findNavController(getView()).navigate(R.id.actionStartProcessing, MakeBundleForTextProcessing());
         }
-        Bundle bundle = new Bundle();
-        bundle.putInt("projectID", newProjID);
-        bundle.putBoolean("isNewProject", true);
-    
-        Navigation.findNavController(getView()).navigate(R.id.actionStartProcessing, bundle);
     }
+    
+    
     
     @Override
     public void onDestroyView()

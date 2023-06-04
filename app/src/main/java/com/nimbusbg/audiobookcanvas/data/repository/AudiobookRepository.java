@@ -13,10 +13,6 @@ import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
 
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class AudiobookRepository
 {
@@ -43,10 +39,32 @@ public class AudiobookRepository
         });
     }
     
+    public void insertProjectWithMetadata(AudiobookProject project, AppInfo appInfo, AudiobookData audiobookData, final InsertedItemListener onInsertListener)
+    {
+        
+        AudiobookProjectDatabase.databaseWriteExecutor.execute(() -> {
+            lastInsertedRowID = projectWithMetadataDao.insertProject(project);
+            lastInsertedProjID = projectWithMetadataDao.getProjectIdByRowId(lastInsertedRowID);
+            appInfo.setProject_id(lastInsertedProjID);
+            projectWithMetadataDao.insertAppInfo(appInfo);
+            audiobookData.setProject_id(lastInsertedProjID);
+            projectWithMetadataDao.insertAudiobookData(audiobookData);
+            onInsertListener.onInsert(lastInsertedProjID);
+        });
+    }
+    
     public void deleteProjectWithMetadataById(int id)
     {
         AudiobookProjectDatabase.databaseWriteExecutor.execute(() -> {
             projectWithMetadataDao.deleteProjectWithMetadataById(id);
+        });
+    }
+    
+    public void deleteProjectWithMetadataById(int id, final DeletedItemListener onDeleteListener)
+    {
+        AudiobookProjectDatabase.databaseWriteExecutor.execute(() -> {
+            projectWithMetadataDao.deleteProjectWithMetadataById(id);
+            onDeleteListener.onDelete();
         });
     }
     
@@ -61,23 +79,14 @@ public class AudiobookRepository
         return projectWithMetadataDao.getProjectWithMetadataById(id);
     }
     
+    public LiveData<ProjectWithMetadata> getProjectWithMetadataByRowId(int row_id)
+    {
+        return projectWithMetadataDao.getProjectWithMetadataByRowId(row_id);
+    }
+    
     public LiveData<List<ProjectWithMetadata>> getAllProjectsWithMetadata()
     {
         return projectWithMetadataDao.getAllProjectWithMetadata();
-    }
-    
-    public int getLastInsertedProjectID() throws ExecutionException, InterruptedException
-    {
-        Future<Integer> idCallable =  AudiobookProjectDatabase
-                .databaseWriteExecutor.submit(new Callable<Integer>() {
-                    @Override
-                    public Integer call()  {
-                        return projectWithMetadataDao.getProjectIdByRowId(lastInsertedRowID);
-                    }
-                });
-        //GET SHOULD WAIT UNTIL WE GET WHAT WE WANT
-        Integer projID = idCallable.get();
-        return projID.intValue();
     }
     
     public void updateProjectWithMetadata(AudiobookProject project, AppInfo appInfo, AudiobookData audiobookData)

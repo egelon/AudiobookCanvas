@@ -35,6 +35,10 @@ public interface ProjectWithMetadataDao
     int getProjectIdByRowId(long rowId);
     
     @Transaction
+    @Query("SELECT * FROM audiobookProject WHERE rowid = :rowId")
+    LiveData<ProjectWithMetadata> getProjectWithMetadataByRowId(long rowId);
+    
+    @Transaction
     @Query("Select * FROM audiobookProject WHERE id = :id")
     LiveData<ProjectWithMetadata> getProjectWithMetadataById(int id);
     
