@@ -1,13 +1,17 @@
 package com.nimbusbg.audiobookcanvas.views;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
@@ -34,21 +38,42 @@ public class NewProjectFragment extends Fragment
     int projectId;
     
     private ProjectWithMetadataViewModel projectWithMetadataViewModel;
+    private ActivityResultLauncher<String> getUriActivity;
     
-    //TODO: try moving this inside the onclick function of the text select button
-    ActivityResultLauncher<String> mGetContent = registerForActivityResult(new ActivityResultContracts.GetContent(),
-            new ActivityResultCallback<Uri>()
-            {
-                @Override
-                public void onActivityResult(Uri uri)
-                {
-                    HandleUIOnTextFileSelection(uri);
-                }
-            });
     
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
+        getUriActivity = registerForActivityResult(
+                new ActivityResultContract<String, Uri>() {
+                    @NonNull
+                    @Override
+                    public Intent createIntent(@NonNull Context context, String input)
+                    {
+                        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                        intent.addCategory(Intent.CATEGORY_OPENABLE);
+                        intent.setType(input);
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+                        return intent;
+                    }
+                
+                    @Override
+                    public Uri parseResult(int resultCode, @Nullable Intent intent)
+                    {
+                        if (intent == null || resultCode != Activity.RESULT_OK)
+                        {
+                            return null;
+                        }
+                        return intent.getData();
+                    }
+                }, new ActivityResultCallback<Uri>() {
+                    @Override
+                    public void onActivityResult(Uri uri)
+                    {
+                        HandleUIOnTextFileSelection(uri);
+                    }
+                });
         setHasOptionsMenu(true);
         super.onCreate(savedInstanceState);
     }
@@ -116,20 +141,6 @@ public class NewProjectFragment extends Fragment
         return binding.getRoot();
     }
     
-    private void HandleUIOnTextFileSelection(Uri uri)
-    {
-        if (uri != null)
-        {
-            binding.textFilePath.setText(uri.toString());
-            binding.textFileBtn.setText(R.string.change_txt_file_btn_label);
-            binding.projectNameLayout.setVisibility(View.VISIBLE);
-            binding.bookNameLayout.setVisibility(View.VISIBLE);
-            binding.authorLayout.setVisibility(View.VISIBLE);
-            binding.descriptionLayout.setVisibility(View.VISIBLE);
-            binding.processTxtBlockBtn.setVisibility(View.VISIBLE);
-        }
-    }
-    
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
@@ -183,7 +194,26 @@ public class NewProjectFragment extends Fragment
     
     public void onSelectTxtFileClicked(View view)
     {
-        mGetContent.launch("text/*");
+        
+    
+        getUriActivity.launch("text/*");
+    }
+    
+    private void HandleUIOnTextFileSelection(Uri uri)
+    {
+        if (uri != null)
+        {
+            final int takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION;
+            requireContext().getContentResolver().takePersistableUriPermission(uri, takeFlags);
+    
+            binding.textFilePath.setText(uri.toString());
+            binding.textFileBtn.setText(R.string.change_txt_file_btn_label);
+            binding.projectNameLayout.setVisibility(View.VISIBLE);
+            binding.bookNameLayout.setVisibility(View.VISIBLE);
+            binding.authorLayout.setVisibility(View.VISIBLE);
+            binding.descriptionLayout.setVisibility(View.VISIBLE);
+            binding.processTxtBlockBtn.setVisibility(View.VISIBLE);
+        }
     }
     
     private Bundle MakeBundleForTextProcessing()
