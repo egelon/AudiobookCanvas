@@ -5,12 +5,18 @@ import android.net.Uri;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 
 
+import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithTextBlocks;
+import com.nimbusbg.audiobookcanvas.data.repository.ApiResponseListener;
 import com.nimbusbg.audiobookcanvas.data.repository.AudiobookRepository;
 import com.nimbusbg.audiobookcanvas.data.repository.FIleOperationListener;
+import com.nimbusbg.audiobookcanvas.data.repository.GptApiRepository;
 import com.nimbusbg.audiobookcanvas.data.repository.InsertedItemListener;
 import com.nimbusbg.audiobookcanvas.data.repository.TextFileRepository;
+
+import org.json.JSONException;
 
 import java.util.ArrayList;
 
@@ -18,8 +24,9 @@ public class ProcessTextFileViewModel extends AndroidViewModel
 {
     private final AudiobookRepository databaseRepository;
     private final TextFileRepository fileRepository;
+    private final GptApiRepository gptApiRepository;
     private ArrayList<String> textChunks;
-    //private ProjectWithTextBlocks projectTextBlocks;
+    private ProjectWithTextBlocks projectTextBlocks;
     
     public void setDialogueStartChar(char start)
     {
@@ -57,9 +64,27 @@ public class ProcessTextFileViewModel extends AndroidViewModel
     
         databaseRepository = new AudiobookRepository(application);
         fileRepository = new TextFileRepository(application);
+        gptApiRepository = new GptApiRepository(application);
     }
     
     public void chunkInputFile(Uri uri, FIleOperationListener listener) {
         fileRepository.GetSanitisedChunks(uri, listener);
+    }
+    
+    public LiveData<ProjectWithTextBlocks> getProjectWithTextBlocksById(int id)
+    {
+        return databaseRepository.getProjectWithTextBlocksById(id);
+    }
+    
+    public void performNamedEntityRecognition(String textBlock, String tag, ApiResponseListener rspListener)
+    {
+        try
+        {
+            gptApiRepository.getCompletion(textBlock, tag, rspListener);
+        }
+        catch (JSONException e)
+        {
+            rspListener.OnException(e);
+        }
     }
 }

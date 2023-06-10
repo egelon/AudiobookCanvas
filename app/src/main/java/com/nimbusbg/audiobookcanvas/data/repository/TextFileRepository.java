@@ -65,73 +65,118 @@ public class TextFileRepository
         return stringBuilder.toString();
     }
     
-    private ArrayList<String> chunkFileData(String fileData) {
-        textChunks = new ArrayList<String>();
+    private ArrayList<String> chunkFileData(String fileData)
+    {
+        ArrayList<String> textChunks = new ArrayList<>();
         StringBuilder text = new StringBuilder();
-        Pattern sentenceBoundaryPattern = Pattern.compile("[.!?]+\\s*");
-    
+        // Regex pattern modified to consider your specific quotation marks
+        Pattern sentenceBoundaryPattern = Pattern.compile("(“)([^”]*)(”)|[.!?]+\\s*");
+        
+        int lastIndex = 0;
+        boolean insideQuotes = false;
+        
         for (int i = 0; i < fileData.length(); i++)
         {
-            text.append(fileData.charAt(i));
+            char c = fileData.charAt(i);
+            text.append(c);
             
-            if (text.length() >= maxChunkSize)
-            {
-                Matcher matcher = sentenceBoundaryPattern.matcher(text);
-                int lastIndex = 0;
-                
-                while (matcher.find())
-                {
-                    if (matcher.start() >= maxChunkSize)
-                    {
-                        break;
-                    }
-                    lastIndex = matcher.end();
-                }
-                
-                if (lastIndex > 0)
-                {
-                    textChunks.add(text.substring(0, lastIndex));
-                    text.delete(0, lastIndex);
-                }
-            }
-        }
-    
-        if (text.length() > 0)
-        {
-            textChunks.add(text.toString());
-        }
-        
-        for(int i = 0; i < textChunks.size(); i++)
-        {
-            textChunks.set(i, sanitiseChunk(textChunks.get(i)));
-        }
-    
-        return textChunks;
-    }
-    
-    private String sanitiseChunk(String chunk)
-    {
-        StringBuilder sanitisedChunk = new StringBuilder();
-        boolean inDialogue = false;
-    
-        for (char c : chunk.toCharArray()) {
-            sanitisedChunk.append(c);
+            // Track if we're inside a dialogue line.
             if (c == dialogueStartChar)
             {
-                inDialogue = true;
+                insideQuotes = true;
             }
             else if (c == dialogueEndChar)
             {
-                if (inDialogue)
+                insideQuotes = false;
+            }
+            
+            Matcher matcher = sentenceBoundaryPattern.matcher(text);
+            
+            while (matcher.find())
+            {
+                // If we're inside a dialogue line, ignore sentence boundaries.
+                if (insideQuotes) continue;
+                
+                if (matcher.end() <= maxChunkSize)
                 {
-                    sanitisedChunk.append("\\n");
-                    inDialogue = false;
+                    lastIndex = matcher.end();
                 }
             }
+            
+            // If we have a valid sentence boundary and the current text length exceeds the maximum chunk size,
+            // we can cut the chunk at the sentence boundary.
+            if (lastIndex > 0 && text.length() > maxChunkSize)
+            {
+                textChunks.add(text.substring(0, lastIndex).trim());
+                text.delete(0, lastIndex);
+                lastIndex = 0;
+            }
+        }
+        
+        // If there's any leftover text, add it to the chunks.
+        if (text.length() > 0)
+        {
+            textChunks.add(text.toString().trim());
+        }
+        
+        // Sanitize each chunk
+        for (int i = 0; i < textChunks.size(); i++)
+        {
+            textChunks.set(i, sanitiseChunk(textChunks.get(i)));
+        }
+        
+        return textChunks;
+    }
+    
+    private String sanitiseChunk(String chunk) {
+        StringBuilder sanitisedChunk = new StringBuilder();
+        boolean inDialogue = false;
+        boolean justExitedDialogue = false; // Tracks if we have just exited a dialogue line
+        
+        for (int i = 0; i < chunk.length(); i++) {
+            char c = chunk.charAt(i);
+            
+            if (c == dialogueStartChar) {
+                if (i > 0 && (!justExitedDialogue || (justExitedDialogue && chunk.charAt(i-1) != '\n'))) {
+                    sanitisedChunk.append("\n");
+                }
+                sanitisedChunk.append(c);
+                inDialogue = true;
+                justExitedDialogue = false; // Reset this flag as we're in a dialogue line now
+            } else if (c == dialogueEndChar) {
+                sanitisedChunk.append(c);
+                inDialogue = false;
+                justExitedDialogue = true; // We just exited a dialogue line
+                
+                if (i + 1 < chunk.length()) {
+                    char nextChar = chunk.charAt(i + 1);
+                    // Add newline if the next character isn't the start of another dialogue line
+                    if (nextChar != ' ' && nextChar != dialogueStartChar) {
+                        sanitisedChunk.append("\n");
+                        justExitedDialogue = false; // We've handled the exit, so reset the flag
+                    }
+                }
+            } else {
+                // If we're not in a dialogue line but just exited one, we must be at the start of a narration line
+                if (!inDialogue && justExitedDialogue) {
+                    sanitisedChunk.append("\n");
+                    justExitedDialogue = false; // We've handled the exit, so reset the flag
+                }
+                sanitisedChunk.append(c);
+            }
+        }
+        
+        // If the string ends with a dialogue line, append a newline
+        if (justExitedDialogue) {
+            sanitisedChunk.append("\n");
         }
         
         return sanitisedChunk.toString();
     }
+    
+    
+    
+    
     
     public void GetSanitisedChunks(Uri uri, FIleOperationListener listener)
     {

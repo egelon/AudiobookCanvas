@@ -13,6 +13,7 @@ import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
 import com.nimbusbg.audiobookcanvas.data.local.entities.TextBlock;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
+import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithTextBlocks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -110,6 +111,11 @@ public class AudiobookRepository
             projectWithTextBlocksDao.insertTextBlocks(textBlocks);
             onInsertListener.onInsert(0); //we don't care about the IDs here
         });
+    }
+    
+    public LiveData<ProjectWithTextBlocks> getProjectWithTextBlocksById(int id)
+    {
+        return projectWithTextBlocksDao.getProjectWithTextBlocksById(id);
     }
     
     

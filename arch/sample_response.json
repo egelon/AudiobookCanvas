@@ -1,0 +1,20 @@
+{
+	"id":"cmpl-7Pyj0AQKRFPDGdI7xSBxA2HNf2ROI",
+	"object":"text_completion",
+	"created":1686425982,
+	"model":"text-davinci-003",
+	"choices":[
+		{
+			"text":"\n<entity=\"Narrator\" id=0 line=\"The wind shrieked like a child in pain. The herd of shoveltusk huddled together for warmth, their thick, shaggy coats protecting them from the worst of the storm. They formed a circle, with the calves shivering and bleating in the center. Their heads, each crowned with a massive antler, drooped toward the snow-covered earth, eyes shut against the whirling snow. Their own breath frosted their muzzles as they planted themselves and endured.\" \/>\n<entity=\"Narrator\" id=1 line=\"In their various dens, the wolves and bears waited out the storms, one with the comfort of their pack, the other solitary and resigned. Whatever their hunger, nothing would drive them forth until after the keening wind had ceased its weeping and the blinding snow had worn itself out.\" \/>\n<entity=\"Narrator\" id=2 line=\"The wind, roaring in from the ocean to beat at the village of Kamagua, tore at the hides that stretched over frames made of the bones of great sea creatures. When the storm passed, the tuskarr whose home this had been for years uncounted knew they would need to repair or replace nets and traps. Their dwellings, sturdy though they were, were always harmed when this storm descended.\" \/>\n<entity=\"Elder Atuik\" id=3 gender=\"male\" line=\"They had all gathered inside the large group dwelling that had been dug deep into the earth, lacing the flaps tight against the storm and lighting smoky oil lamps.\" \/>\n<entity=\"Elder Atuik\" id=4 gender=\"male\" line=\"Elder Atuik waited in stoic silence. He had seen many of these storms over the last seven years.\" \/>",
+			"index":0,
+			"logprobs":null,
+			"finish_reason":"stop"
+		}
+	],
+	"usage":
+	{
+		"prompt_tokens":1410,
+		"completion_tokens":375,
+		"total_tokens":1785
+	}
+}
