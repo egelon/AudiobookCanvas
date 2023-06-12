@@ -58,6 +58,6 @@
     <fragment
         android:id="@+id/TextPreparationFragment"
         android:name="com.nimbusbg.audiobookcanvas.views.TextPreparationFragment"
-        android:label="text_preparation_fragment"
+        android:label="@string/text_preparation_fragment_title"
         tools:layout="@layout/text_preparation_fragment" />
 </navigation>

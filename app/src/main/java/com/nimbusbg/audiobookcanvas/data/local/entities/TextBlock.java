@@ -43,11 +43,22 @@ public class TextBlock  implements Serializable {
     @NonNull
     @ColumnInfo(name = "text")
     private String text;
+    
+    @NonNull
+    @ColumnInfo(name = "isReviewed")
+    private Boolean isReviewed;
+    
+    @NonNull
+    @ColumnInfo(name = "isProcessedByAPI")
+    private Boolean isProcessedByAPI;
 
     public TextBlock(final int projectId, String generatedAudioPath, String text) {
         this.projectId = projectId;
         this.generatedAudioPath = generatedAudioPath;
         this.text = text;
+        this.isReviewed = false;
+        this.isProcessedByAPI = false;
+        this.backgroundTrackVolume = 50;
     }
 
     public int getId() {
@@ -69,7 +80,27 @@ public class TextBlock  implements Serializable {
     public Integer getBackgroundTrackId() {
         return backgroundTrackId;
     }
-
+    
+    public Boolean isReviewed()
+    {
+        return isReviewed;
+    }
+    
+    public void setReviewed(Boolean reviewed)
+    {
+        isReviewed = reviewed;
+    }
+    
+    public Boolean isProcessedByAPI()
+    {
+        return isProcessedByAPI;
+    }
+    
+    public void setProcessedByAPI(Boolean processedByAPI)
+    {
+        isProcessedByAPI = processedByAPI;
+    }
+    
     public void setBackgroundTrackId(Integer backgroundTrackId) {
         this.backgroundTrackId = backgroundTrackId;
     }

@@ -25,4 +25,7 @@ public interface ProjectWithTextBlocksDao
     @Transaction
     @Query("DELETE FROM textBlock WHERE project_id = :project_id")
     void deleteAllTextBlocksForProject(int project_id);
+    
+    @Query("UPDATE textBlock SET isProcessedByAPI = :flag WHERE id =:textblock_id")
+    void setAPIProcessedFlagForTextBlockId(int textblock_id, Boolean flag);
 }

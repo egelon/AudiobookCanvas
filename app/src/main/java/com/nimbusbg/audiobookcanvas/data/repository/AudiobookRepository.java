@@ -8,12 +8,14 @@ import androidx.lifecycle.LiveData;
 import com.nimbusbg.audiobookcanvas.data.local.AudiobookProjectDatabase;
 import com.nimbusbg.audiobookcanvas.data.local.dao.ProjectWithMetadataDao;
 import com.nimbusbg.audiobookcanvas.data.local.dao.ProjectWithTextBlocksDao;
+import com.nimbusbg.audiobookcanvas.data.local.dao.TextBlockWithDataDao;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
 import com.nimbusbg.audiobookcanvas.data.local.entities.TextBlock;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithTextBlocks;
+import com.nimbusbg.audiobookcanvas.data.local.relations.TextBlockWithData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +24,7 @@ public class AudiobookRepository
 {
     private final ProjectWithMetadataDao projectWithMetadataDao;
     private final ProjectWithTextBlocksDao projectWithTextBlocksDao;
+    private final TextBlockWithDataDao textBlockWithDataDao;
     private LiveData<List<ProjectWithMetadata>> allProjects;
     private long lastInsertedRowID;
     private int lastInsertedProjID;
@@ -31,6 +34,7 @@ public class AudiobookRepository
         AudiobookProjectDatabase database = AudiobookProjectDatabase.getInstance(application);
         projectWithMetadataDao = database.projectWithMetadataDao();
         projectWithTextBlocksDao = database.projectWithTextBlocksDao();
+        textBlockWithDataDao = database.textBlockWithDataDao();
     }
     
     public void insertProjectWithMetadata(AudiobookProject project, AppInfo appInfo, AudiobookData audiobookData)
@@ -95,6 +99,13 @@ public class AudiobookRepository
         return projectWithMetadataDao.getAllProjectWithMetadata();
     }
     
+    public LiveData<List<TextBlockWithData>> getTextBlocksWithDataByProjectId(int proj_id)
+    {
+        return textBlockWithDataDao.getTextBlocksWithDataByProjectId(proj_id);
+    }
+    
+    
+    
     public void updateProjectWithMetadata(AudiobookProject project, AppInfo appInfo, AudiobookData audiobookData)
     {
     }
@@ -116,6 +127,13 @@ public class AudiobookRepository
     public LiveData<ProjectWithTextBlocks> getProjectWithTextBlocksById(int id)
     {
         return projectWithTextBlocksDao.getProjectWithTextBlocksById(id);
+    }
+    
+    public void setAPIProcessedFlagForTextBlockId(int textBlock_id, Boolean flag)
+    {
+        AudiobookProjectDatabase.databaseWriteExecutor.execute(() -> {
+            projectWithTextBlocksDao.setAPIProcessedFlagForTextBlockId(textBlock_id, flag);
+        });
     }
     
     
