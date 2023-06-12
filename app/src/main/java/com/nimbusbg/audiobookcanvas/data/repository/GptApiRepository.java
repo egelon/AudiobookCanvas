@@ -31,7 +31,6 @@ public class GptApiRepository
     private String openaiCompletionsEndpoint;
     private String API_key;
     private String namedEntityRecognitionPrompt;
-    private String authBearer;
     private int apiResponseTimeoutMs = 50000;
     //public static final String requestTag = "NamedEntityRecognitionRequest";
     
@@ -50,7 +49,6 @@ public class GptApiRepository
         }
         this.openaiCompletionsEndpoint = application.getString(R.string.openai_completions_endpoint);
         this.namedEntityRecognitionPrompt = application.getString(R.string.named_entity_recognition_prompt);
-        this.authBearer = application.getString(R.string.openai_api_authorisation_bearer);
     }
     
     private JSONObject createCompletionRequestBody(String textBlock)  throws JSONException
@@ -73,7 +71,7 @@ public class GptApiRepository
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("Content-Type", " application/json");
-        params.put("Authorization", "Bearer " + authBearer);
+        params.put("Authorization", "Bearer " + API_key);
         return params;
     }
     
@@ -104,8 +102,17 @@ public class GptApiRepository
     
     public void getCompletion(String textBlock, String tag, ApiResponseListener responseListener) throws JSONException
     {
-        JSONObject requestBody = createCompletionRequestBody(textBlock);
-        JsonObjectRequest jsonRequest = createCompletionRequest(requestBody, responseListener);
-        performCompletionRequest(jsonRequest, tag);
+        apiRequestThreadPool.execute(() -> {
+            JSONObject requestBody = null;
+            try
+            {
+                requestBody = createCompletionRequestBody(textBlock);
+            } catch (JSONException ex)
+            {
+                responseListener.OnException(ex);
+            }
+            JsonObjectRequest jsonRequest = createCompletionRequest(requestBody, responseListener);
+            performCompletionRequest(jsonRequest, tag);
+        });
     }
 }

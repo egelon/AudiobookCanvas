@@ -99,6 +99,5 @@ Uther actually laughed, though it was bitter laughter.
     <string name="action_delete_project">Delete</string>
     <string name="open_audiobook_btn_label">Open Audiobook</string>
     <string name="openai_completions_endpoint">https://api.openai.com/v1/completions</string>
-    <string name="openai_api_authorisation_bearer">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</string>
 
 </resources>
