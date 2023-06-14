@@ -12,6 +12,7 @@ import com.nimbusbg.audiobookcanvas.data.local.dao.TextBlockWithDataDao;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
+import com.nimbusbg.audiobookcanvas.data.local.entities.BlockState;
 import com.nimbusbg.audiobookcanvas.data.local.entities.TextBlock;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithTextBlocks;
@@ -129,10 +130,10 @@ public class AudiobookRepository
         return projectWithTextBlocksDao.getProjectWithTextBlocksById(id);
     }
     
-    public void setAPIProcessedFlagForTextBlockId(int textBlock_id, Boolean flag)
+    public void setTextBlockStateById(int textBlock_id, BlockState state)
     {
         AudiobookProjectDatabase.databaseWriteExecutor.execute(() -> {
-            projectWithTextBlocksDao.setAPIProcessedFlagForTextBlockId(textBlock_id, flag);
+            projectWithTextBlocksDao.setTextBlockStateById(textBlock_id, state);
         });
     }
     

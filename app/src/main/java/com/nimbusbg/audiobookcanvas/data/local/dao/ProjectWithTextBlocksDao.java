@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Transaction;
 
+import com.nimbusbg.audiobookcanvas.data.local.entities.BlockState;
 import com.nimbusbg.audiobookcanvas.data.local.entities.TextBlock;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithTextBlocks;
 
@@ -26,6 +27,6 @@ public interface ProjectWithTextBlocksDao
     @Query("DELETE FROM textBlock WHERE project_id = :project_id")
     void deleteAllTextBlocksForProject(int project_id);
     
-    @Query("UPDATE textBlock SET isProcessedByAPI = :flag WHERE id =:textblock_id")
-    void setAPIProcessedFlagForTextBlockId(int textblock_id, Boolean flag);
+    @Query("UPDATE textBlock SET state = :state WHERE id =:textblock_id")
+    void setTextBlockStateById(int textblock_id, BlockState state);
 }

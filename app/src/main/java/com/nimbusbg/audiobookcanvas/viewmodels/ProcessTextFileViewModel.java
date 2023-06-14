@@ -8,6 +8,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
 
+import com.nimbusbg.audiobookcanvas.data.local.entities.BlockState;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithTextBlocks;
 import com.nimbusbg.audiobookcanvas.data.local.relations.TextBlockWithData;
 import com.nimbusbg.audiobookcanvas.data.repository.ApiResponseListener;
@@ -90,9 +91,9 @@ public class ProcessTextFileViewModel extends AndroidViewModel
         }
     }
     
-    public void setProcessedFlag(int textBlock_Id, Boolean flag_value)
+    public void setTextBlockStateById(int textBlock_Id, BlockState state)
     {
-        databaseRepository.setAPIProcessedFlagForTextBlockId(textBlock_Id, flag_value);
+        databaseRepository.setTextBlockStateById(textBlock_Id, state);
     }
     
     public LiveData<List<TextBlockWithData>> getTextBlocksWithDataByProjectId(int proj_id)

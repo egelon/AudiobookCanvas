@@ -8,7 +8,6 @@ import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
 
-
 @Entity(tableName = "textBlock",
         foreignKeys = {
                 @ForeignKey(entity = AudiobookProject.class,
@@ -45,20 +44,15 @@ public class TextBlock  implements Serializable {
     private String text;
     
     @NonNull
-    @ColumnInfo(name = "isReviewed")
-    private Boolean isReviewed;
-    
-    @NonNull
-    @ColumnInfo(name = "isProcessedByAPI")
-    private Boolean isProcessedByAPI;
+    @ColumnInfo(name="state")
+    private BlockState state;
 
     public TextBlock(final int projectId, String generatedAudioPath, String text) {
         this.projectId = projectId;
         this.generatedAudioPath = generatedAudioPath;
         this.text = text;
-        this.isReviewed = false;
-        this.isProcessedByAPI = false;
         this.backgroundTrackVolume = 50;
+        this.state = BlockState.NOT_REQUESTED;
     }
 
     public int getId() {
@@ -80,27 +74,7 @@ public class TextBlock  implements Serializable {
     public Integer getBackgroundTrackId() {
         return backgroundTrackId;
     }
-    
-    public Boolean isReviewed()
-    {
-        return isReviewed;
-    }
-    
-    public void setReviewed(Boolean reviewed)
-    {
-        isReviewed = reviewed;
-    }
-    
-    public Boolean isProcessedByAPI()
-    {
-        return isProcessedByAPI;
-    }
-    
-    public void setProcessedByAPI(Boolean processedByAPI)
-    {
-        isProcessedByAPI = processedByAPI;
-    }
-    
+
     public void setBackgroundTrackId(Integer backgroundTrackId) {
         this.backgroundTrackId = backgroundTrackId;
     }
@@ -127,5 +101,16 @@ public class TextBlock  implements Serializable {
 
     public void setText(String text) {
         this.text = text;
+    }
+    
+    @NonNull
+    public BlockState getState()
+    {
+        return state;
+    }
+    
+    public void setState(BlockState state)
+    {
+        this.state = state;
     }
 }

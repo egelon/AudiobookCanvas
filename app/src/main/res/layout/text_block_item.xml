@@ -49,13 +49,15 @@
     
         <TextView
             android:id="@+id/text_block_snippet"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentLeft="false"
             android:layout_alignParentRight="false"
             android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
             android:layout_toEndOf="@id/text_block_telltale_constraint"
             android:ellipsize="end"
+            android:gravity="center"
             android:maxLines="7"
             android:text="Jorum Balnir grunted in amusement. “doubt you’d feel that way if something the size of this foal was coming out of you, lad.”His son Jarim, crouching beside his father and the prince, laughed and so did Arthas, giggling uncontrollably even as hot and soggy foam from Brightmane’s champing mouth dropped onto his leg. laughed and so did Arthas, giggling uncontrollably even as hot and soggy foam from Brightmane’s champing mouth dropped onto his leg."
             android:textAlignment="viewStart" />

@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 import com.nimbusbg.audiobookcanvas.R;
+import com.nimbusbg.audiobookcanvas.data.local.entities.BlockState;
 import com.nimbusbg.audiobookcanvas.data.local.entities.TextBlock;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithTextBlocks;
 import com.nimbusbg.audiobookcanvas.data.repository.ApiResponseListener;
@@ -90,11 +91,35 @@ public class TextPreparationFragment extends Fragment
             @Override
             public void onTextBlockClicked(TextBlock textBlock)
             {
-                //TODO: navigate to the selected text block
-
-            
-                Toast.makeText(requireActivity(), "TextBlock ID: " + String.valueOf(textBlock.getId()) + "Tapped", Toast.LENGTH_SHORT).show();
-                queryCharacters(textBlock);
+                switch(textBlock.getState())
+                {
+                    case NOT_REVIEWED:
+                    {
+                        //TODO: navigate to the selected text block
+                        Toast.makeText(requireActivity(), "Block ID " + String.valueOf(textBlock.getId()) + " not reviewed", Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+                    case NOT_REQUESTED:
+                    {
+                        queryCharacters(textBlock);
+                        break;
+                    }
+                    case REVIEWED:
+                    {
+                        //TODO: navigate to the selected text block
+                        Toast.makeText(requireActivity(), "Block ID " + String.valueOf(textBlock.getId()) + " already reviewed", Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+                    case WAITING_RESPONSE:
+                    case ERROR:
+                    default:
+                    {
+                        //TODO: we should check if we're still waiting for a response here
+                        //for now we'll just add another response
+                        queryCharacters(textBlock);
+                        break;
+                    }
+                }
             }
         });
     
@@ -137,8 +162,6 @@ public class TextPreparationFragment extends Fragment
             //load the chunks from the database
             loadTextChunks();
         }
-    
-        
     }
     
     private void loadTextChunks()
@@ -185,6 +208,7 @@ public class TextPreparationFragment extends Fragment
     
     private void queryCharacters(TextBlock textBlock)
     {
+        processTextFileViewModel.setTextBlockStateById(textBlock.getId(), BlockState.WAITING_RESPONSE);
         //TODO: For test purposes only
         processTextFileViewModel.performNamedEntityRecognition(textBlock.getText(), "test", new ApiResponseListener()
         {
@@ -193,18 +217,20 @@ public class TextPreparationFragment extends Fragment
             {
                 //TODO: either do something with the fetched character, or move on?
                 OnFetchedCharacters(response);
-                processTextFileViewModel.setProcessedFlag(textBlock.getId(), true);
+                processTextFileViewModel.setTextBlockStateById(textBlock.getId(), BlockState.NOT_REVIEWED);
             }
     
             @Override
             public void OnError(VolleyError error)
             {
+                processTextFileViewModel.setTextBlockStateById(textBlock.getId(), BlockState.ERROR);
                 OnFetchCharacterError(error.toString());
             }
     
             @Override
             public void OnException(JSONException ex)
             {
+                processTextFileViewModel.setTextBlockStateById(textBlock.getId(), BlockState.ERROR);
                 OnQueryException(ex.toString());
             }
         });

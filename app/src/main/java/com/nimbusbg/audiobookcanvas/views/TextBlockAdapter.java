@@ -50,28 +50,49 @@ public class TextBlockAdapter extends RecyclerView.Adapter<TextBlockAdapter.Text
     
         TextBlock currentTextBlock = textBlocks.get(position);
         holder.textBlockId.setText(String.valueOf(currentTextBlock.getId()));
-        holder.textBlockSnippet.setText(currentTextBlock.getText());
         
         int completedColor;
-        if(!currentTextBlock.isProcessedByAPI())
+        switch(currentTextBlock.getState())
         {
-            //we are still waiting for the APi response
-            completedColor = holder.itemView.getResources().getColor(R.color.textblock_waiting_api);
-        }
-        else
-        {
-            //we have received an API response for this text block at some point in the past. CHeck its status
-            if(currentTextBlock.isReviewed())
+            case WAITING_RESPONSE:
             {
-                //User has reviewed this text block
-                completedColor = holder.itemView.getResources().getColor(R.color.textblock_done);
+                holder.textBlockSnippet.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                holder.textBlockSnippet.setText("AI is thinking...");
+                completedColor = holder.itemView.getResources().getColor(R.color.textblock_waiting_api);
+                break;
             }
-            else
+            case NOT_REVIEWED:
             {
-                //User has not reviewed this text block yet
+                holder.textBlockSnippet.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
+                holder.textBlockSnippet.setText(currentTextBlock.getText());
                 completedColor = holder.itemView.getResources().getColor(R.color.textblock_not_reviewed);
+                break;
             }
+            case REVIEWED:
+            {
+                holder.textBlockSnippet.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
+                holder.textBlockSnippet.setText("Checked!\n" + currentTextBlock.getText());
+                completedColor = holder.itemView.getResources().getColor(R.color.textblock_done);
+                break;
+            }
+            case ERROR:
+            {
+                holder.textBlockSnippet.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
+                holder.textBlockSnippet.setText("Could not get response from the AI\n" + currentTextBlock.getText());
+                completedColor = holder.itemView.getResources().getColor(R.color.textblock_error);
+                break;
+            }
+            case NOT_REQUESTED:
+            default:
+            {
+                holder.textBlockSnippet.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
+                holder.textBlockSnippet.setText(currentTextBlock.getText());
+                completedColor = holder.itemView.getResources().getColor(R.color.textblock_not_requested);
+                break;
+            }
+            
         }
+        
         holder.completedTelltale.setColorFilter(completedColor);
     }
     
