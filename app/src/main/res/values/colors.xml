@@ -9,7 +9,8 @@
     <color name="white">#FFFFFFFF</color>
     <color name="main_nav_bar">#FF0695D8</color>
     <color name="popup_menu_item">#FF018786</color>
-    <color name="textblock_waiting_api">#B3CBDD</color>
+    <color name="textblock_not_requested">#B3CBDD</color>
+    <color name="textblock_waiting_api">#F4A50F</color>
     <color name="textblock_done">#81B840</color>
     <color name="textblock_not_reviewed">#BF0606</color>
 </resources>

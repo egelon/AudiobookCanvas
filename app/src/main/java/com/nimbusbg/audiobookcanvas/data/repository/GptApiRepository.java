@@ -13,6 +13,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.nimbusbg.audiobookcanvas.R;
 import com.nimbusbg.audiobookcanvas.data.network.RequestQueueSingleton;
 
@@ -97,7 +98,9 @@ public class GptApiRepository
         // Add the request to the RequestQueue.
         jsonRequest.setTag(requestTag);
         jsonRequest.setRetryPolicy(new DefaultRetryPolicy(apiResponseTimeoutMs, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        RequestQueueSingleton.getInstance(appContext).addToRequestQueue(jsonRequest);
+        //RequestQueueSingleton.getInstance(appContext).addToRequestQueue(jsonRequest);
+    
+        Volley.newRequestQueue(appContext).add(jsonRequest);
     }
     
     public void getCompletion(String textBlock, String tag, ApiResponseListener responseListener) throws JSONException

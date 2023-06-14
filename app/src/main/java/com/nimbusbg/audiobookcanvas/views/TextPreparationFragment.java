@@ -21,16 +21,12 @@ import android.widget.Toast;
 import com.android.volley.VolleyError;
 import com.nimbusbg.audiobookcanvas.R;
 import com.nimbusbg.audiobookcanvas.data.local.entities.TextBlock;
-import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithTextBlocks;
-import com.nimbusbg.audiobookcanvas.data.local.relations.TextBlockWithData;
 import com.nimbusbg.audiobookcanvas.data.repository.ApiResponseListener;
 import com.nimbusbg.audiobookcanvas.data.repository.FIleOperationListener;
 import com.nimbusbg.audiobookcanvas.data.repository.InsertedItemListener;
-import com.nimbusbg.audiobookcanvas.databinding.NewProjectFragmentBinding;
 import com.nimbusbg.audiobookcanvas.databinding.TextPreparationFragmentBinding;
 import com.nimbusbg.audiobookcanvas.viewmodels.ProcessTextFileViewModel;
-import com.nimbusbg.audiobookcanvas.viewmodels.ProjectWithMetadataViewModel;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,7 +34,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 public class TextPreparationFragment extends Fragment
 {
@@ -81,7 +76,8 @@ public class TextPreparationFragment extends Fragment
         Uri fileUri = Uri.parse(textFileURI);
     
         areTextBlocksInserted = false;
-        binding.progressBar.setVisibility(View.VISIBLE);
+        
+        toggleLoadingBarVisibility(View.VISIBLE);
     
         RecyclerView textBlocksRecyclerView = binding.textBlocksRecyclerView;
         textBlocksRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -95,6 +91,7 @@ public class TextPreparationFragment extends Fragment
             public void onTextBlockClicked(TextBlock textBlock)
             {
                 //TODO: navigate to the selected text block
+
             
                 Toast.makeText(requireActivity(), "TextBlock ID: " + String.valueOf(textBlock.getId()) + "Tapped", Toast.LENGTH_SHORT).show();
                 queryCharacters(textBlock);
@@ -103,6 +100,7 @@ public class TextPreparationFragment extends Fragment
     
         if(isNewProject)
         {
+            binding.loadingText.setText(R.string.loading_text_loading_file);
             //load chunks into the database
             processTextFileViewModel.chunkInputFile(fileUri, new FIleOperationListener()
             {
@@ -110,7 +108,7 @@ public class TextPreparationFragment extends Fragment
                 public void OnFileLoaded(String data)
                 {
                     requireActivity().runOnUiThread(() -> {
-                        Toast.makeText(requireActivity(), "Loaded", Toast.LENGTH_SHORT).show();
+                        binding.loadingText.setText(R.string.loading_text_splitting_file);
                     });
                 }
         
@@ -126,7 +124,6 @@ public class TextPreparationFragment extends Fragment
                         {
                             requireActivity().runOnUiThread(() -> {
                                 areTextBlocksInserted = true;
-                                Toast.makeText(requireActivity(), String.valueOf(processTextFileViewModel.getNumberTextChunks()) + " Text Blocks added", Toast.LENGTH_SHORT).show();
                                 //load the newly added chunks from the database
                                 loadTextChunks();
                             });
@@ -146,9 +143,8 @@ public class TextPreparationFragment extends Fragment
     
     private void loadTextChunks()
     {
-        //TODO: finish me
         //load all projects into the recycler view
-    
+        binding.loadingText.setText(R.string.loading_text_saved_loading_from_database);
         processTextFileViewModel.getProjectWithTextBlocksById(projectId).observe(getViewLifecycleOwner(), new Observer<ProjectWithTextBlocks>()
         {
             @Override
@@ -159,22 +155,32 @@ public class TextPreparationFragment extends Fragment
                 {
                     if(areTextBlocksInserted && (binding.progressBar.getVisibility() == View.VISIBLE))
                     {
-                        binding.progressBar.setVisibility(View.GONE);
+                        toggleLoadingBarVisibility(View.GONE);
                     }
                 }
                 else
                 {
-                    binding.progressBar.setVisibility(View.GONE);
+                    toggleLoadingBarVisibility(View.GONE);
                 }
-
-                //Toast.makeText(requireActivity(), String.valueOf(textBlockData.textBlocks.size()) + " Text Blocks loaded", Toast.LENGTH_SHORT).show();
                 //update the recycler view
                 textBlockAdapter.setTextBlocks(textBlockData);
-                
-                //TODO: and here we would start a background worker to query the text blocks in paralel
-                
+                //TODO: and here we would start a background worker to query the text blocks in paralel?
             }
         });
+    }
+    
+    private void toggleLoadingBarVisibility(int loadingBarVisibility)
+    {
+        binding.progressBar.setVisibility(loadingBarVisibility);
+        binding.loadingText.setVisibility(loadingBarVisibility);
+        if(loadingBarVisibility == View.GONE)
+        {
+            binding.textBlocksRecyclerView.setVisibility(View.VISIBLE);
+        }
+        else if(loadingBarVisibility == View.VISIBLE)
+        {
+            binding.textBlocksRecyclerView.setVisibility(View.GONE);
+        }
     }
     
     private void queryCharacters(TextBlock textBlock)
