@@ -39,18 +39,6 @@ public class AudiobookRepository
         textBlockWithDataDao = database.textBlockWithDataDao();
     }
     
-    public void insertProjectWithMetadata(AudiobookProject project, AppInfo appInfo, AudiobookData audiobookData)
-    {
-        AudiobookProjectDatabase.databaseWriteExecutor.execute(() -> {
-            lastInsertedRowID = projectWithMetadataDao.insertProject(project);
-            lastInsertedProjID = projectWithMetadataDao.getProjectIdByRowId(lastInsertedRowID);
-            appInfo.setProject_id(lastInsertedProjID);
-            projectWithMetadataDao.insertAppInfo(appInfo);
-            audiobookData.setProject_id(lastInsertedProjID);
-            projectWithMetadataDao.insertAudiobookData(audiobookData);
-        });
-    }
-    
     public void insertProjectWithMetadata(AudiobookProject project, AppInfo appInfo, AudiobookData audiobookData, final InsertedItemListener onInsertListener)
     {
         
@@ -65,13 +53,6 @@ public class AudiobookRepository
         });
     }
     
-    public void deleteProjectWithMetadataById(int id)
-    {
-        AudiobookProjectDatabase.databaseWriteExecutor.execute(() -> {
-            projectWithMetadataDao.deleteProjectWithMetadataById(id);
-        });
-    }
-    
     public void deleteProjectWithMetadataById(int id, final DeletedItemListener onDeleteListener)
     {
         AudiobookProjectDatabase.databaseWriteExecutor.execute(() -> {
@@ -80,20 +61,9 @@ public class AudiobookRepository
         });
     }
     
-    public void deleteAllProjectsWithMetadata()
-    {
-        //maybe this also needs the executor?
-        projectWithMetadataDao.deleteAllProjectsWithMetadata();
-    }
-    
     public LiveData<ProjectWithMetadata> getProjectWithMetadataById(int id)
     {
         return projectWithMetadataDao.getProjectWithMetadataById(id);
-    }
-    
-    public LiveData<ProjectWithMetadata> getProjectWithMetadataByRowId(int row_id)
-    {
-        return projectWithMetadataDao.getProjectWithMetadataByRowId(row_id);
     }
     
     public LiveData<List<ProjectWithMetadata>> getAllProjectsWithMetadata()

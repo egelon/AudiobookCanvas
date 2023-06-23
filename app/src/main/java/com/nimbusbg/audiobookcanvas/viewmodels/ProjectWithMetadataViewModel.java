@@ -75,20 +75,9 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel
         }
     }
     
-    public void insertProjectWithMetadata(AudiobookProject project, AppInfo appInfo, AudiobookData audiobookData)
-    {
-        repository.insertProjectWithMetadata(project, appInfo, audiobookData);
-    }
-    
     public ProjectWithMetadata getEmptyProject()
     {
         return emptyProject;
-    }
-    
-    public void insertEmptyProject()
-    {
-        createEmptyProject();
-        repository.insertProjectWithMetadata(emptyProject.project, emptyProject.appInfo, emptyProject.audiobookData);
     }
     
     public void insertNewProject(String projName, String title, String author, String descr, String uri, InsertedItemListener onInsertListener)
@@ -103,31 +92,9 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel
         repository.insertProjectWithMetadata(emptyProject.project, emptyProject.appInfo, emptyProject.audiobookData, onInsertListener);
     }
     
-    public void insertNewProject(String projName, String title, String author, String descr, String uri)
-    {
-        createEmptyProject();
-        emptyProject.project.setProjectName(projName);
-        emptyProject.project.setInputFilePath(uri);
-        emptyProject.audiobookData.setBookTitle(title);
-        emptyProject.audiobookData.setAuthor(author);
-        emptyProject.audiobookData.setDescription(descr);
-        
-        repository.insertProjectWithMetadata(emptyProject.project, emptyProject.appInfo, emptyProject.audiobookData);
-    }
-    
     private String getResourceString(int resourceID)
     {
         return getApplication().getResources().getString(resourceID);
-    }
-    
-    public void deleteAllProjectsWithMetadata()
-    {
-        repository.deleteAllProjectsWithMetadata();
-    }
-    
-    public void deleteProjectWithMetadataById(int id)
-    {
-        repository.deleteProjectWithMetadataById(id);
     }
     
     public void deleteProjectWithMetadataById(int id, DeletedItemListener onDeleteListener)
@@ -145,11 +112,6 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel
     public LiveData<ProjectWithMetadata> getProjectWithMetadataById(int id)
     {
         return repository.getProjectWithMetadataById(id);
-    }
-    
-    public LiveData<ProjectWithMetadata> getProjectWithMetadataByRowId(int row_id)
-    {
-        return repository.getProjectWithMetadataByRowId(row_id);
     }
     
     public void updateProjectWithMetadata(int id, String projectNameStr, String bookNameStr, String authorNameStr, String projectDescriptionStr)

@@ -4,11 +4,13 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -51,12 +53,36 @@ public class TextPreparationFragment extends Fragment
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+    
+        Bundle navigateBackBundle = new Bundle();
         if (getArguments() != null)
         {
             projectId = getArguments().getInt("projectID");
             isNewProject = getArguments().getBoolean("isNewProject");
             textFileURI = getArguments().getString("txtFileUri");
+    
+            if(isNewProject)
+            {
+                //this is used so we can load the project setup fragment as if we've selected this new project from the project list
+                navigateBackBundle.putInt("projectID", getArguments().getInt("projectID"));
+                navigateBackBundle.putBoolean("isNewProject", false);
+                navigateBackBundle.putString("txtFileUri", getArguments().getString("txtFileUri"));
+            }
         }
+        
+        requireActivity().getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true /* enabled by default */) {
+            @Override
+            public void handleOnBackPressed() {
+                if(isNewProject)
+                {
+                    Navigation.findNavController(getView()).navigate(R.id.actionBackFromNewProjectTextProcessing, navigateBackBundle);
+                }
+                else
+                {
+                    Navigation.findNavController(getView()).navigateUp();
+                }
+            }
+        });
     }
     
     @Override

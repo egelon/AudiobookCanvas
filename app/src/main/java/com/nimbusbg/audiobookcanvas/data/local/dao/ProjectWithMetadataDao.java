@@ -52,9 +52,6 @@ public interface ProjectWithMetadataDao
     @Query("DELETE FROM audiobookProject WHERE id = :id")
     void deleteProjectWithMetadataById(int id);
     
-    @Transaction
-    @Query("DELETE FROM audiobookProject")
-    void deleteAllProjectsWithMetadata();
     
     
     @Query("UPDATE audiobookProject SET name = :projectNameStr, output_audiobook_path = :audiobookFileName, last_modified = :modifiedTimestamp WHERE id =:project_id")

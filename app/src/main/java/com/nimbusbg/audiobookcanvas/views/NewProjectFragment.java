@@ -74,64 +74,8 @@ public class NewProjectFragment extends Fragment
                         HandleUIOnTextFileSelection(uri);
                     }
                 });
-        setHasOptionsMenu(true);
+        setHasOptionsMenu(false);
         super.onCreate(savedInstanceState);
-    }
-    
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
-    {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        
-        inflater.inflate(R.menu.save_project_menu, menu);
-        menu.removeItem(R.id.action_delete_project);
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-    
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item)
-    {
-        // Handle action bar item clicks here.
-        int optionItemID = item.getItemId();
-        if (optionItemID == R.id.action_save_project)
-        {
-            isProjectSaved = isProjectSavedSuccessfully();
-            return isProjectSaved;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-    
-    private boolean isFileSelected()
-    {
-        return !binding.textFilePath.getText().toString().isEmpty();
-    }
-    
-    private void SaveProject()
-    {
-        projectWithMetadataViewModel.insertNewProject(binding.projName.getText().toString(),
-                binding.bookName.getText().toString(),
-                binding.authorName.getText().toString(),
-                binding.descriptionText.getText().toString(),
-                binding.textFilePath.getText().toString(),
-                itemId -> requireActivity().runOnUiThread(() -> {
-                    projectId = itemId;
-                    Toast.makeText(requireActivity(), "Project '" + binding.projName.getText().toString() +"' Saved", Toast.LENGTH_SHORT).show();
-                }));
-    }
-    
-    private boolean isProjectSavedSuccessfully()
-    {
-        //check if there is a text file selected
-        if(isFileSelected())
-        {
-            SaveProject();
-            return true;
-        }
-        else
-        {
-            Toast.makeText(this.getActivity(), "No text file selected", Toast.LENGTH_SHORT).show();
-            return false;
-        }
     }
     
     @Override
@@ -194,8 +138,6 @@ public class NewProjectFragment extends Fragment
     
     public void onSelectTxtFileClicked(View view)
     {
-        
-    
         getUriActivity.launch("text/*");
     }
     
@@ -246,8 +188,6 @@ public class NewProjectFragment extends Fragment
             Navigation.findNavController(getView()).navigate(R.id.actionStartProcessing, MakeBundleForTextProcessing());
         }
     }
-    
-    
     
     @Override
     public void onDestroyView()

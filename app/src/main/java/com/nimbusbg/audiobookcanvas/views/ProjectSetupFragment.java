@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -33,7 +34,7 @@ import com.nimbusbg.audiobookcanvas.viewmodels.ProjectWithMetadataViewModel;
 import java.text.DateFormat;
 import java.util.Date;
 
-public class ProjectSetupFragment extends Fragment implements View.OnFocusChangeListener
+public class ProjectSetupFragment extends Fragment
 {
     private ProjectSetupFragmentBinding binding;
     Context appActivityContext;
@@ -63,6 +64,13 @@ public class ProjectSetupFragment extends Fragment implements View.OnFocusChange
     {
         setHasOptionsMenu(true);
         super.onCreate(savedInstanceState);
+    
+        requireActivity().getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true /* enabled by default */) {
+            @Override
+            public void handleOnBackPressed() {
+                Navigation.findNavController(getView()).navigate(R.id.actionBackToProjectList);
+            }
+        });
     }
     
     @Override
@@ -83,7 +91,8 @@ public class ProjectSetupFragment extends Fragment implements View.OnFocusChange
         int optionItemID = item.getItemId();
         if (optionItemID == R.id.action_save_project)
         {
-            return isProjectSavedSuccessfully();
+            updateCurrentProject();
+            return true;
         }
         else if (optionItemID == R.id.action_delete_project)
         {
@@ -98,17 +107,7 @@ public class ProjectSetupFragment extends Fragment implements View.OnFocusChange
         int projectID = getArguments().getInt("projectID");
         projectWithMetadataViewModel.deleteProjectWithMetadataById(projectID,
                 () -> requireActivity().runOnUiThread(
-                        () -> Navigation.findNavController(getView()).navigateUp()
-                ));
-    }
-    
-    private boolean isProjectSavedSuccessfully()
-    {
-        //the only things we will update are project name, metadata entries
-        
-        updateCurrentProject();
-        
-        return true;
+                        () -> Navigation.findNavController(getView()).navigate(R.id.actionBackToProjectList)));
     }
     
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState)
@@ -151,21 +150,6 @@ public class ProjectSetupFragment extends Fragment implements View.OnFocusChange
         lastBookName = binding.bookName.getText().toString();
         lastAuthorName = binding.authorName.getText().toString();
         lastDescriptionText = binding.descriptionText.getText().toString();
-        
-        binding.projName.setOnFocusChangeListener(this);
-        binding.bookName.setOnFocusChangeListener(this);
-        binding.authorName.setOnFocusChangeListener(this);
-        binding.descriptionText.setOnFocusChangeListener(this);
-    }
-    
-    @Override
-    public void onFocusChange(View v, boolean hasFocus)
-    {
-        // When focus is lost, update our database
-        if (!hasFocus)
-        {
-            //updateCurrentProject();
-        }
     }
     
     private void updateCurrentProject()
@@ -192,57 +176,57 @@ public class ProjectSetupFragment extends Fragment implements View.OnFocusChange
             @Override
             public void onChanged(@Nullable ProjectWithMetadata projectData)
             {
-                // Update your UI here.
-                binding.projName.setText(projectData.project.getProjectName());
-                binding.projFileVersion.setText(projectData.project.getProjectVersion());
-                binding.bookName.setText(projectData.audiobookData.getBookTitle());
-                binding.authorName.setText(projectData.audiobookData.getAuthor());
-                binding.descriptionText.setText(projectData.audiobookData.getDescription());
-                binding.textFilePath.setText(projectData.project.getInputFilePath());
-                
-                int lastBlockID = projectData.project.getLastProcessedBlockId();
-                binding.lastProcessedBlock.setText(String.valueOf(lastBlockID));
-                
-                if (projectData.project.getCompleted() || (lastBlockID == 0))
+                if(projectData != null)
                 {
-                    binding.percentCompletedLabel.setVisibility(View.VISIBLE);
-                    binding.percentCompleted.setVisibility(View.VISIBLE);
-                }
-                else
-                {
-                    binding.percentCompletedLabel.setVisibility(View.GONE);
-                    binding.percentCompleted.setVisibility(View.GONE);
-                }
+                    // Update your UI here.
+                    binding.projName.setText(projectData.project.getProjectName());
+                    binding.projFileVersion.setText(projectData.project.getProjectVersion());
+                    binding.bookName.setText(projectData.audiobookData.getBookTitle());
+                    binding.authorName.setText(projectData.audiobookData.getAuthor());
+                    binding.descriptionText.setText(projectData.audiobookData.getDescription());
+                    binding.textFilePath.setText(projectData.project.getInputFilePath());
     
-                if (lastBlockID == 0)
-                {
-                    binding.percentCompleted.setText("0%");
-                    binding.processTxtBlockBtn.setVisibility(View.VISIBLE);
-                    binding.processTxtBlockBtn.setText(R.string.start_processing_btn_label);
-                    binding.openAudiobookBtn.setVisibility(View.GONE);
+                    int lastBlockID = projectData.project.getLastProcessedBlockId();
+                    binding.lastProcessedBlock.setText(String.valueOf(lastBlockID));
+    
+                    if (projectData.project.getCompleted() || (lastBlockID == 0))
+                    {
+                        binding.percentCompletedLabel.setVisibility(View.VISIBLE);
+                        binding.percentCompleted.setVisibility(View.VISIBLE);
+                    } else
+                    {
+                        binding.percentCompletedLabel.setVisibility(View.GONE);
+                        binding.percentCompleted.setVisibility(View.GONE);
+                    }
+    
+                    if (lastBlockID == 0)
+                    {
+                        binding.percentCompleted.setText("0%");
+                        binding.processTxtBlockBtn.setVisibility(View.VISIBLE);
+                        binding.processTxtBlockBtn.setText(R.string.start_processing_btn_label);
+                        binding.openAudiobookBtn.setVisibility(View.GONE);
+                    } else if (projectData.project.getCompleted())
+                    {
+                        binding.percentCompleted.setText("100%");
+                        binding.processTxtBlockBtn.setVisibility(View.GONE);
+                        binding.openAudiobookBtn.setVisibility(View.VISIBLE);
+                    } else
+                    {
+                        binding.processTxtBlockBtn.setVisibility(View.VISIBLE);
+                        binding.processTxtBlockBtn.setText(R.string.continue_processing_btn_label);
+                        binding.openAudiobookBtn.setVisibility(View.GONE);
+                    }
+    
+                    Date lastModifiedDate = projectData.project.getLastModified();
+                    binding.lastEditedOn.setText(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(lastModifiedDate));
+    
+                    Date createdOnDate = projectData.project.getCreatedOn();
+                    binding.createdOn.setText(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(createdOnDate));
+    
+                    binding.appVersion.setText(projectData.appInfo.getAppVersion());
+                    binding.osVersion.setText(projectData.appInfo.getOsVersion());
+                    binding.deviceName.setText(projectData.appInfo.getDeviceType());
                 }
-                else if(projectData.project.getCompleted())
-                {
-                    binding.percentCompleted.setText("100%");
-                    binding.processTxtBlockBtn.setVisibility(View.GONE);
-                    binding.openAudiobookBtn.setVisibility(View.VISIBLE);
-                }
-                else
-                {
-                    binding.processTxtBlockBtn.setVisibility(View.VISIBLE);
-                    binding.processTxtBlockBtn.setText(R.string.continue_processing_btn_label);
-                    binding.openAudiobookBtn.setVisibility(View.GONE);
-                }
-                
-                Date lastModifiedDate = projectData.project.getLastModified();
-                binding.lastEditedOn.setText(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(lastModifiedDate));
-                
-                Date createdOnDate = projectData.project.getCreatedOn();
-                binding.createdOn.setText(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(createdOnDate));
-                
-                binding.appVersion.setText(projectData.appInfo.getAppVersion());
-                binding.osVersion.setText(projectData.appInfo.getOsVersion());
-                binding.deviceName.setText(projectData.appInfo.getDeviceType());
             }
         });
     }

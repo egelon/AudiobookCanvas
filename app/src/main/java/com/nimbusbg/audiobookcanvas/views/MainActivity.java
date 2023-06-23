@@ -57,11 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
     AppBarConfiguration appBarConfiguration;
     NavController navController;
-
-    public NavController getNavController() {
-        return navController;
-    }
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,6 +75,15 @@ public class MainActivity extends AppCompatActivity {
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
         // Make sure actions in the ActionBar get propagated to the NavController
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+    
+        binding.mainToolbar.setNavigationOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                onBackPressed();
+            }
+        });
     }
 
     @Override
