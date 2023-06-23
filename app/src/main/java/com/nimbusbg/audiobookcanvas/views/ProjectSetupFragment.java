@@ -3,6 +3,8 @@ package com.nimbusbg.audiobookcanvas.views;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,10 +33,15 @@ import com.nimbusbg.audiobookcanvas.viewmodels.ProjectWithMetadataViewModel;
 import java.text.DateFormat;
 import java.util.Date;
 
-public class ProjectSetupFragment extends Fragment
+public class ProjectSetupFragment extends Fragment implements View.OnFocusChangeListener
 {
     private ProjectSetupFragmentBinding binding;
     Context appActivityContext;
+    
+    String lastProjName;
+    String lastBookName;
+    String lastAuthorName;
+    String lastDescriptionText;
     
     private ProjectWithMetadataViewModel projectWithMetadataViewModel;
     
@@ -98,12 +105,8 @@ public class ProjectSetupFragment extends Fragment
     private boolean isProjectSavedSuccessfully()
     {
         //the only things we will update are project name, metadata entries
-        Toast.makeText(this.getActivity(), "Project Updated", Toast.LENGTH_SHORT).show();
         
-        //TODO: finish this function or better yet CHANGE THE VIEWMODEL!!!!!
-        //projectWithMetadataViewModel.updateProjectWithMetadata(projectID, projectNameStr, audiobookNameStr, bookNameStr, authorNameStr, projectDescriptionStr);
-        
-        //navController.navigate(R.id.actionProjectSaved);
+        updateCurrentProject();
         
         return true;
     }
@@ -144,6 +147,41 @@ public class ProjectSetupFragment extends Fragment
         });
         
         loadSelectedProject();
+        lastProjName = binding.projName.getText().toString();
+        lastBookName = binding.bookName.getText().toString();
+        lastAuthorName = binding.authorName.getText().toString();
+        lastDescriptionText = binding.descriptionText.getText().toString();
+        
+        binding.projName.setOnFocusChangeListener(this);
+        binding.bookName.setOnFocusChangeListener(this);
+        binding.authorName.setOnFocusChangeListener(this);
+        binding.descriptionText.setOnFocusChangeListener(this);
+    }
+    
+    @Override
+    public void onFocusChange(View v, boolean hasFocus)
+    {
+        // When focus is lost, update our database
+        if (!hasFocus)
+        {
+            //updateCurrentProject();
+        }
+    }
+    
+    private void updateCurrentProject()
+    {
+        if(lastProjName != binding.projName.getText().toString() ||
+        lastAuthorName != binding.authorName.getText().toString() ||
+        lastBookName != binding.bookName.getText().toString() ||
+        lastDescriptionText != binding.descriptionText.getText().toString())
+        {
+            int projectID = getArguments().getInt("projectID");
+            projectWithMetadataViewModel.updateProjectWithMetadata(projectID,
+                    binding.projName.getText().toString(),
+                    binding.bookName.getText().toString(),
+                    binding.authorName.getText().toString(),
+                    binding.descriptionText.getText().toString());
+        }
     }
     
     private void loadSelectedProject()

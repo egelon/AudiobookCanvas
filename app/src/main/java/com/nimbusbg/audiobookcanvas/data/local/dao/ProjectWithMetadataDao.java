@@ -10,8 +10,10 @@ import androidx.room.Transaction;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
+import com.nimbusbg.audiobookcanvas.data.local.entities.BlockState;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
 
+import java.util.Date;
 import java.util.List;
 
 @Dao
@@ -53,4 +55,13 @@ public interface ProjectWithMetadataDao
     @Transaction
     @Query("DELETE FROM audiobookProject")
     void deleteAllProjectsWithMetadata();
+    
+    
+    @Query("UPDATE audiobookProject SET name = :projectNameStr, output_audiobook_path = :audiobookFileName, last_modified = :modifiedTimestamp WHERE id =:project_id")
+    void updateProjectNameById(int project_id, String projectNameStr, String audiobookFileName, long modifiedTimestamp);
+    
+    
+    @Query("UPDATE audiobookData SET book_title = :bookNameStr, author = :authorNameStr, description = :projectDescriptionStr WHERE project_id =:project_id")
+    void updateProjectMetadataById(int project_id, String bookNameStr, String authorNameStr, String projectDescriptionStr);
+    
 }

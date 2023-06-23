@@ -3,6 +3,8 @@ package com.nimbusbg.audiobookcanvas.viewmodels;
 import android.app.Application;
 import android.icu.util.Calendar;
 import android.os.Build;
+import android.text.Editable;
+import android.text.TextWatcher;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -78,11 +80,6 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel
         repository.insertProjectWithMetadata(project, appInfo, audiobookData);
     }
     
-    public void updateProjectWithMetadata(int id, String projectNameStr, String audiobookNameStr, String bookNameStr, String authorNameStr, String projectDescriptionStr)
-    {
-        //repository.updateProjectWithMetadata(project, appInfo, audiobookData);
-    }
-    
     public ProjectWithMetadata getEmptyProject()
     {
         return emptyProject;
@@ -153,6 +150,13 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel
     public LiveData<ProjectWithMetadata> getProjectWithMetadataByRowId(int row_id)
     {
         return repository.getProjectWithMetadataByRowId(row_id);
+    }
+    
+    public void updateProjectWithMetadata(int id, String projectNameStr, String bookNameStr, String authorNameStr, String projectDescriptionStr)
+    {
+        Date currentTime = Calendar.getInstance().getTime();
+        String newAudiobookName = projectNameStr + ".mp3";
+        repository.updateProjectWithMetadata(id, projectNameStr, newAudiobookName, bookNameStr, authorNameStr, projectDescriptionStr, currentTime);
     }
 }
 

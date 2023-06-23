@@ -19,6 +19,7 @@ import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithTextBlocks;
 import com.nimbusbg.audiobookcanvas.data.local.relations.TextBlockWithData;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class AudiobookRepository
@@ -107,8 +108,12 @@ public class AudiobookRepository
     
     
     
-    public void updateProjectWithMetadata(AudiobookProject project, AppInfo appInfo, AudiobookData audiobookData)
+    public void updateProjectWithMetadata(int id, String projectNameStr, String audiobookFileName, String bookNameStr, String authorNameStr, String projectDescriptionStr, Date currentTime)
     {
+        AudiobookProjectDatabase.databaseWriteExecutor.execute(() -> {
+            projectWithMetadataDao.updateProjectNameById(id, projectNameStr, audiobookFileName, Converters.dateToTimestamp(currentTime));
+            projectWithMetadataDao.updateProjectMetadataById(id, bookNameStr, authorNameStr, projectDescriptionStr);
+        });
     }
     
     public void insertTextBlocks(int projectID, ArrayList<String> textChunks, InsertedItemListener onInsertListener)
