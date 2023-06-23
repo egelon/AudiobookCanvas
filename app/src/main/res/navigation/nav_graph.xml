@@ -28,7 +28,10 @@
             app:destination="@id/ProjectListFragment" />
         <action
             android:id="@+id/actionBackToProjectList"
-            app:destination="@id/ProjectListFragment" />
+            app:destination="@id/ProjectListFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@+id/nav_graph"
+            app:popUpToInclusive="true"/>
         <action
             android:id="@+id/actionContinueProcessing"
             app:destination="@id/TextPreparationFragment" />
