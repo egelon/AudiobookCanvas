@@ -1,0 +1,4 @@
+Device FIle Explorer v lqvo
+data\user\0\com.nimbusbg.audiobookcanvas\files
+
+za momenta suzdavam tmp direktoriq za wav-ovete

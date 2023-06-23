@@ -13,6 +13,8 @@ import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
 import com.nimbusbg.audiobookcanvas.data.local.entities.BlockState;
+import com.nimbusbg.audiobookcanvas.data.local.entities.CharacterLine;
+import com.nimbusbg.audiobookcanvas.data.local.entities.StoryCharacter;
 import com.nimbusbg.audiobookcanvas.data.local.entities.TextBlock;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithTextBlocks;
@@ -109,6 +111,15 @@ public class AudiobookRepository
     {
         AudiobookProjectDatabase.databaseWriteExecutor.execute(() -> {
             projectWithTextBlocksDao.setTextBlockStateById(textBlock_id, state);
+        });
+    }
+    
+    public void storeCharacterLinesAndCharacters(List<CharacterLine> characterLines, List<StoryCharacter> characters, InsertedMultipleItemsListener onInsertListener)
+    {
+        AudiobookProjectDatabase.databaseWriteExecutor.execute(() -> {
+            projectWithTextBlocksDao.insertCharacters(characters);
+            List<Long> insertedLines = projectWithTextBlocksDao.setCharacterLines(characterLines);
+            onInsertListener.onInsert(insertedLines);
         });
     }
     

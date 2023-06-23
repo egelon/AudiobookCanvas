@@ -12,7 +12,7 @@ public class StoryCharacter  implements Serializable {
     @NonNull
     @ColumnInfo(name = "name")
     @PrimaryKey(autoGenerate = false)
-    private String Name;
+    private String name;
 
     @NonNull
     @ColumnInfo(name = "gender")
@@ -22,17 +22,18 @@ public class StoryCharacter  implements Serializable {
     @ColumnInfo(name = "voice")
     private String voice;
 
-    public StoryCharacter(String gender, String voice) {
+    public StoryCharacter(String name, String gender, String voice) {
+        this.name = name;
         this.gender = gender;
         this.voice = voice;
     }
 
     public String getName() {
-        return Name;
+        return name;
     }
 
     public void setName(String name) {
-        Name = name;
+        this.name = name;
     }
 
     public String getGender() {

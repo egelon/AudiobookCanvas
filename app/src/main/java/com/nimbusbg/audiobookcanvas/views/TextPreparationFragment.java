@@ -28,15 +28,16 @@ import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithTextBlocks;
 import com.nimbusbg.audiobookcanvas.data.repository.ApiResponseListener;
 import com.nimbusbg.audiobookcanvas.data.repository.FIleOperationListener;
 import com.nimbusbg.audiobookcanvas.data.repository.InsertedItemListener;
+import com.nimbusbg.audiobookcanvas.data.repository.InsertedMultipleItemsListener;
+import com.nimbusbg.audiobookcanvas.data.repository.TtsListener;
 import com.nimbusbg.audiobookcanvas.databinding.TextPreparationFragmentBinding;
 import com.nimbusbg.audiobookcanvas.viewmodels.ProcessTextFileViewModel;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.List;
 
 public class TextPreparationFragment extends Fragment
 {
@@ -83,6 +84,8 @@ public class TextPreparationFragment extends Fragment
                 }
             }
         });
+        
+        
     }
     
     @Override
@@ -188,6 +191,41 @@ public class TextPreparationFragment extends Fragment
             //load the chunks from the database
             loadTextChunks();
         }
+    
+        processTextFileViewModel.initTTS(new TtsListener()
+        {
+            @Override
+            public void OnInitSuccess()
+            {
+        
+            }
+    
+            @Override
+            public void OnInitFailure()
+            {
+        
+            }
+    
+            @Override
+            public void OnUtteranceStart(String s)
+            {
+        
+            }
+    
+            @Override
+            public void OnUtteranceDone(String s)
+            {
+        
+            }
+    
+            @Override
+            public void OnUtteranceError(String s)
+            {
+        
+            }
+    
+    
+        });
     }
     
     private void loadTextChunks()
@@ -236,13 +274,13 @@ public class TextPreparationFragment extends Fragment
     {
         processTextFileViewModel.setTextBlockStateById(textBlock.getId(), BlockState.WAITING_RESPONSE);
         //TODO: For test purposes only
-        processTextFileViewModel.performNamedEntityRecognition(textBlock.getText(), "test", new ApiResponseListener()
+        processTextFileViewModel.performNamedEntityRecognition(textBlock.getText(), String.valueOf(textBlock.getId()), new ApiResponseListener()
         {
             @Override
             public void OnResponse(JSONObject response)
             {
                 //TODO: either do something with the fetched character, or move on?
-                OnFetchedCharacters(response);
+                OnFetchedCharacters(response, textBlock);
                 processTextFileViewModel.setTextBlockStateById(textBlock.getId(), BlockState.NOT_REVIEWED);
             }
     
@@ -262,31 +300,21 @@ public class TextPreparationFragment extends Fragment
         });
     }
     
-    private void OnFetchedCharacters(JSONObject apiResponse)
+    private void OnFetchedCharacters(JSONObject apiResponse, TextBlock textBlock)
     {
         try
         {
-            String id = apiResponse.getString("id");
-            String object = apiResponse.getString("object");
-            Date created = new Date(apiResponse.getInt("created"));
-            String model = apiResponse.getString("model");
-    
-            String rawResponseText = "";
-            JSONArray choicesArray = apiResponse.getJSONArray("choices");
-            for (int i = 0; i < choicesArray.length(); i++)
+            processTextFileViewModel.storeCharactersForTextBlock(apiResponse, textBlock, new InsertedMultipleItemsListener()
             {
-                JSONObject choiceObject = choicesArray.getJSONObject(i);
-                rawResponseText = choiceObject.getString("text");
-            }
-            JSONObject usageObject = apiResponse.getJSONObject("usage");
-            int promptTokens = usageObject.getInt("prompt_tokens");
-            int completionTokens = usageObject.getInt("completion_tokens");
-            int totalTokens = usageObject.getInt("total_tokens");
+                @Override
+                public void onInsert(List<Long> itemIds)
+                {
+                    requireActivity().runOnUiThread(() -> {
+                        Toast.makeText(requireActivity(), "Added " + String.valueOf(itemIds.size()) + " character lines", Toast.LENGTH_SHORT).show();
+                    });
+                }
+            });
             
-            JSONObject characterLines = new JSONObject(rawResponseText);
-            //binding.textView.setText(rawResponseText);
-    
-            Toast.makeText(requireActivity(), "API response id: " + id, Toast.LENGTH_SHORT).show();
         }
         catch (JSONException ex)
         {
@@ -316,6 +344,7 @@ public class TextPreparationFragment extends Fragment
         @Override
     public void onDestroyView()
     {
+        processTextFileViewModel.destroyTTS();
         super.onDestroyView();
         binding = null;
     }
