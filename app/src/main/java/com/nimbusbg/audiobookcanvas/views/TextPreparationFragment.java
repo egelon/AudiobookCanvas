@@ -125,7 +125,11 @@ public class TextPreparationFragment extends Fragment
                     case NOT_REVIEWED:
                     {
                         //TODO: navigate to the selected text block
-                        Toast.makeText(requireActivity(), "Block ID " + String.valueOf(textBlock.getId()) + " not reviewed", Toast.LENGTH_SHORT).show();
+    
+                        Bundle textBlockReviewBundle = new Bundle();
+                        textBlockReviewBundle.putInt("textblockID", textBlock.getId());
+                        Navigation.findNavController(getView()).navigate(R.id.actionProcessedTextBlockSelected, textBlockReviewBundle);
+                        //Toast.makeText(requireActivity(), "Block ID " + String.valueOf(textBlock.getId()) + " not reviewed", Toast.LENGTH_SHORT).show();
                         break;
                     }
                     case NOT_REQUESTED:

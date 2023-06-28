@@ -66,5 +66,12 @@
         <action
             android:id="@+id/actionBackFromNewProjectTextProcessing"
             app:destination="@id/ProjectSetupFragment" />
+        <action
+            android:id="@+id/actionProcessedTextBlockSelected"
+            app:destination="@id/characterLinesFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/characterLinesFragment"
+        android:name="com.nimbusbg.audiobookcanvas.views.CharacterLinesFragment"
+        android:label="@string/character_lines_fragment_label" />
 </navigation>

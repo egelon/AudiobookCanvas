@@ -123,5 +123,20 @@ public class AudiobookRepository
         });
     }
     
+    public LiveData<List<CharacterLine>> getCharacterLinesByTextBlockId(int id)
+    {
+        return textBlockWithDataDao.getCharacterLinesByTextBlockId(id);
+    }
+    
+    public LiveData<List<StoryCharacter>> getAllCharacters()
+    {
+        return textBlockWithDataDao.getAllCharacters();
+    }
+    
+    public LiveData<TextBlockWithData> getTextBlockWithDataByTextBlockId(int textblockId)
+    {
+        return textBlockWithDataDao.getTextBlockWithDataByTextBlockId(textblockId);
+    }
+    
     
 }
