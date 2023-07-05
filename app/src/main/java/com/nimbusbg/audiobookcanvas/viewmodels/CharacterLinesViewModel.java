@@ -16,11 +16,16 @@ import java.util.List;
 public class CharacterLinesViewModel extends AndroidViewModel
 {
     private final AudiobookRepository repository;
+    private LiveData<TextBlockWithData> currentTextBlockWithData;
+    private LiveData<List<StoryCharacter>> allCharacters;
     
-    public CharacterLinesViewModel(@NonNull Application application)
+    public CharacterLinesViewModel(@NonNull Application application, int textblockId)
     {
         super(application);
         repository = new AudiobookRepository(application);
+    
+        currentTextBlockWithData = repository.getTextBlockWithDataByTextBlockId(textblockId);
+        allCharacters = repository.getAllCharacters();
     }
     
     public LiveData<List<CharacterLine>> getCharacterLinesByTextBlockId(int id)
@@ -30,11 +35,11 @@ public class CharacterLinesViewModel extends AndroidViewModel
     
     public LiveData<List<StoryCharacter>> getAllCharacters()
     {
-        return repository.getAllCharacters();
+        return allCharacters;
     }
     
-    public LiveData<TextBlockWithData> getTextBlockWithDataByTextBlockId(int textblockId)
+    public LiveData<TextBlockWithData> getTextBlockWithData()
     {
-        return repository.getTextBlockWithDataByTextBlockId(textblockId);
+        return currentTextBlockWithData;
     }
 }

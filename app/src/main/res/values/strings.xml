@@ -30,24 +30,16 @@
     <string name="default_project_name">newAudiobookProject</string>
     <string name="openai_api_key_summary">Paste your OpenAI API key here</string>
     <string name="openai_api_key">OpenAI API Key</string>
-    <string name="named_entity_recognition_prompt">Perform Named Entity Recognition on the following text fragment. 
-This symbol always marks the start of a dialogue line: "“"
-This symbol always marks the end of a dialogue line: "”"
-Narration lines never start with the symbol for the start of a dialogue line. If a line does not start with the "“" symbol, this means it is a narration line.
-Narration lines are always read by the Narrator character. They are never read by any other character
-Dialogue lines are always read by a character, different than the Narrator.
-If you see a dialogue line, but cannot infer the character\'s name from the context of the rest of the text, use "Unknown" as the name of the character, and don\'t add a gender.
-Each dialogue or narration line always starts on a new line. 
-Mark the name and gender of each character at the start of his or her dialogue line. Mark narration lines with the Narrator character. Your response needs to be well-formed JSON. The "character attribute contains the name of the character. The "gender" attribute contains the character's gender. The Narrator doesn't have a "gender" attribute. The "text" attribute contains a copy of the corresponding text line from the input. Here is an example of the format you need to use:
-[Input]
-His face was impassive, but more lined than Arthas remembered. His eyes, however, burned with righteous fury.
-“The dog returns to his vomit,”
- Uther said, the words cracking like a whip.
-“I’d prayed you’d stay away.”
-Arthas twitched slightly. His voice was rough as he replied, 
-“I’m a bad copper—I just keep turning up. I see you still call yourself a paladin, even though I dissolved your order.”
-Uther actually laughed, though it was bitter laughter.
-“As if you could dissolve it yourself. I answer to the Light, boy. So did you, once.”
+    <string name="named_entity_recognition_prompt">Perform Named Entity Recognition on the following text fragment.\n
+This symbol always marks the start of a dialogue line: \"“\".\n
+This symbol always marks the end of a dialogue line: \"”\".\n
+Narration lines never start with the symbol for the start of a dialogue line. If a line does not start with the "“" symbol, this means it is a narration line.\n
+Narration lines are always read by the Narrator character. They are never read by any other character.\n
+Dialogue lines are always read by a character, different than the Narrator.\n
+If you see a dialogue line, but cannot infer the character\'s name from the context of the rest of the text, use "Unknown" as the name of the character, and don\'t add a gender.\n
+Each dialogue or narration line always starts on a new line.\n
+Mark the name and gender of each character at the start of his or her dialogue line. Mark narration lines with the Narrator character. Your response needs to be well-formed JSON. The "character attribute contains the name of the character. The "gender" attribute contains the character's gender. The Narrator doesn't have a "gender" attribute. The "text" attribute contains a copy of the corresponding text line from the input. Here are two examples of the format you need to use:\n
+[Input]\nHis face was impassive, but more lined than Arthas remembered. His eyes, however, burned with righteous fury.\n“The dog returns to his vomit,”\nUther said, the words cracking like a whip.\n“I’d prayed you’d stay away.”\nArthas twitched slightly. His voice was rough as he replied,\n“I’m a bad copper—I just keep turning up. I see you still call yourself a paladin, even though I dissolved your order.”\nUther actually laughed, though it was bitter laughter.\n“As if you could dissolve it yourself. I answer to the Light, boy. So did you, once.”\n
 [Output]
 {\"characterLines\":[
 {\"character\":\"Narrator\",\"text\":\"His face was impassive, but more lined than Arthas remembered. His eyes, however, burned with righteous fury.\"},
@@ -57,8 +49,12 @@ Uther actually laughed, though it was bitter laughter.
 {\"character\":\"Narrator\",\"text\":\"Arthas twitched slightly. His voice was rough as he replied, \"},
 {\"character\":\"Arthas\",\"gender\":\"male\",\"text\":\"“I’m a bad copper—I just keep turning up. I see you still call yourself a paladin, even though I dissolved your order.”\"},
 {\"character\":\"Narrator\",\"text\":\"Uther actually laughed, though it was bitter laughter.\"},
-{\"character\":\"Uther\",\"gender\":\"male\",\"text\":\"“As if you could dissolve it yourself. I answer to the Light, boy. So did you, once.”\"}]}
-[Input]</string>
+{\"character\":\"Uther\",\"gender\":\"male\",\"text\":\"“As if you could dissolve it yourself. I answer to the Light, boy. So did you, once.”\"}]}\n\n
+[Input]\nWorld of WarCraft: Arthas: Rise of the Lich King PROLOGUE: THE DREAMING A table, long and heavy and carved, occupied most of the space in the room. It could have hosted three dozen easily. Only three figures sat at the table now: a man, an orc, and a boy.None of it was real, of course. The man who sat at the table understood this. He was dreaming; he had been dreaming.”\n
+[Output]
+{\"characterLines\":[
+{\"character\":\"Narrator\",\"text\":\"World of WarCraft: Arthas: Rise of the Lich King PROLOGUE: THE DREAMING A table, long and heavy and carved, occupied most of the space in the room. It could have hosted three dozen easily. Only three figures sat at the table now: a man, an orc, and a boy.None of it was real, of course. The man who sat at the table understood this. He was dreaming; he had been dreaming.\"},]}\n
+[Input]\n</string>
     <string name="enter_project_name">Audiobook audiobookProject name</string>
     <string name="xmlProjectFileVersion">1.0.0</string>
     <string name="defaultAudiobookProjName">New Project</string>

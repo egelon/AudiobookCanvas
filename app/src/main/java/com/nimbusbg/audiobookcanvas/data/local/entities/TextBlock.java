@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
@@ -46,6 +47,9 @@ public class TextBlock  implements Serializable {
     @NonNull
     @ColumnInfo(name="state")
     private BlockState state;
+    
+    @Ignore
+    private String[] textLines;
 
     public TextBlock(final int projectId, String generatedAudioPath, String text) {
         this.projectId = projectId;
@@ -53,6 +57,8 @@ public class TextBlock  implements Serializable {
         this.text = text;
         this.backgroundTrackVolume = 50;
         this.state = BlockState.NOT_REQUESTED;
+    
+        storeTextLines();
     }
 
     public int getId() {
@@ -98,9 +104,45 @@ public class TextBlock  implements Serializable {
     public String getText() {
         return text;
     }
+    
+    private void storeTextLines()
+    {
+        if(!this.text.isEmpty())
+        {
+            this.textLines = this.text.split("\n");
+        }
+    }
 
-    public void setText(String text) {
+    public void setText(String text)
+    {
         this.text = text;
+        storeTextLines();
+    }
+    
+    public String[] getTextLines()
+    {
+        return this.textLines;
+    }
+    
+    public String getLineByIndex(int index)
+    {
+        if(this.textLines != null && index >= 0 && index < this.textLines.length)
+        {
+            return this.textLines[index];
+        }
+        return null;
+    }
+    
+    public String getLineAudioPath(int index)
+    {
+        if(index > 0 && index <= this.textLines.length)
+        {
+            return "textBlock_" + String.valueOf(id) + "_Line_" + String.valueOf(index) + ".wav";
+        }
+        else
+        {
+            return "textBlock_" + String.valueOf(id) + "_Line_-1.wav";
+        }
     }
     
     @NonNull

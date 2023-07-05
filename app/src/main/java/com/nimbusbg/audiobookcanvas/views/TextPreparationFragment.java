@@ -26,12 +26,13 @@ import com.nimbusbg.audiobookcanvas.data.local.entities.BlockState;
 import com.nimbusbg.audiobookcanvas.data.local.entities.TextBlock;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithTextBlocks;
 import com.nimbusbg.audiobookcanvas.data.repository.ApiResponseListener;
-import com.nimbusbg.audiobookcanvas.data.repository.FIleOperationListener;
+import com.nimbusbg.audiobookcanvas.data.repository.FileOperationListener;
 import com.nimbusbg.audiobookcanvas.data.repository.InsertedItemListener;
 import com.nimbusbg.audiobookcanvas.data.repository.InsertedMultipleItemsListener;
 import com.nimbusbg.audiobookcanvas.data.repository.TtsListener;
 import com.nimbusbg.audiobookcanvas.databinding.TextPreparationFragmentBinding;
 import com.nimbusbg.audiobookcanvas.viewmodels.ProcessTextFileViewModel;
+import com.nimbusbg.audiobookcanvas.viewmodelfactories.ProcessTextFileViewModelFactory;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -101,8 +102,12 @@ public class TextPreparationFragment extends Fragment
     
         appActivityContext = this.getActivity();
     
-        processTextFileViewModel = new ViewModelProvider(NavHostFragment.findNavController(this).getViewModelStoreOwner(R.id.nav_graph)).get(ProcessTextFileViewModel.class);
-        setStartAndEndDialogueChar();
+        processTextFileViewModel = new ViewModelProvider(NavHostFragment.findNavController(this).getViewModelStoreOwner(R.id.nav_graph), new ProcessTextFileViewModelFactory(requireActivity().getApplication(), projectId)).get(ProcessTextFileViewModel.class);
+        
+        //TODO: we need some good way of detecting this, and this needs to be stored with the project settings
+        processTextFileViewModel.setDialogueStartChar('“');
+        processTextFileViewModel.setDialogueEndChar('”');
+        
         Uri fileUri = Uri.parse(textFileURI);
     
         areTextBlocksInserted = false;
@@ -123,24 +128,17 @@ public class TextPreparationFragment extends Fragment
                 switch(textBlock.getState())
                 {
                     case NOT_REVIEWED:
+                    case REVIEWED:
                     {
-                        //TODO: navigate to the selected text block
-    
                         Bundle textBlockReviewBundle = new Bundle();
                         textBlockReviewBundle.putInt("textblockID", textBlock.getId());
                         Navigation.findNavController(getView()).navigate(R.id.actionProcessedTextBlockSelected, textBlockReviewBundle);
-                        //Toast.makeText(requireActivity(), "Block ID " + String.valueOf(textBlock.getId()) + " not reviewed", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(requireActivity(), "Block ID " + String.valueOf(textBlock.getId()), Toast.LENGTH_SHORT).show();
                         break;
                     }
                     case NOT_REQUESTED:
                     {
                         queryCharacters(textBlock);
-                        break;
-                    }
-                    case REVIEWED:
-                    {
-                        //TODO: navigate to the selected text block
-                        Toast.makeText(requireActivity(), "Block ID " + String.valueOf(textBlock.getId()) + " already reviewed", Toast.LENGTH_SHORT).show();
                         break;
                     }
                     case WAITING_RESPONSE:
@@ -160,7 +158,7 @@ public class TextPreparationFragment extends Fragment
         {
             binding.loadingText.setText(R.string.loading_text_loading_file);
             //load chunks into the database
-            processTextFileViewModel.chunkInputFile(fileUri, new FIleOperationListener()
+            processTextFileViewModel.chunkInputFile(fileUri, new FileOperationListener()
             {
                 @Override
                 public void OnFileLoaded(String data)
@@ -236,7 +234,7 @@ public class TextPreparationFragment extends Fragment
     {
         //load all projects into the recycler view
         binding.loadingText.setText(R.string.loading_text_saved_loading_from_database);
-        processTextFileViewModel.getProjectWithTextBlocksById(projectId).observe(getViewLifecycleOwner(), new Observer<ProjectWithTextBlocks>()
+        processTextFileViewModel.getProjectWithTextBlocks().observe(getViewLifecycleOwner(), new Observer<ProjectWithTextBlocks>()
         {
             @Override
             public void onChanged(@Nullable ProjectWithTextBlocks textBlockData)
@@ -278,7 +276,7 @@ public class TextPreparationFragment extends Fragment
     {
         processTextFileViewModel.setTextBlockStateById(textBlock.getId(), BlockState.WAITING_RESPONSE);
         //TODO: For test purposes only
-        processTextFileViewModel.performNamedEntityRecognition(textBlock.getText(), String.valueOf(textBlock.getId()), new ApiResponseListener()
+        processTextFileViewModel.performNamedEntityRecognition(textBlock.getText(), "TAG_" + String.valueOf(textBlock.getId()), new ApiResponseListener()
         {
             @Override
             public void OnResponse(JSONObject response)
@@ -334,15 +332,6 @@ public class TextPreparationFragment extends Fragment
     private void OnQueryException(String exception)
     {
         Toast.makeText(requireActivity(), "Query Exception: " + exception, Toast.LENGTH_SHORT).show();
-    }
-    
-    
-    
-    private void setStartAndEndDialogueChar()
-    {
-        //TODO: we need some good way of detecting this, and this needs to be stored with the project settings
-        processTextFileViewModel.setDialogueStartChar('“');
-        processTextFileViewModel.setDialogueEndChar('”');
     }
         
         @Override

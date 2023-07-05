@@ -33,6 +33,7 @@ public class GptApiRepository
     private String API_key;
     private String namedEntityRecognitionPrompt;
     private int apiResponseTimeoutMs = 50000;
+    private char dialogueStartChar, dialogueEndChar;
     //public static final String requestTag = "NamedEntityRecognitionRequest";
     
     Context appContext;
@@ -49,8 +50,19 @@ public class GptApiRepository
         
         }
         this.openaiCompletionsEndpoint = application.getString(R.string.openai_completions_endpoint);
-        this.namedEntityRecognitionPrompt = application.getString(R.string.named_entity_recognition_prompt);
+        //this.namedEntityRecognitionPrompt = application.getString(R.string.named_entity_recognition_prompt);
     }
+    
+    public void setDialogueStartChar(char dialogueStartChar)
+    {
+        this.dialogueStartChar = dialogueStartChar;
+    }
+    
+    public void setDialogueEndChar(char dialogueEndChar)
+    {
+        this.dialogueEndChar = dialogueEndChar;
+    }
+    
     
     private JSONObject createCompletionRequestBody(String textBlock)  throws JSONException
     {
@@ -58,10 +70,56 @@ public class GptApiRepository
         // adding params to json object.
         requestBody.put("model", "text-davinci-003");
         //requestBody.put("model", "gpt-3.5-turbo");
-        String prompt = namedEntityRecognitionPrompt + textBlock + "\n\n[Output]";
+    
+        namedEntityRecognitionPrompt = "Perform Named Entity Recognition on the following text fragment, following these rules:\n" +
+                "This symbol always marks the start of a dialogue line: \"" + dialogueStartChar + "\".\n" +
+                "This symbol always marks the end of a dialogue line: \"" + dialogueEndChar + "\".\n" +
+                "Narration lines never start with the symbol for the start of a dialogue line. If a line does not start with the \"" + dialogueStartChar + "\" symbol, this means it is a narration line. A Narration line may start with a space. Narration lines are always read by the Narrator character. They are never read by any other character. Always mark narration lines with the Narrator character. \n" +
+                "Dialogue lines are always read by some other character, different from the Narrator. If you see a dialogue line, but cannot infer the character's name from the context of the rest of the text, use Unknown as the name of the character.\n" +
+                "Each dialogue or narration story line always starts on a new line (this means it always ends with the \"\\n\" character).\n" +
+                "Examples:\n" +
+                "\"" + dialogueStartChar + "Hello!" + dialogueEndChar + "\" - this is a dialogue line, spoken by a character\n" +
+                "\" he said.\" - this is a narration line, spoken by the Narrator.\n" +
+                "\n" +
+                "Your response needs to be well-formed JSON. \n" +
+                "The first element is an array, called \"characterLines\". Each object from this array contains a \"line\" and a \"character\" attribute. \n" +
+                "The \"line\" attribute contains a copy of the corresponding text line from the input - do not change this text in any way - copy it verbatim from the input! Do not split long input lines into multiple character lines! The \"character\" attribute contains the name of the character, inferred from the text. Mark the name of each character at the end of his or her dialogue line. There must be exactly as many character lines in your output, as there are lines in the input. Each object in the \"characterLines\" array contains exactly one \"line\" and one \"character\" attribute.\n" +
+                "After the \"characterLines\" array, there needs to be a \"characters\" array. There must be exactly as many objects in this array, as the number of unique character names in the \"character\" attributes from the \"characterLines\" array.\n" +
+                "Each object of the \"characters\" array contains 2 attributes - \"character\" and \"gender\". The \"character\" attribute contains the unique name of a character from the \"character\" attributes of the \"characterLines\" array, except the Narrator. The \"gender\" contains the inferred gender of that character from the text fragment's context.\n" +
+                "Here's an example of a text fragment:\n" +
+                "[Input]\n" +
+                "His face was impassive, but more lined than Arthas remembered. His eyes, however, burned with righteous fury.\n" +
+                "" + dialogueStartChar + "The dog returns to his vomit," + dialogueEndChar + "\n" +
+                " said Uther, the words cracking like a whip.\n" +
+                "" + dialogueStartChar + "I’d prayed you’d stay away." + dialogueEndChar + "\n" +
+                "Arthas twitched slightly. His voice was rough as he replied,\n" +
+                "" + dialogueStartChar + "I’m a bad copper—I just keep turning up. I see you still call yourself a paladin, even though I dissolved your order." + dialogueEndChar + "\n" +
+                "Uther actually laughed, though it was bitter laughter.\n" +
+                "" + dialogueStartChar + "As if you could dissolve it yourself. I answer to the Light, boy. So did you, once." + dialogueEndChar + "\n" +
+                "\n" +
+                "Here's an example of correct output:\n" +
+                "[Output]\n" +
+                "{\"characterLines\":[\n" +
+                "{\"line\":\"His face was impassive, but more lined than Arthas remembered. His eyes, however, burned with righteous fury.\", \"character\":\"Narrator\"},\n" +
+                "{\"line\":\"" + dialogueStartChar + "The dog returns to his vomit," + dialogueEndChar + "\", \"character\":\"Uther\"},\n" +
+                "{\"line\":\" said Uther, the words cracking like a whip.\", \"character\":\"Narrator\"},\n" +
+                "{\"line\":\"" + dialogueStartChar + "I’d prayed you’d stay away." + dialogueEndChar + "\", \"character\":\"Uther\"},\n" +
+                "{\"line\":\"Arthas twitched slightly. His voice was rough as he replied, \", \"character\":\"Narrator\"},\n" +
+                "{\"line\":\"" + dialogueStartChar + "I’m a bad copper—I just keep turning up. I see you still call yourself a paladin, even though I dissolved your order." + dialogueEndChar + "\", \"character\":\"Arthas\"},\n" +
+                "{\"line\":\"Uther actually laughed, though it was bitter laughter.\", \"character\":\"Narrator\"},\n" +
+                "{\"line\":\"" + dialogueStartChar + "As if you could dissolve it yourself. I answer to the Light, boy. So did you, once." + dialogueEndChar + "\", \"character\":\"Uther\"}],\n" +
+                "\"characters\":[\n" +
+                "{\"character\":\"Arthas\", \"gender\":\"male\"},\n" +
+                "{\"character\":\"Uther\", \"gender\":\"male\"}\n" +
+                "]}\n" +
+                "\n" +
+                "[Input]";
+        
+        String prompt = namedEntityRecognitionPrompt + textBlock + "\n[Output]";
+        
         requestBody.put("prompt", prompt);
         requestBody.put("temperature", 0);
-        requestBody.put("max_tokens", 1500);
+        requestBody.put("max_tokens", 1700);
         requestBody.put("top_p", 1);
         requestBody.put("frequency_penalty", 0.0);
         requestBody.put("presence_penalty", 0.0);

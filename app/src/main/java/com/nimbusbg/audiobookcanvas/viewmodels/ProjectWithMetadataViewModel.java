@@ -29,6 +29,8 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel
     private final AudiobookRepository repository;
     private ProjectWithMetadata emptyProject;
     
+    private LiveData<List<ProjectWithMetadata>> allProjectsWithMetadata;
+    
     public void createEmptyProject()
     {
         emptyProject = new ProjectWithMetadata();
@@ -53,6 +55,7 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel
         
         repository = new AudiobookRepository(application);
         createEmptyProject();
+        allProjectsWithMetadata = repository.getAllProjectsWithMetadata();
     }
     
     public String getAndroidVersion()
@@ -106,7 +109,7 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel
     
     public LiveData<List<ProjectWithMetadata>> getAllProjectsWithMetadata()
     {
-        return repository.getAllProjectsWithMetadata();
+        return allProjectsWithMetadata;
     }
     
     public LiveData<ProjectWithMetadata> getProjectWithMetadataById(int id)

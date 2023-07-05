@@ -29,7 +29,7 @@ public class TextFileRepository
     public TextFileRepository(Application application)
     {
         this.contentResolver = application.getApplicationContext().getContentResolver();
-        maxChunkSize = 1500;
+        maxChunkSize = 4000;
     }
     
     public void setDialogueStartChar(char dialogueStartChar)
@@ -70,7 +70,7 @@ public class TextFileRepository
         ArrayList<String> textChunks = new ArrayList<>();
         StringBuilder text = new StringBuilder();
         // Regex pattern modified to consider your specific quotation marks
-        Pattern sentenceBoundaryPattern = Pattern.compile("(“)([^”]*)(”)|[.!?]+\\s*");
+        Pattern sentenceBoundaryPattern = Pattern.compile("(" + dialogueStartChar +")([^" + dialogueEndChar + "]*)(" + dialogueEndChar + ")|[.!?]+\\s*");
         
         int lastIndex = 0;
         boolean insideQuotes = false;
@@ -107,7 +107,9 @@ public class TextFileRepository
             // we can cut the chunk at the sentence boundary.
             if (lastIndex > 0 && text.length() > maxChunkSize)
             {
-                textChunks.add(text.substring(0, lastIndex).trim());
+                String finalChunk = text.substring(0, lastIndex).trim();
+                String sanitisedFinalChunk = sanitiseChunk(finalChunk);
+                textChunks.add(sanitisedFinalChunk);
                 text.delete(0, lastIndex);
                 lastIndex = 0;
             }
@@ -116,13 +118,9 @@ public class TextFileRepository
         // If there's any leftover text, add it to the chunks.
         if (text.length() > 0)
         {
-            textChunks.add(text.toString().trim());
-        }
-        
-        // Sanitize each chunk
-        for (int i = 0; i < textChunks.size(); i++)
-        {
-            textChunks.set(i, sanitiseChunk(textChunks.get(i)));
+            String finalChunk = text.toString().trim();
+            String sanitisedFinalChunk = sanitiseChunk(finalChunk);
+            textChunks.add(sanitisedFinalChunk);
         }
         
         return textChunks;
@@ -175,17 +173,30 @@ public class TextFileRepository
     }
     
     
+    private String sanitiseFileContents(String input)
+    {
+        // Replace each special character sequence or character with a space
+        String output = input.replace("\r\n", " ");
+        output = output.replace("\n", " ");
+        output = output.replace("\r", " ");
+        output = output.replace("\t", " ");
+    
+        // Replace a period followed by a non-space character with a period, a space, and the character
+        output = output.replaceAll("(\\.)(\\S)", "$1 $2");
+        
+        return output;
+    }
+ 
     
     
-    
-    public void GetSanitisedChunks(Uri uri, FIleOperationListener listener)
+    public void GetSanitisedChunks(Uri uri, FileOperationListener listener)
     {
         fileOperationExecutor.execute(() -> {
             String fileContents;
             try {
                 fileContents = readFileContent(uri);
                 listener.OnFileLoaded(fileContents);
-                textChunks = chunkFileData(fileContents);
+                textChunks = chunkFileData(sanitiseFileContents(fileContents));
                 listener.OnFileChunked(textChunks);
             } catch (IOException e) {
                 Log.e("Error", e.getMessage());

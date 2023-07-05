@@ -2,12 +2,9 @@ package com.nimbusbg.audiobookcanvas.views;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,8 +21,8 @@ import com.nimbusbg.audiobookcanvas.data.local.entities.CharacterLine;
 import com.nimbusbg.audiobookcanvas.data.local.entities.StoryCharacter;
 import com.nimbusbg.audiobookcanvas.data.local.relations.TextBlockWithData;
 import com.nimbusbg.audiobookcanvas.databinding.CharacterLinesFragmentBinding;
+import com.nimbusbg.audiobookcanvas.viewmodelfactories.CharacterLinesViewModelFactory;
 import com.nimbusbg.audiobookcanvas.viewmodels.CharacterLinesViewModel;
-import com.nimbusbg.audiobookcanvas.viewmodels.ProcessTextFileViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,10 +82,11 @@ public class CharacterLinesFragment extends Fragment
         if (getArguments() != null)
         {
             textblockId = getArguments().getInt("textblockID");
-            Toast.makeText(requireActivity(), "textblockID: " + String.valueOf(textblockId), Toast.LENGTH_SHORT).show();
+            //Toast.makeText(requireActivity(), "textblockID: " + String.valueOf(textblockId), Toast.LENGTH_SHORT).show();
         }
         else
         {
+            textblockId = -1;
             Toast.makeText(requireActivity(), "Missing textblockID!", Toast.LENGTH_SHORT).show();
         }
     }
@@ -96,7 +94,7 @@ public class CharacterLinesFragment extends Fragment
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
-        characterLinesViewModel = new ViewModelProvider(NavHostFragment.findNavController(this).getViewModelStoreOwner(R.id.nav_graph)).get(CharacterLinesViewModel.class);
+        characterLinesViewModel = new ViewModelProvider(NavHostFragment.findNavController(this).getViewModelStoreOwner(R.id.nav_graph), new CharacterLinesViewModelFactory(requireActivity().getApplication(), textblockId)).get(CharacterLinesViewModel.class);
         storyCharacterNames = new ArrayList<String>();
         loadAllCharacters();
     }
@@ -123,20 +121,18 @@ public class CharacterLinesFragment extends Fragment
     
     private void loadCharacterLines()
     {
-        characterLinesViewModel.getTextBlockWithDataByTextBlockId(textblockId).observe(getViewLifecycleOwner(), new Observer<TextBlockWithData>()
+        characterLinesViewModel.getTextBlockWithData().observe(getViewLifecycleOwner(), new Observer<TextBlockWithData>()
         {
             @Override
             public void onChanged(TextBlockWithData textBlockWithData)
             {
-                populateList(textBlockWithData.textBlock.getText(), textBlockWithData.characterLines, storyCharacterNames);
+                populateList(textBlockWithData.textBlock.getTextLines(), textBlockWithData.characterLines, storyCharacterNames);
             }
         });
     }
     
-    private void populateList(String textBlockText, List<CharacterLine> characterLines, List<String> characterNames)
+    private void populateList(String[] lines, List<CharacterLine> characterLines, List<String> characterNames)
     {
-        String[] lines = textBlockText.split("\n");
-        
         for (CharacterLine line : characterLines)
         {
             View itemView = getLayoutInflater().inflate(R.layout.character_line_item, binding.CharacterLineLayout, false);
