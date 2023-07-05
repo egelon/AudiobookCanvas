@@ -29,7 +29,7 @@ public class TextFileRepository
     public TextFileRepository(Application application)
     {
         this.contentResolver = application.getApplicationContext().getContentResolver();
-        maxChunkSize = 4000;
+        maxChunkSize = 2000;
     }
     
     public void setDialogueStartChar(char dialogueStartChar)
@@ -126,7 +126,7 @@ public class TextFileRepository
         return textChunks;
     }
     
-    private String sanitiseChunk(String chunk) {
+    private String sanitiseChunk2(String chunk) {
         StringBuilder sanitisedChunk = new StringBuilder();
         boolean inDialogue = false;
         boolean justExitedDialogue = false; // Tracks if we have just exited a dialogue line
@@ -172,6 +172,58 @@ public class TextFileRepository
         return sanitisedChunk.toString();
     }
     
+    private String sanitiseChunk(String chunk) {
+        StringBuilder sanitisedChunk = new StringBuilder();
+        boolean inDialogue = false;
+        boolean justExitedDialogue = false; // Tracks if we have just exited a dialogue line
+        
+        for (int i = 0; i < chunk.length(); i++) {
+            char c = chunk.charAt(i);
+            
+            if (c == dialogueStartChar) {
+                // Check if the character following the dialogue start character is a capital letter
+                if (i + 1 < chunk.length() && Character.isUpperCase(chunk.charAt(i + 1))) {
+                    if (i > 0 && (!justExitedDialogue || (justExitedDialogue && chunk.charAt(i-1) != '\n'))) {
+                        sanitisedChunk.append("\n");
+                    }
+                    sanitisedChunk.append(c);
+                    inDialogue = true;
+                    justExitedDialogue = false; // Reset this flag as we're in a dialogue line now
+                } else {
+                    sanitisedChunk.append(c); // Treat as narration line
+                }
+            } else if (c == dialogueEndChar) {
+                sanitisedChunk.append(c);
+                if (inDialogue) {
+                    inDialogue = false;
+                    justExitedDialogue = true; // We just exited a dialogue line
+                    
+                    if (i + 1 < chunk.length()) {
+                        char nextChar = chunk.charAt(i + 1);
+                        // Add newline if the next character isn't the start of another dialogue line
+                        if (nextChar != ' ' && nextChar != dialogueStartChar) {
+                            sanitisedChunk.append("\n");
+                            justExitedDialogue = false; // We've handled the exit, so reset the flag
+                        }
+                    }
+                }
+            } else {
+                // If we're not in a dialogue line but just exited one, we must be at the start of a narration line
+                if (!inDialogue && justExitedDialogue) {
+                    sanitisedChunk.append("\n");
+                    justExitedDialogue = false; // We've handled the exit, so reset the flag
+                }
+                sanitisedChunk.append(c);
+            }
+        }
+        
+        // If the string ends with a dialogue line, append a newline
+        if (justExitedDialogue) {
+            sanitisedChunk.append("\n");
+        }
+        
+        return sanitisedChunk.toString();
+    }
     
     private String sanitiseFileContents(String input)
     {

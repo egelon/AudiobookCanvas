@@ -1,5 +1,4 @@
 package com.nimbusbg.audiobookcanvas.data.repository;
-
 import java.util.ArrayList;
 
 public interface FileOperationListener

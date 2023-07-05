@@ -142,10 +142,9 @@ public class ProcessTextFileViewModel extends AndroidViewModel
         JSONArray characters = new JSONObject(rawResponseText).getJSONArray("characters");
         ArrayList<String> voices = ttsRepository.getVoicesForLocale("en", "US");
         List<StoryCharacter> storyCharacters = new ArrayList<>();
-        for (int i = 0; i < characters.length(); i++)
-        {
-            addUniqueStoryCharacter(characters.getJSONObject(i), storyCharacters, getRandomVoice(voices));
-        }
+        storyCharacters.add(new StoryCharacter("Narrator", "none", getRandomVoice(voices)));
+        addUniqueStoryCharacters(characters, storyCharacters, getRandomVoice(voices));
+        
     
         JSONArray characterLines = new JSONObject(rawResponseText).getJSONArray("characterLines");
         List<CharacterLine> characterLinesList = new ArrayList<>();
@@ -206,30 +205,29 @@ public class ProcessTextFileViewModel extends AndroidViewModel
         return null;
     }
     
-    private void addUniqueStoryCharacter(JSONObject character, List<StoryCharacter> existingCharacters, String voice) throws JSONException
+    private void addUniqueStoryCharacters(JSONArray characters, List<StoryCharacter> existingCharacters, String voice) throws JSONException
     {
-        String characterName = character.getString("character");
-        String characterGender = character.has("gender") ? character.getString("gender") : "none";
-
-        if(existingCharacters.isEmpty())
+        for (int i = 0; i < characters.length(); i++)
         {
-            existingCharacters.add(new StoryCharacter(characterName, characterGender, voice));
-        }
-        else
-        {
+            JSONObject character = characters.getJSONObject(i);
+            String characterName = character.getString("character");
+            String characterGender = character.has("gender") ? character.getString("gender") : "none";
+            
+            boolean isExisting = false;
             for (StoryCharacter storyCharacter : existingCharacters)
             {
                 if (storyCharacter.getName().equals(characterName))
                 {
+                    isExisting = true;
                     break;
                 }
-                else
-                {
-                    existingCharacters.add(new StoryCharacter(characterName, characterGender, voice));
-                }
+            }
+            
+            if(!isExisting)
+            {
+                existingCharacters.add(new StoryCharacter(characterName, characterGender, voice));
             }
         }
-        
     }
     
     private void addCharacterLine(JSONObject characterLine, TextBlock textBlock, List<CharacterLine> characterLinesList) throws JSONException
@@ -247,7 +245,7 @@ public class ProcessTextFileViewModel extends AndroidViewModel
         for (int i = 0; i < lines.length; i++)
         {
             // If the line matches textLine, return the current index.
-            if (lines[i].trim().equals(textLine.trim()))
+            if (lines[i].trim().contains(textLine.trim()))
             {
                 return i;
             }
