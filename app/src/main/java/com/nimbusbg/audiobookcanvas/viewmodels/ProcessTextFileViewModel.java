@@ -103,11 +103,11 @@ public class ProcessTextFileViewModel extends AndroidViewModel
         return currentProjectWithTextBlocks;
     }
     
-    public void performNamedEntityRecognition(String textBlock, String tag, ApiResponseListener rspListener)
+    public void performNamedEntityRecognition(String[] textLines, String tag, ApiResponseListener rspListener)
     {
         try
         {
-            gptApiRepository.getCompletion(textBlock, tag, rspListener);
+            gptApiRepository.getCompletion(textLines, tag, rspListener);
         }
         catch (JSONException e)
         {
@@ -154,9 +154,12 @@ public class ProcessTextFileViewModel extends AndroidViewModel
     
             //TODO: REMOVE ME!!! TEST ONLY!!!
             CharacterLine newCharacterLine = characterLinesList.get(characterLinesList.size()-1);
+            String characterLine = textBlock.getLineByIndex(newCharacterLine.getStartIndex());
+            String characterVoice = getVoiceByCharacterName(newCharacterLine.getCharacterName(), storyCharacters);
+            
             if (newCharacterLine != null)
             {
-                ttsRepository.speakCharacterLine(textBlock.getLineByIndex(newCharacterLine.getStartIndex()), textBlock.getLineAudioPath(newCharacterLine.getStartIndex()), new TtsListener()
+                ttsRepository.speakCharacterLine(characterLine, characterVoice, textBlock.getLineAudioPath(newCharacterLine.getStartIndex()), new TtsListener()
                 {
                     @Override
                     public void OnInitSuccess()
@@ -192,6 +195,19 @@ public class ProcessTextFileViewModel extends AndroidViewModel
         }
         
         databaseRepository.storeCharacterLinesAndCharacters(characterLinesList, storyCharacters, onInsertListener);
+        ttsRepository.stitchWavFiles(textBlock.getId(), textBlock.getGeneratedAudioPath());
+    }
+    
+    private String getVoiceByCharacterName(String charName, List<StoryCharacter> characters)
+    {
+        for(StoryCharacter character : characters)
+        {
+            if(charName.equals(character.getName()))
+            {
+                return character.getVoice();
+            }
+        }
+        return "en-us-x-tpd-network";
     }
     
     private String getRawResponseText(JSONObject apiResponse) throws JSONException

@@ -276,7 +276,7 @@ public class TextPreparationFragment extends Fragment
     {
         processTextFileViewModel.setTextBlockStateById(textBlock.getId(), BlockState.WAITING_RESPONSE);
         //TODO: For test purposes only
-        processTextFileViewModel.performNamedEntityRecognition(textBlock.getText(), "TAG_" + String.valueOf(textBlock.getId()), new ApiResponseListener()
+        processTextFileViewModel.performNamedEntityRecognition(textBlock.getTextLines(), "TAG_" + String.valueOf(textBlock.getId()), new ApiResponseListener()
         {
             @Override
             public void OnResponse(JSONObject response)
@@ -313,6 +313,7 @@ public class TextPreparationFragment extends Fragment
                 {
                     requireActivity().runOnUiThread(() -> {
                         Toast.makeText(requireActivity(), "Added " + String.valueOf(itemIds.size()) + " character lines", Toast.LENGTH_SHORT).show();
+                        
                     });
                 }
             });

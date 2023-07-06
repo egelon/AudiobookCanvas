@@ -64,7 +64,7 @@ public class GptApiRepository
     }
     
     
-    private JSONObject createCompletionRequestBody(String textBlock)  throws JSONException
+    private JSONObject createCompletionRequestBody(String[] textLines)  throws JSONException
     {
         JSONObject requestBody = new JSONObject();
         // adding params to json object.
@@ -113,9 +113,17 @@ public class GptApiRepository
                 "{\"character\":\"Uther\", \"gender\":\"male\"}\n" +
                 "]}\n" +
                 "\n" +
-                "[Input]";
+                "[Input]"+
+                "\n";
         
-        String prompt = namedEntityRecognitionPrompt + textBlock + "\n[Output]";
+        String prompt = namedEntityRecognitionPrompt;
+        
+        for(int i=0; i<textLines.length; i++)
+        {
+            prompt = prompt.concat(textLines[i]);
+            prompt = prompt.concat("\n");
+        }
+        prompt = prompt.concat("\n[Output]");
         
         requestBody.put("prompt", prompt);
         requestBody.put("temperature", 0);
@@ -161,13 +169,13 @@ public class GptApiRepository
         Volley.newRequestQueue(appContext).add(jsonRequest);
     }
     
-    public void getCompletion(String textBlock, String tag, ApiResponseListener responseListener) throws JSONException
+    public void getCompletion(String[] textLines, String tag, ApiResponseListener responseListener) throws JSONException
     {
         apiRequestThreadPool.execute(() -> {
             JSONObject requestBody = null;
             try
             {
-                requestBody = createCompletionRequestBody(textBlock);
+                requestBody = createCompletionRequestBody(textLines);
             } catch (JSONException ex)
             {
                 responseListener.OnException(ex);
