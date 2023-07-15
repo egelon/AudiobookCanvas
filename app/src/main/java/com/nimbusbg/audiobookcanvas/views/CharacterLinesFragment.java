@@ -29,12 +29,13 @@ import java.util.List;
 
 public class CharacterLinesFragment extends Fragment
 {
-    CharacterLinesFragmentBinding binding;
-    int textblockId;
+    private CharacterLinesFragmentBinding binding;
+    private int textblockId;
+    private int projectId;
     
     private CharacterLinesViewModel characterLinesViewModel;
     
-    List<String> storyCharacterNames;
+    private List<String> storyCharacterNames;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -82,11 +83,13 @@ public class CharacterLinesFragment extends Fragment
         if (getArguments() != null)
         {
             textblockId = getArguments().getInt("textblockID");
+            projectId = getArguments().getInt("projectID");
             //Toast.makeText(requireActivity(), "textblockID: " + String.valueOf(textblockId), Toast.LENGTH_SHORT).show();
         }
         else
         {
             textblockId = -1;
+            projectId = -1;
             Toast.makeText(requireActivity(), "Missing textblockID!", Toast.LENGTH_SHORT).show();
         }
     }
@@ -94,7 +97,7 @@ public class CharacterLinesFragment extends Fragment
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
-        characterLinesViewModel = new ViewModelProvider(NavHostFragment.findNavController(this).getViewModelStoreOwner(R.id.nav_graph), new CharacterLinesViewModelFactory(requireActivity().getApplication(), textblockId)).get(CharacterLinesViewModel.class);
+        characterLinesViewModel = new ViewModelProvider(NavHostFragment.findNavController(this).getViewModelStoreOwner(R.id.nav_graph), new CharacterLinesViewModelFactory(requireActivity().getApplication(), textblockId, projectId)).get(CharacterLinesViewModel.class);
         storyCharacterNames = new ArrayList<String>();
         loadAllCharacters();
     }

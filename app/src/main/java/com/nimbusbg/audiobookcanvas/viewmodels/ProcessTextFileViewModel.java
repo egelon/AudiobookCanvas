@@ -140,10 +140,10 @@ public class ProcessTextFileViewModel extends AndroidViewModel
         }
         
         JSONArray characters = new JSONObject(rawResponseText).getJSONArray("characters");
-        ArrayList<String> voices = ttsRepository.getVoicesForLocale("en", "US");
+        ArrayList<String> voices = ttsRepository.getVoicesForLocale(); //("en", "US");
         List<StoryCharacter> storyCharacters = new ArrayList<>();
-        storyCharacters.add(new StoryCharacter("Narrator", "none", getRandomVoice(voices)));
-        addUniqueStoryCharacters(characters, storyCharacters, getRandomVoice(voices));
+        storyCharacters.add(new StoryCharacter("Narrator", "none", getRandomVoice(voices), textBlock.getProjectId()));
+        addUniqueStoryCharacters(characters, storyCharacters, getRandomVoice(voices), textBlock.getProjectId());
         
     
         JSONArray characterLines = new JSONObject(rawResponseText).getJSONArray("characterLines");
@@ -215,13 +215,13 @@ public class ProcessTextFileViewModel extends AndroidViewModel
         JSONArray choicesArray = apiResponse.getJSONArray("choices");
         for (int i = 0; i < choicesArray.length(); i++)
         {
-            JSONObject choiceObject = choicesArray.getJSONObject(i);
-            return choiceObject.getString("text");
+            String message = choicesArray.getJSONObject(i).getJSONObject("message").getString("content");
+            return message;
         }
         return null;
     }
     
-    private void addUniqueStoryCharacters(JSONArray characters, List<StoryCharacter> existingCharacters, String voice) throws JSONException
+    private void addUniqueStoryCharacters(JSONArray characters, List<StoryCharacter> existingCharacters, String voice, int projectId) throws JSONException
     {
         for (int i = 0; i < characters.length(); i++)
         {
@@ -241,7 +241,7 @@ public class ProcessTextFileViewModel extends AndroidViewModel
             
             if(!isExisting)
             {
-                existingCharacters.add(new StoryCharacter(characterName, characterGender, voice));
+                existingCharacters.add(new StoryCharacter(characterName, characterGender, voice, projectId));
             }
         }
     }
@@ -255,14 +255,23 @@ public class ProcessTextFileViewModel extends AndroidViewModel
         }
     }
     
-    private int determineTextLineStartIndex(String textLine, String[] lines)
-    {
+    private int determineTextLineStartIndex(String textLine, String[] lines) {
+        // Normalize all types of quotation marks in textLine
+        if (textLine.startsWith(String.valueOf(fileRepository.getDialogueStartChar())) || textLine.startsWith(String.valueOf(fileRepository.getDialogueStartChar()))) {
+            textLine = normalizeQuotes(textLine);
+        }
+        
         // Iterate over the lines array.
-        for (int i = 0; i < lines.length; i++)
-        {
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i];
+            
+            // Normalize all types of quotation marks in the current line
+            if (line.startsWith(String.valueOf(fileRepository.getDialogueStartChar())) || line.startsWith(String.valueOf(fileRepository.getDialogueEndChar()))) {
+                line = normalizeQuotes(line);
+            }
+            
             // If the line matches textLine, return the current index.
-            if (lines[i].trim().contains(textLine.trim()))
-            {
+            if (line.trim().contains(textLine.trim())) {
                 return i;
             }
         }
@@ -270,6 +279,14 @@ public class ProcessTextFileViewModel extends AndroidViewModel
         // If no match was found, return -1.
         return -1;
     }
+    
+    private String normalizeQuotes(String s)
+    {
+        // Replace all types of quotation marks with a standard one
+        String res = s.replace(fileRepository.getDialogueStartChar(), '\"').replace(fileRepository.getDialogueEndChar(), '\"');
+        return res;
+    }
+    
     
     public void initTTS(TtsListener listener)
     {

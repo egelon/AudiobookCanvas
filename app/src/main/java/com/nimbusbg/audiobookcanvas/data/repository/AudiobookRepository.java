@@ -128,9 +128,9 @@ public class AudiobookRepository
         return textBlockWithDataDao.getCharacterLinesByTextBlockId(id);
     }
     
-    public LiveData<List<StoryCharacter>> getAllCharacters()
+    public LiveData<List<StoryCharacter>> getAllCharactersByProjectId(int prjId)
     {
-        return textBlockWithDataDao.getAllCharacters();
+        return textBlockWithDataDao.getAllCharactersByProjectId(prjId);
     }
     
     public LiveData<TextBlockWithData> getTextBlockWithDataByTextBlockId(int textblockId)

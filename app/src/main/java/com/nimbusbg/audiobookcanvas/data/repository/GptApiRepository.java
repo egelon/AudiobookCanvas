@@ -17,6 +17,7 @@ import com.android.volley.toolbox.Volley;
 import com.nimbusbg.audiobookcanvas.R;
 import com.nimbusbg.audiobookcanvas.data.network.RequestQueueSingleton;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -68,15 +69,15 @@ public class GptApiRepository
     {
         JSONObject requestBody = new JSONObject();
         // adding params to json object.
-        requestBody.put("model", "text-davinci-003");
-        //requestBody.put("model", "gpt-3.5-turbo");
+        //requestBody.put("model", "text-davinci-003");
+        requestBody.put("model", "gpt-4");
     
         namedEntityRecognitionPrompt = "Perform Named Entity Recognition on the following text fragment, following these rules:\n" +
                 "This symbol always marks the start of a dialogue line: \"" + dialogueStartChar + "\".\n" +
                 "This symbol always marks the end of a dialogue line: \"" + dialogueEndChar + "\".\n" +
                 "Narration lines never start with the symbol for the start of a dialogue line. If a line does not start with the \"" + dialogueStartChar + "\" symbol, this means it is a narration line. A Narration line may start with a space. Narration lines are always read by the Narrator character. They are never read by any other character. Always mark narration lines with the Narrator character. \n" +
                 "Dialogue lines are always read by some other character, different from the Narrator. If you see a dialogue line, but cannot infer the character's name from the context of the rest of the text, use Unknown as the name of the character.\n" +
-                "Each dialogue or narration story line always starts on a new line (this means it always ends with the \"\\n\" character).\n" +
+                "Each dialogue or narration story line always starts on a new line.\n" +
                 "Examples:\n" +
                 "\"" + dialogueStartChar + "Hello!" + dialogueEndChar + "\" - this is a dialogue line, spoken by a character\n" +
                 "\" he said.\" - this is a narration line, spoken by the Narrator.\n" +
@@ -112,12 +113,21 @@ public class GptApiRepository
                 "{\"character\":\"Arthas\", \"gender\":\"male\"},\n" +
                 "{\"character\":\"Uther\", \"gender\":\"male\"}\n" +
                 "]}\n" +
-                "\n" +
-                "[Input]"+
                 "\n";
+    
+    
+        JSONArray messagesArray = new JSONArray();
+    
+        // Create the first message object
+        JSONObject systemMessage = new JSONObject();
+        systemMessage.put("role", "system");
+        systemMessage.put("content", namedEntityRecognitionPrompt);
+        messagesArray.put(systemMessage);
+    
         
-        String prompt = namedEntityRecognitionPrompt;
-        
+    
+        String prompt = "[Input]\n";;
+    
         for(int i=0; i<textLines.length; i++)
         {
             prompt = prompt.concat(textLines[i]);
@@ -125,7 +135,15 @@ public class GptApiRepository
         }
         prompt = prompt.concat("\n[Output]");
         
-        requestBody.put("prompt", prompt);
+        // Create the second message object
+        JSONObject userMessage = new JSONObject();
+        userMessage.put("role", "user");
+        userMessage.put("content", prompt);
+        messagesArray.put(userMessage);
+    
+        // Add the messages array to the requestBody
+        requestBody.put("messages", messagesArray);
+        
         requestBody.put("temperature", 0);
         requestBody.put("max_tokens", 1700);
         requestBody.put("top_p", 1);

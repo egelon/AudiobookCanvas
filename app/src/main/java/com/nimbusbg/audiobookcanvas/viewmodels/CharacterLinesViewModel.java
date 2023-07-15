@@ -19,13 +19,13 @@ public class CharacterLinesViewModel extends AndroidViewModel
     private LiveData<TextBlockWithData> currentTextBlockWithData;
     private LiveData<List<StoryCharacter>> allCharacters;
     
-    public CharacterLinesViewModel(@NonNull Application application, int textblockId)
+    public CharacterLinesViewModel(@NonNull Application application, int textblockId, int projectId)
     {
         super(application);
         repository = new AudiobookRepository(application);
     
         currentTextBlockWithData = repository.getTextBlockWithDataByTextBlockId(textblockId);
-        allCharacters = repository.getAllCharacters();
+        allCharacters = repository.getAllCharactersByProjectId(projectId);
     }
     
     public LiveData<List<CharacterLine>> getCharacterLinesByTextBlockId(int id)

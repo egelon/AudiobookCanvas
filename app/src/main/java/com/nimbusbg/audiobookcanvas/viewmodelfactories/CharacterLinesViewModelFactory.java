@@ -12,18 +12,20 @@ public class CharacterLinesViewModelFactory implements ViewModelProvider.Factory
 {
     private Application mApplication;
     private int mTextBlockId;
+    private int mProjectId;
     
     
-    public CharacterLinesViewModelFactory(Application application, int id)
+    public CharacterLinesViewModelFactory(Application application, int textblockId, int projectId)
     {
         mApplication = application;
-        mTextBlockId = id;
+        mTextBlockId = textblockId;
+        mProjectId = projectId;
     }
     
     
     @Override
     public <T extends ViewModel> T create(Class<T> modelClass)
     {
-        return (T) new CharacterLinesViewModel(mApplication, mTextBlockId);
+        return (T) new CharacterLinesViewModel(mApplication, mTextBlockId, mProjectId);
     }
 }

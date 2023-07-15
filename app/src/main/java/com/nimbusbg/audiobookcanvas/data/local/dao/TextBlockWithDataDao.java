@@ -27,6 +27,6 @@ public interface TextBlockWithDataDao
     LiveData<List<CharacterLine>> getCharacterLinesByTextBlockId(int id);
     
     @Transaction
-    @Query("Select * FROM storyCharacter")
-    LiveData<List<StoryCharacter>> getAllCharacters();
+    @Query("Select * FROM storyCharacter WHERE project_id = :prjId")
+    LiveData<List<StoryCharacter>> getAllCharactersByProjectId(int prjId);
 }

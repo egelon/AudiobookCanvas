@@ -132,6 +132,7 @@ public class TextPreparationFragment extends Fragment
                     {
                         Bundle textBlockReviewBundle = new Bundle();
                         textBlockReviewBundle.putInt("textblockID", textBlock.getId());
+                        textBlockReviewBundle.putInt("projectID", projectId);
                         Navigation.findNavController(getView()).navigate(R.id.actionProcessedTextBlockSelected, textBlockReviewBundle);
                         //Toast.makeText(requireActivity(), "Block ID " + String.valueOf(textBlock.getId()), Toast.LENGTH_SHORT).show();
                         break;

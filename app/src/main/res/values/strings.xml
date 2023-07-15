@@ -94,7 +94,7 @@ Mark the name and gender of each character at the start of his or her dialogue l
     <string name="change_txt_file_btn_label">Change file</string>
     <string name="action_delete_project">Delete</string>
     <string name="open_audiobook_btn_label">Open Audiobook</string>
-    <string name="openai_completions_endpoint">https://api.openai.com/v1/completions</string>
+    <string name="openai_completions_endpoint">https://api.openai.com/v1/chat/completions</string>
     <string name="loading_text_loading_file">Loading file...</string>
     <string name="loading_text_splitting_file">Splitting into pages...</string>
     <string name="loading_text_saved_loading_from_database">Text blocks saved. Loading...</string>

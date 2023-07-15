@@ -255,4 +255,14 @@ public class TextFileRepository
             }
         });
     }
+    
+    public char getDialogueStartChar()
+    {
+        return dialogueStartChar;
+    }
+    
+    public char getDialogueEndChar()
+    {
+        return dialogueEndChar;
+    }
 }

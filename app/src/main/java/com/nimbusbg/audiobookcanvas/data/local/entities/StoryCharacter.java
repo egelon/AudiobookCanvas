@@ -3,11 +3,17 @@ package com.nimbusbg.audiobookcanvas.data.local.entities;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
 
-@Entity(tableName = "storyCharacter")
+@Entity(tableName = "storyCharacter",
+        foreignKeys = {
+                @ForeignKey(entity = AudiobookProject.class,
+                        parentColumns = "id",
+                        childColumns = "project_id",
+                        onDelete = ForeignKey.CASCADE)})
 public class StoryCharacter  implements Serializable {
     @NonNull
     @ColumnInfo(name = "name")
@@ -21,11 +27,16 @@ public class StoryCharacter  implements Serializable {
     @NonNull
     @ColumnInfo(name = "voice")
     private String voice;
+    
+    @NonNull
+    @ColumnInfo(name = "project_id")
+    private int projectId;
 
-    public StoryCharacter(String name, String gender, String voice) {
+    public StoryCharacter(String name, String gender, String voice, final int projectId) {
         this.name = name;
         this.gender = gender;
         this.voice = voice;
+        this.projectId = projectId;
     }
 
     public String getName() {
@@ -50,5 +61,15 @@ public class StoryCharacter  implements Serializable {
 
     public void setVoice(String voice) {
         this.voice = voice;
+    }
+    
+    public int getProjectId()
+    {
+        return projectId;
+    }
+    
+    public void setProjectId(int projectId)
+    {
+        this.projectId = projectId;
     }
 }

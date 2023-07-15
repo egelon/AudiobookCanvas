@@ -55,15 +55,16 @@ public class TtsRepository
         });
     }
     
-    public ArrayList<String> getVoicesForLocale(String language, String country)
+    public ArrayList<String> getVoicesForLocale()//String language, String country)
     {
-        Locale locale = new Locale(language, country);  // specify your locale
+        Locale currentLocale = Locale.getDefault();
+        //Locale locale = new Locale(language, country);  // specify your locale
         Set<Voice> voices = tts.getVoices();
         ArrayList<String> voiceNamesForLocale = new ArrayList<String>();
         voicesForLocale = new ArrayList<>();
         for (Voice voice : voices)
         {
-            if (voice.getLocale().equals(locale))
+            if (voice.getLocale().equals(currentLocale))
             {
                 voicesForLocale.add(voice);
     
