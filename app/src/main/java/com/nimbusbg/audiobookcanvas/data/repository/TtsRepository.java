@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -45,6 +45,15 @@ public class TtsRepository
             {
                 if (status == TextToSpeech.SUCCESS)
                 {
+                    voicesForLocale = new ArrayList<>();
+                    for (Voice voice : tts.getVoices())
+                    {
+                        if (voice.getLocale().equals(Locale.getDefault()))
+                        {
+                            voicesForLocale.add(voice);
+                        }
+                    }
+                    
                     listener.OnInitSuccess();
                 }
                 else
@@ -55,23 +64,30 @@ public class TtsRepository
         });
     }
     
-    public ArrayList<String> getVoicesForLocale()//String language, String country)
+    public ArrayList<String> getVoiceNamesForCurrentLocale()
     {
-        Locale currentLocale = Locale.getDefault();
-        //Locale locale = new Locale(language, country);  // specify your locale
-        Set<Voice> voices = tts.getVoices();
         ArrayList<String> voiceNamesForLocale = new ArrayList<String>();
-        voicesForLocale = new ArrayList<>();
-        for (Voice voice : voices)
+        for (Voice voice : voicesForLocale)
         {
-            if (voice.getLocale().equals(currentLocale))
-            {
-                voicesForLocale.add(voice);
-    
-                voiceNamesForLocale.add(voice.getName());
-            }
+            voiceNamesForLocale.add(voice.getName());
         }
         return voiceNamesForLocale;
+    }
+    
+    public String getRandomVoiceName()
+    {
+        if(voicesForLocale != null)
+        {
+            // Create a Random object
+            Random rand = new Random();
+    
+            // Generate a random index within the bounds of the list
+            int randomIndex = rand.nextInt(voicesForLocale.size());
+    
+            // Return the element at the random index
+            return voicesForLocale.get(randomIndex).getName();
+        }
+        return "";
     }
     
     private Voice findVoiceByName(String desiredVoiceName)

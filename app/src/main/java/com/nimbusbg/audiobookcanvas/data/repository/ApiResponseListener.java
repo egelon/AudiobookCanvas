@@ -1,13 +1,19 @@
 package com.nimbusbg.audiobookcanvas.data.repository;
 
+import androidx.annotation.NonNull;
+
 import com.android.volley.VolleyError;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+
+import okhttp3.Call;
+import okhttp3.Response;
+
 public interface ApiResponseListener
 {
-    void OnResponse(JSONObject response);
-    void OnError(VolleyError error);
-    void OnException(JSONException ex);
+    void OnResponse(@NonNull Call call, @NonNull Response response);
+    void OnError(@NonNull Call call, @NonNull IOException e);
 }

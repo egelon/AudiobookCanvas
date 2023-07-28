@@ -97,7 +97,7 @@ public class CharacterLinesFragment extends Fragment
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
-        characterLinesViewModel = new ViewModelProvider(NavHostFragment.findNavController(this).getViewModelStoreOwner(R.id.nav_graph), new CharacterLinesViewModelFactory(requireActivity().getApplication(), textblockId, projectId)).get(CharacterLinesViewModel.class);
+        characterLinesViewModel = new ViewModelProvider(this, new CharacterLinesViewModelFactory(requireActivity().getApplication(), textblockId, projectId)).get(CharacterLinesViewModel.class);
         storyCharacterNames = new ArrayList<String>();
         loadAllCharacters();
     }

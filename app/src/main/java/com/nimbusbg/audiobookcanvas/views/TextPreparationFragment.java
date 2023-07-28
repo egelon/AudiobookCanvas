@@ -20,11 +20,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.nimbusbg.audiobookcanvas.R;
 import com.nimbusbg.audiobookcanvas.data.local.entities.BlockState;
 import com.nimbusbg.audiobookcanvas.data.local.entities.TextBlock;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithTextBlocks;
+import com.nimbusbg.audiobookcanvas.data.network.RequestQueueSingleton;
 import com.nimbusbg.audiobookcanvas.data.repository.ApiResponseListener;
 import com.nimbusbg.audiobookcanvas.data.repository.FileOperationListener;
 import com.nimbusbg.audiobookcanvas.data.repository.InsertedItemListener;
@@ -37,6 +39,7 @@ import com.nimbusbg.audiobookcanvas.viewmodelfactories.ProcessTextFileViewModelF
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,11 +105,13 @@ public class TextPreparationFragment extends Fragment
     
         appActivityContext = this.getActivity();
     
-        processTextFileViewModel = new ViewModelProvider(NavHostFragment.findNavController(this).getViewModelStoreOwner(R.id.nav_graph), new ProcessTextFileViewModelFactory(requireActivity().getApplication(), projectId)).get(ProcessTextFileViewModel.class);
+        processTextFileViewModel = new ViewModelProvider(this, new ProcessTextFileViewModelFactory(requireActivity().getApplication(), projectId)).get(ProcessTextFileViewModel.class);
         
         //TODO: we need some good way of detecting this, and this needs to be stored with the project settings
         processTextFileViewModel.setDialogueStartChar('“');
         processTextFileViewModel.setDialogueEndChar('”');
+    
+        processTextFileViewModel.initTTS();
         
         Uri fileUri = Uri.parse(textFileURI);
     
@@ -134,21 +139,13 @@ public class TextPreparationFragment extends Fragment
                         textBlockReviewBundle.putInt("textblockID", textBlock.getId());
                         textBlockReviewBundle.putInt("projectID", projectId);
                         Navigation.findNavController(getView()).navigate(R.id.actionProcessedTextBlockSelected, textBlockReviewBundle);
-                        //Toast.makeText(requireActivity(), "Block ID " + String.valueOf(textBlock.getId()), Toast.LENGTH_SHORT).show();
                         break;
                     }
                     case NOT_REQUESTED:
-                    {
-                        queryCharacters(textBlock);
-                        break;
-                    }
                     case WAITING_RESPONSE:
                     case ERROR:
                     default:
                     {
-                        //TODO: we should check if we're still waiting for a response here
-                        //for now we'll just add another response
-                        queryCharacters(textBlock);
                         break;
                     }
                 }
@@ -194,41 +191,6 @@ public class TextPreparationFragment extends Fragment
             //load the chunks from the database
             loadTextChunks();
         }
-    
-        processTextFileViewModel.initTTS(new TtsListener()
-        {
-            @Override
-            public void OnInitSuccess()
-            {
-        
-            }
-    
-            @Override
-            public void OnInitFailure()
-            {
-        
-            }
-    
-            @Override
-            public void OnUtteranceStart(String s)
-            {
-        
-            }
-    
-            @Override
-            public void OnUtteranceDone(String s)
-            {
-        
-            }
-    
-            @Override
-            public void OnUtteranceError(String s)
-            {
-        
-            }
-    
-    
-        });
     }
     
     private void loadTextChunks()
@@ -240,6 +202,7 @@ public class TextPreparationFragment extends Fragment
             @Override
             public void onChanged(@Nullable ProjectWithTextBlocks textBlockData)
             {
+                
                 // Update your UI here.
                 if(isNewProject)
                 {
@@ -253,8 +216,11 @@ public class TextPreparationFragment extends Fragment
                     toggleLoadingBarVisibility(View.GONE);
                 }
                 //update the recycler view
-                textBlockAdapter.setTextBlocks(textBlockData);
                 //TODO: and here we would start a background worker to query the text blocks in paralel?
+                
+                
+                textBlockAdapter.setTextBlocks(textBlockData);
+                processTextFileViewModel.fetchCharactersForUnprocessedTextBlocks();
             }
         });
     }
@@ -272,73 +238,11 @@ public class TextPreparationFragment extends Fragment
             binding.textBlocksRecyclerView.setVisibility(View.GONE);
         }
     }
-    
-    private void queryCharacters(TextBlock textBlock)
-    {
-        processTextFileViewModel.setTextBlockStateById(textBlock.getId(), BlockState.WAITING_RESPONSE);
-        //TODO: For test purposes only
-        processTextFileViewModel.performNamedEntityRecognition(textBlock.getTextLines(), "TAG_" + String.valueOf(textBlock.getId()), new ApiResponseListener()
-        {
-            @Override
-            public void OnResponse(JSONObject response)
-            {
-                //TODO: either do something with the fetched character, or move on?
-                OnFetchedCharacters(response, textBlock);
-                processTextFileViewModel.setTextBlockStateById(textBlock.getId(), BlockState.NOT_REVIEWED);
-            }
-    
-            @Override
-            public void OnError(VolleyError error)
-            {
-                processTextFileViewModel.setTextBlockStateById(textBlock.getId(), BlockState.ERROR);
-                OnFetchCharacterError(error.toString());
-            }
-    
-            @Override
-            public void OnException(JSONException ex)
-            {
-                processTextFileViewModel.setTextBlockStateById(textBlock.getId(), BlockState.ERROR);
-                OnQueryException(ex.toString());
-            }
-        });
-    }
-    
-    private void OnFetchedCharacters(JSONObject apiResponse, TextBlock textBlock)
-    {
-        try
-        {
-            processTextFileViewModel.storeCharactersForTextBlock(apiResponse, textBlock, new InsertedMultipleItemsListener()
-            {
-                @Override
-                public void onInsert(List<Long> itemIds)
-                {
-                    requireActivity().runOnUiThread(() -> {
-                        Toast.makeText(requireActivity(), "Added " + String.valueOf(itemIds.size()) + " character lines", Toast.LENGTH_SHORT).show();
-                        
-                    });
-                }
-            });
-            
-        }
-        catch (JSONException ex)
-        {
-            Toast.makeText(requireActivity(), "Exception: " + ex, Toast.LENGTH_SHORT).show();
-        }
-    }
-    
-    private void OnFetchCharacterError(String error)
-    {
-        Toast.makeText(requireActivity(), "Fetch Error: " + error, Toast.LENGTH_SHORT).show();
-    }
-    
-    private void OnQueryException(String exception)
-    {
-        Toast.makeText(requireActivity(), "Query Exception: " + exception, Toast.LENGTH_SHORT).show();
-    }
         
         @Override
     public void onDestroyView()
     {
+        processTextFileViewModel.stopCharacterRequests();
         processTextFileViewModel.destroyTTS();
         super.onDestroyView();
         binding = null;

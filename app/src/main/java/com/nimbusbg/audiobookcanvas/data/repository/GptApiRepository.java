@@ -1,49 +1,51 @@
 package com.nimbusbg.audiobookcanvas.data.repository;
 
 import android.app.Application;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
 import com.nimbusbg.audiobookcanvas.R;
-import com.nimbusbg.audiobookcanvas.data.network.RequestQueueSingleton;
+import com.nimbusbg.audiobookcanvas.data.network.GptChatMessage;
+import com.nimbusbg.audiobookcanvas.data.network.GptChatRequest;
+import com.nimbusbg.audiobookcanvas.data.network.OkHttpSingleton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class GptApiRepository
 {
-    private static final int maxNumberOfRequests = 16;
-    
     private String openaiCompletionsEndpoint;
     private String API_key;
-    private String namedEntityRecognitionPrompt;
     private int apiResponseTimeoutMs = 50000;
     private char dialogueStartChar, dialogueEndChar;
-    //public static final String requestTag = "NamedEntityRecognitionRequest";
     
     Context appContext;
-    public static final ExecutorService apiRequestThreadPool = Executors.newFixedThreadPool(maxNumberOfRequests);
     
     public GptApiRepository(Application application)
     {
         this.appContext = application.getApplicationContext();
-    
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(application.getApplicationContext());
         this.API_key = preferences.getString("openai_API_key", "");
         if(!API_key.isEmpty())
@@ -51,28 +53,20 @@ public class GptApiRepository
         
         }
         this.openaiCompletionsEndpoint = application.getString(R.string.openai_completions_endpoint);
-        //this.namedEntityRecognitionPrompt = application.getString(R.string.named_entity_recognition_prompt);
     }
     
-    public void setDialogueStartChar(char dialogueStartChar)
-    {
-        this.dialogueStartChar = dialogueStartChar;
-    }
+    public void setDialogueStartChar(char dialogueStartChar) { this.dialogueStartChar = dialogueStartChar; }
+    public void setDialogueEndChar(char dialogueEndChar) { this.dialogueEndChar = dialogueEndChar; }
     
-    public void setDialogueEndChar(char dialogueEndChar)
+    private GptChatRequest createCompletionRequestBody(String[] textLines)
     {
-        this.dialogueEndChar = dialogueEndChar;
-    }
-    
-    
-    private JSONObject createCompletionRequestBody(String[] textLines)  throws JSONException
-    {
-        JSONObject requestBody = new JSONObject();
+        GptChatRequest requestBody = new GptChatRequest();
+        
         // adding params to json object.
         //requestBody.put("model", "text-davinci-003");
-        requestBody.put("model", "gpt-4");
+        requestBody.setModel("gpt-3.5-turbo");
     
-        namedEntityRecognitionPrompt = "Perform Named Entity Recognition on the following text fragment, following these rules:\n" +
+        String namedEntityRecognitionPrompt = "Perform Named Entity Recognition on the following text fragment, following these rules:\n" +
                 "This symbol always marks the start of a dialogue line: \"" + dialogueStartChar + "\".\n" +
                 "This symbol always marks the end of a dialogue line: \"" + dialogueEndChar + "\".\n" +
                 "Narration lines never start with the symbol for the start of a dialogue line. If a line does not start with the \"" + dialogueStartChar + "\" symbol, this means it is a narration line. A Narration line may start with a space. Narration lines are always read by the Narrator character. They are never read by any other character. Always mark narration lines with the Narrator character. \n" +
@@ -116,18 +110,12 @@ public class GptApiRepository
                 "\n";
     
     
-        JSONArray messagesArray = new JSONArray();
-    
-        // Create the first message object
-        JSONObject systemMessage = new JSONObject();
-        systemMessage.put("role", "system");
-        systemMessage.put("content", namedEntityRecognitionPrompt);
-        messagesArray.put(systemMessage);
-    
+        List<GptChatMessage> messages = new ArrayList<>();
         
-    
+        // Create the system message object
+        messages.add(new GptChatMessage("system", namedEntityRecognitionPrompt));
+        
         String prompt = "[Input]\n";;
-    
         for(int i=0; i<textLines.length; i++)
         {
             prompt = prompt.concat(textLines[i]);
@@ -136,22 +124,18 @@ public class GptApiRepository
         prompt = prompt.concat("\n[Output]");
         
         // Create the second message object
-        JSONObject userMessage = new JSONObject();
-        userMessage.put("role", "user");
-        userMessage.put("content", prompt);
-        messagesArray.put(userMessage);
-    
-        // Add the messages array to the requestBody
-        requestBody.put("messages", messagesArray);
-        
-        requestBody.put("temperature", 0);
-        requestBody.put("max_tokens", 1700);
-        requestBody.put("top_p", 1);
-        requestBody.put("frequency_penalty", 0.0);
-        requestBody.put("presence_penalty", 0.0);
+        messages.add(new GptChatMessage("user", prompt));
+
+        requestBody.setMessages(messages);
+        requestBody.setTemperature(0);
+        requestBody.setMax_tokens(1700);
+        requestBody.setTop_p(1);
+        requestBody.setFrequency_penalty(0.0);
+        requestBody.setPresence_penalty(0.0);
         return requestBody;
     }
     
+    /*
     private Map<String, String> getCompletionRequestHeaders()
     {
         Map<String, String> params = new HashMap<String, String>();
@@ -159,7 +143,9 @@ public class GptApiRepository
         params.put("Authorization", "Bearer " + API_key);
         return params;
     }
+     */
     
+    /*
     private JsonObjectRequest createCompletionRequest(JSONObject reqBody, ApiResponseListener listener)
     {
         // Request a string response from the provided URL.
@@ -176,30 +162,64 @@ public class GptApiRepository
             }
         };
     }
+     */
     
+    /*
     private void performCompletionRequest(JsonObjectRequest jsonRequest, String requestTag)
     {
         // Add the request to the RequestQueue.
-        jsonRequest.setTag(requestTag);
-        jsonRequest.setRetryPolicy(new DefaultRetryPolicy(apiResponseTimeoutMs, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        //RequestQueueSingleton.getInstance(appContext).addToRequestQueue(jsonRequest);
+        //jsonRequest.setTag(requestTag);
+        //jsonRequest.setRetryPolicy(new DefaultRetryPolicy(apiResponseTimeoutMs, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
     
-        Volley.newRequestQueue(appContext).add(jsonRequest);
+        // Create the request body.
+        RequestBody requestBody = RequestBody.create(jsonRequest.toString(), MediaType.parse("application/json; charset=utf-8"));
+        OkHttpSingleton.getInstance(appContext).getClient().newCall(requestBody);
+    
+        Request request = new Request.Builder()
+                .url("https://myapi.com/endpoint") // Replace with your URL.
+                .post(requestBody)
+                .tag(requestTag)
+                .build();
+    
+        //RequestQueueSingleton.getInstance(appContext).addToRequestQueue(jsonRequest);
+    }
+     */
+    
+    public void getCompletion(String[] textLines, String tag, ApiResponseListener responseListener)
+    {
+        GptChatRequest requestBody =  createCompletionRequestBody(textLines);
+        enqueueRequest(requestBody, responseListener);
     }
     
-    public void getCompletion(String[] textLines, String tag, ApiResponseListener responseListener) throws JSONException
+    private void enqueueRequest(GptChatRequest jsonRequestBody, ApiResponseListener responseListener)
     {
-        apiRequestThreadPool.execute(() -> {
-            JSONObject requestBody = null;
-            try
+        Gson gson = new Gson();
+        Request request = OkHttpSingleton.getInstance(appContext).createRequest(openaiCompletionsEndpoint, gson.toJson(jsonRequestBody), API_key);
+        OkHttpSingleton.getInstance(appContext).getClient().newCall(request).enqueue(new Callback()
+        {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e)
             {
-                requestBody = createCompletionRequestBody(textLines);
-            } catch (JSONException ex)
-            {
-                responseListener.OnException(ex);
+                responseListener.OnError(call, e);
             }
-            JsonObjectRequest jsonRequest = createCompletionRequest(requestBody, responseListener);
-            performCompletionRequest(jsonRequest, tag);
+    
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response)
+            {
+                responseListener.OnResponse(call, response);
+            }
         });
+    }
+    
+    /*
+    public void startQueuedRequests()
+    {
+        RequestQueueSingleton.getInstance(appContext).startQueue();
+    }
+    */
+    
+    public void stopQueuedRequests()
+    {
+        OkHttpSingleton.getInstance(appContext).cancelAllRequests();
     }
 }
