@@ -35,6 +35,9 @@
         <action
             android:id="@+id/actionContinueProcessing"
             app:destination="@id/TextPreparationFragment" />
+        <action
+            android:id="@+id/actionChangeCharacterVoices"
+            app:destination="@id/CharacterSettingsFragment" />
     </fragment>
 
     <fragment
@@ -74,4 +77,9 @@
         android:id="@+id/characterLinesFragment"
         android:name="com.nimbusbg.audiobookcanvas.views.CharacterLinesFragment"
         android:label="@string/character_lines_fragment_label" />
+    <fragment
+        android:id="@+id/CharacterSettingsFragment"
+        android:name="com.nimbusbg.audiobookcanvas.views.CharacterSettingsFragment"
+        android:label="character_settings_fragment"
+        tools:layout="@layout/character_settings_fragment" />
 </navigation>

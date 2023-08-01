@@ -3,6 +3,7 @@ package com.nimbusbg.audiobookcanvas.data.repository;
 import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.speech.tts.Voice;
 import android.util.Log;
@@ -153,6 +154,37 @@ public class TtsRepository
             Log.e("TTS_REPOSITORY", ex.getMessage());
             Log.e("TTS_REPOSITORY", "can't open audio file " + utteranceId);
         }
+    }
+    
+    public void playVoiceSample(String voiceName, String voiceSampleText)
+    {
+        // Set desired speech rate and pitch
+        TtsSingleton.getInstance(context).getTts().setSpeechRate(1.0f); // Normal speed
+        TtsSingleton.getInstance(context).getTts().setPitch(1.0f); // Normal pitch
+        TtsSingleton.getInstance(context).getTts().setVoice(findVoiceByName(voiceName));
+        TtsSingleton.getInstance(context).getTts().setOnUtteranceProgressListener(new UtteranceProgressListener()
+        {
+            @Override
+            public void onStart(String s)
+            {
+                Log.d("TTS_REPOSITORY", "playVoiceSample onStart: " +s);
+            }
+        
+            @Override
+            public void onDone(String s)
+            {
+                Log.d("TTS_REPOSITORY", "playVoiceSample onDone: " +s);
+            }
+        
+            @Override
+            public void onError(String s)
+            {
+                Log.d("TTS_REPOSITORY", "playVoiceSample onError: " +s);
+            }
+        });
+        String utteranceId = "utterance_" + voiceName;
+        TtsSingleton.getInstance(context).getTts().speak(voiceSampleText, TextToSpeech.QUEUE_FLUSH, new Bundle(), utteranceId);
+        
     }
     
     public void stitchWavFiles(int id, String outputFileName)

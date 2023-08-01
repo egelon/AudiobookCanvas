@@ -146,4 +146,11 @@ public class AudiobookRepository
             textBlockWithDataDao.updateCharacter(selectedCharacter, itemIndex, textblockId);
         });
     }
+    
+    public void updateCharacterVoice(String selectedCharacterName, String newVoice, int projectId)
+    {
+        AudiobookProjectDatabase.databaseWriteExecutor.execute(() -> {
+            textBlockWithDataDao.updateCharacterVoice(selectedCharacterName, newVoice, projectId);
+        });
+    }
 }

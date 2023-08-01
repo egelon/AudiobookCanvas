@@ -32,4 +32,7 @@ public interface TextBlockWithDataDao
 
     @Query("UPDATE characterLine SET character_name = :selectedCharacter WHERE text_block_id =:textblockId AND start_index =:itemIndex")
     void updateCharacter(String selectedCharacter, int itemIndex, int textblockId);
+    
+    @Query("UPDATE storyCharacter SET voice =:newVoice WHERE name =:selectedCharacterName AND project_id =:projectId")
+    void updateCharacterVoice(String selectedCharacterName, String newVoice, int projectId);
 }

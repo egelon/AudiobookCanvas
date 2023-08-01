@@ -111,12 +111,12 @@ public class ProjectSetupFragment extends Fragment
         
         projectWithMetadataViewModel = new ViewModelProvider(NavHostFragment.findNavController(this).getViewModelStoreOwner(R.id.nav_graph)).get(ProjectWithMetadataViewModel.class);
         
-        binding.exportAsXMLBtn.setOnClickListener(new View.OnClickListener()
+        binding.changeVoicesBtn.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View view)
             {
-                onExportAsXMLClicked(view);
+                onChangeVoicesClicked(view);
             }
         });
         
@@ -224,9 +224,11 @@ public class ProjectSetupFragment extends Fragment
         });
     }
     
-    public void onExportAsXMLClicked(View view)
+    public void onChangeVoicesClicked(View view)
     {
-        Toast.makeText(this.getActivity(), "Export as XML", Toast.LENGTH_LONG).show();
+        Bundle bundle = new Bundle();
+        bundle.putInt("projectID", getArguments().getInt("projectID"));
+        Navigation.findNavController(getView()).navigate(R.id.actionChangeCharacterVoices, bundle);
     }
     
     private Bundle MakeBundleForTextProcessing()

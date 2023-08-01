@@ -1,0 +1,62 @@
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="0dp"
+    android:layout_marginTop="0dp"
+    android:layout_marginEnd="0dp"
+    android:layout_marginBottom="0dp"
+    app:cardBackgroundColor="#F4F4F4"
+    app:cardCornerRadius="10dp">
+    
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:padding="1dp">
+    
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/character_settings_name_label_constraint"
+            android:layout_width="150dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp">
+        
+            <TextView
+                android:id="@+id/characterSettingsName"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text="Jorum Balnir"
+                android:textAlignment="viewStart"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                />
+    
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    
+        <Spinner
+            android:id="@+id/characterSettingsVoice"
+            android:layout_width="150dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
+            android:layout_toEndOf="@+id/character_settings_name_label_constraint"
+            android:background="#FFF9C7" />
+    
+        <Button
+            android:id="@+id/playSampleVoiceBtn"
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+    
+            android:layout_marginEnd="10dp"
+            android:textAlignment="center"
+            app:icon="@android:drawable/ic_media_play" />
+
+    </RelativeLayout>
+    
+    
+
+
+</androidx.cardview.widget.CardView>

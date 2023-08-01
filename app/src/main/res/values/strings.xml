@@ -13,6 +13,7 @@
     <string name="project_list_fragment_label">Audiobook Projects</string>
     <string name="project_setup_fragment_label">Project Setup</string>
     <string name="settings_fragment_label">Settings</string>
+    <string name="character_settings_fragment_label">Characters</string>
     
     <!-- Get Started screen UI element labels -->
     <string name="welcome_text">Create a new audio book audiobookProject from a .txt file with the text of your book, or edit an already created audiobookProject</string>
@@ -71,7 +72,7 @@ Mark the name and gender of each character at the start of his or her dialogue l
     <string name="last_edited_on_label">Last edited on:</string>
     <string name="last_processed_block_label">Last processed text block:</string>
     <string name="percent_completed_label">Percent of book text processed:</string>
-    <string name="export_as_xml_btn_label">Export as XML</string>
+    <string name="pick_voices_label">Change Voices</string>
     <string name="start_processing_btn_label">Start Processing</string>
     <string name="continue_processing_btn_label">Continue processing</string>
     <string name="edit_project_title">Edit Project</string>
