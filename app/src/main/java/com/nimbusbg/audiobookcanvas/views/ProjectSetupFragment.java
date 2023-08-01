@@ -1,10 +1,7 @@
 package com.nimbusbg.audiobookcanvas.views;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,9 +11,6 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -27,7 +21,6 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.nimbusbg.audiobookcanvas.R;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
-import com.nimbusbg.audiobookcanvas.data.repository.DeletedItemListener;
 import com.nimbusbg.audiobookcanvas.databinding.ProjectSetupFragmentBinding;
 import com.nimbusbg.audiobookcanvas.viewmodels.ProjectWithMetadataViewModel;
 

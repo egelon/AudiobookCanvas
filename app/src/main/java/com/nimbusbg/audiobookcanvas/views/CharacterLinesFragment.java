@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -20,6 +21,7 @@ import com.nimbusbg.audiobookcanvas.R;
 import com.nimbusbg.audiobookcanvas.data.local.entities.CharacterLine;
 import com.nimbusbg.audiobookcanvas.data.local.entities.StoryCharacter;
 import com.nimbusbg.audiobookcanvas.data.local.relations.TextBlockWithData;
+import com.nimbusbg.audiobookcanvas.data.listeners.TtsInitListener;
 import com.nimbusbg.audiobookcanvas.databinding.CharacterLinesFragmentBinding;
 import com.nimbusbg.audiobookcanvas.viewmodelfactories.CharacterLinesViewModelFactory;
 import com.nimbusbg.audiobookcanvas.viewmodels.CharacterLinesViewModel;
@@ -97,8 +99,19 @@ public class CharacterLinesFragment extends Fragment
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
-        characterLinesViewModel = new ViewModelProvider(this, new CharacterLinesViewModelFactory(requireActivity().getApplication(), textblockId, projectId)).get(CharacterLinesViewModel.class);
+        characterLinesViewModel = new ViewModelProvider(NavHostFragment.findNavController(this).getViewModelStoreOwner(R.id.nav_graph), new CharacterLinesViewModelFactory(requireActivity().getApplication(), textblockId, projectId)).get(CharacterLinesViewModel.class);
         storyCharacterNames = new ArrayList<String>();
+    
+        binding.generateAudioBtn.setVisibility(View.GONE);
+        binding.generateAudioBtn.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                characterLinesViewModel.recordAllCharacterLines();
+            }
+        });
+        
         loadAllCharacters();
     }
     
@@ -136,6 +149,8 @@ public class CharacterLinesFragment extends Fragment
     
     private void populateList(String[] lines, List<CharacterLine> characterLines, List<String> characterNames)
     {
+        binding.CharacterLineLayout.removeAllViews();
+        int i=0;
         for (CharacterLine line : characterLines)
         {
             View itemView = getLayoutInflater().inflate(R.layout.character_line_item, binding.CharacterLineLayout, false);
@@ -146,6 +161,34 @@ public class CharacterLinesFragment extends Fragment
             ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, characterNames);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinner.setAdapter(adapter);
+            spinner.setTag(i);
+            i++;
+    
+            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+            {
+                boolean isSpinnerInitialSelected = true;
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+                {
+                    if (isSpinnerInitialSelected)
+                    {
+                        isSpinnerInitialSelected = false;
+                    }
+                    else
+                    {
+                        String selectedCharacter = (String) parent.getItemAtPosition(position);
+                        int itemIndex = (int) parent.getTag();
+                        // Here you can call your function using the selected item
+                        characterLinesViewModel.updateCharacter(selectedCharacter, itemIndex, textblockId);
+                    }
+                }
+    
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView)
+                {
+        
+                }
+            });
         
             // Set the pre-selected value for the spinner
             int spinnerPosition = adapter.getPosition(line.getCharacterName());
@@ -157,6 +200,22 @@ public class CharacterLinesFragment extends Fragment
             // Add the view to the linear layout
             binding.CharacterLineLayout.addView(itemView);
         }
+    
+    
+        characterLinesViewModel.waitForTTS(new TtsInitListener()
+        {
+            @Override
+            public void OnInitSuccess()
+            {
+                binding.generateAudioBtn.setVisibility(View.VISIBLE);
+            }
+        
+            @Override
+            public void OnInitFailure()
+            {
+                binding.generateAudioBtn.setVisibility(View.GONE);
+            }
+        });
     }
     
     @Override
@@ -164,5 +223,6 @@ public class CharacterLinesFragment extends Fragment
     {
         super.onDestroyView();
         binding = null;
+        characterLinesViewModel.destroyTTS();
     }
 }

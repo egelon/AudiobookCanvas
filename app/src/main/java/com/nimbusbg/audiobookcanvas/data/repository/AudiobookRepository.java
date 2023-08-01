@@ -1,10 +1,12 @@
 package com.nimbusbg.audiobookcanvas.data.repository;
 
 import android.app.Application;
-import android.net.Uri;
 
 import androidx.lifecycle.LiveData;
 
+import com.nimbusbg.audiobookcanvas.data.listeners.DeletedItemListener;
+import com.nimbusbg.audiobookcanvas.data.listeners.InsertedItemListener;
+import com.nimbusbg.audiobookcanvas.data.listeners.InsertedMultipleItemsListener;
 import com.nimbusbg.audiobookcanvas.data.local.AudiobookProjectDatabase;
 import com.nimbusbg.audiobookcanvas.data.local.dao.ProjectWithMetadataDao;
 import com.nimbusbg.audiobookcanvas.data.local.dao.ProjectWithTextBlocksDao;
@@ -138,5 +140,10 @@ public class AudiobookRepository
         return textBlockWithDataDao.getTextBlockWithDataByTextBlockId(textblockId);
     }
     
-    
+    public void updateCharacter(String selectedCharacter, int itemIndex, int textblockId)
+    {
+        AudiobookProjectDatabase.databaseWriteExecutor.execute(() -> {
+            textBlockWithDataDao.updateCharacter(selectedCharacter, itemIndex, textblockId);
+        });
+    }
 }

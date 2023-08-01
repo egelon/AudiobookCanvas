@@ -1,4 +1,4 @@
-package com.nimbusbg.audiobookcanvas.data.network;
+package com.nimbusbg.audiobookcanvas.data.singletons;
 
 import android.content.Context;
 
@@ -28,7 +28,7 @@ public class OkHttpSingleton
         ctx = context;
         cacheName = "okhttp";
         cacheSizeMb = 1;
-        numThreads = 10;//Runtime.getRuntime().availableProcessors();
+        numThreads = Runtime.getRuntime().availableProcessors();
         client = getClient();
     }
     

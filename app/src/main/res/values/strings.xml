@@ -99,5 +99,9 @@ Mark the name and gender of each character at the start of his or her dialogue l
     <string name="loading_text_splitting_file">Splitting into pages...</string>
     <string name="loading_text_saved_loading_from_database">Text blocks saved. Loading...</string>
     <string name="character_lines_fragment_label">Character Lines</string>
+    <string name="enqueue_blocks_btn">Start processing</string>
+    <string name="stop_processing_btn">Stop processing</string>
+    <string name="retry_errors_btn_label">Retry errors</string>
+    <string name="generate_audio_btn_label">Generate audio</string>
 
 </resources>

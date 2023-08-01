@@ -42,6 +42,7 @@
             android:id="@+id/text_blocks_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginBottom="120dp"
             android:background="#E4E4E4"
             android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -49,6 +50,36 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:listitem="@layout/text_block_item" />
+    
+        <Button
+            android:id="@+id/enqueueBlocksBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="5dp"
+            android:text="@string/enqueue_blocks_btn"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_blocks_recycler_view" />
+    
+        <Button
+            android:id="@+id/stopProcessingBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="60dp"
+            android:text="@string/stop_processing_btn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_blocks_recycler_view" />
+    
+        <Button
+            android:id="@+id/retryErrorBlocksBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/retry_errors_btn_label"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_blocks_recycler_view" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>

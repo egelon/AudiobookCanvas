@@ -1,4 +1,4 @@
-package com.nimbusbg.audiobookcanvas.data.repository;
+package com.nimbusbg.audiobookcanvas.data.listeners;
 
 public interface DeletedItemListener
 {

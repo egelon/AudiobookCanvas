@@ -10,9 +10,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
 
-import com.android.volley.VolleyError;
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.nimbusbg.audiobookcanvas.data.local.entities.BlockState;
 import com.nimbusbg.audiobookcanvas.data.local.entities.CharacterLine;
 import com.nimbusbg.audiobookcanvas.data.local.entities.StoryCharacter;
@@ -23,18 +21,15 @@ import com.nimbusbg.audiobookcanvas.data.network.GptCharacter;
 import com.nimbusbg.audiobookcanvas.data.network.GptCharacterLine;
 import com.nimbusbg.audiobookcanvas.data.network.GptChatResponse;
 import com.nimbusbg.audiobookcanvas.data.network.GptCompletion;
-import com.nimbusbg.audiobookcanvas.data.repository.ApiResponseListener;
+import com.nimbusbg.audiobookcanvas.data.listeners.ApiResponseListener;
 import com.nimbusbg.audiobookcanvas.data.repository.AudiobookRepository;
-import com.nimbusbg.audiobookcanvas.data.repository.FileOperationListener;
+import com.nimbusbg.audiobookcanvas.data.listeners.FileOperationListener;
 import com.nimbusbg.audiobookcanvas.data.repository.GptApiRepository;
-import com.nimbusbg.audiobookcanvas.data.repository.InsertedItemListener;
-import com.nimbusbg.audiobookcanvas.data.repository.InsertedMultipleItemsListener;
+import com.nimbusbg.audiobookcanvas.data.listeners.InsertedItemListener;
+import com.nimbusbg.audiobookcanvas.data.listeners.InsertedMultipleItemsListener;
 import com.nimbusbg.audiobookcanvas.data.repository.TextFileRepository;
-import com.nimbusbg.audiobookcanvas.data.repository.TtsListener;
+import com.nimbusbg.audiobookcanvas.data.listeners.TtsInitListener;
 import com.nimbusbg.audiobookcanvas.data.repository.TtsRepository;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,12 +46,24 @@ public class ProcessTextFileViewModel extends AndroidViewModel
     private final GptApiRepository gptApiRepository;
     private final TtsRepository ttsRepository;
     private ArrayList<String> textChunks;
+    private boolean isProcessingStarted;
+    private boolean isErrorRetryStarted;
     private ArrayList<String> voices;
     private ArrayList<TextBlockWithData> textBlocks;
     
     private LiveData<ProjectWithTextBlocks> currentProjectWithTextBlocks;
     
     public TextToSpeech tts;
+    
+    public boolean isProcessingStarted()
+    {
+        return isProcessingStarted;
+    }
+    
+    public boolean isErrorRetryStarted()
+    {
+        return isErrorRetryStarted;
+    }
     
     public void setDialogueStartChar(char start)
     {
@@ -102,6 +109,11 @@ public class ProcessTextFileViewModel extends AndroidViewModel
         currentProjectWithTextBlocks = databaseRepository.getProjectWithTextBlocksById(proj_id);
     }
     
+    public void waitForTTS(TtsInitListener listener)
+    {
+        ttsRepository.initTTS(listener);
+    }
+    
     
     
     public void chunkInputFile(Uri uri, FileOperationListener listener) {
@@ -115,6 +127,7 @@ public class ProcessTextFileViewModel extends AndroidViewModel
     
     public void fetchCharactersForUnprocessedTextBlocks()
     {
+        isProcessingStarted = true;
         for(TextBlock textBlock : currentProjectWithTextBlocks.getValue().textBlocks)
         {
             if(textBlock.getState() == BlockState.NOT_REQUESTED)
@@ -124,8 +137,22 @@ public class ProcessTextFileViewModel extends AndroidViewModel
         }
     }
     
+    public void retryErrorTextBlocks()
+    {
+        isErrorRetryStarted = true;
+        for(TextBlock textBlock : currentProjectWithTextBlocks.getValue().textBlocks)
+        {
+            if(textBlock.getState() == BlockState.ERROR)
+            {
+                performNamedEntityRecognition(textBlock, "TAG_" + String.valueOf(textBlock.getId()));
+            }
+        }
+    }
+    
     public void stopCharacterRequests()
     {
+        isProcessingStarted = false;
+        isErrorRetryStarted = false;
         for (TextBlock textBlock : currentProjectWithTextBlocks.getValue().textBlocks)
         {
             if (textBlock.getState() == BlockState.WAITING_RESPONSE)
@@ -146,6 +173,8 @@ public class ProcessTextFileViewModel extends AndroidViewModel
             @Override
             public void OnResponse(@NonNull Call call, @NonNull Response response)
             {
+                Log.d("ProcessTextFileViewModel", "OnResponse received for request: " + call.request().body().toString());
+    
                 OnCompletionResponse(response, textBlock);
             }
 
@@ -169,15 +198,24 @@ public class ProcessTextFileViewModel extends AndroidViewModel
             {
                 GptChatResponse gptResponse = gson.fromJson(jsonBody, GptChatResponse.class);
             
-                storeCharactersForTextBlock(gptResponse, textBlock, new InsertedMultipleItemsListener()
+                if(gptResponse.hasError())
                 {
-                    @Override
-                    public void onInsert(List<Long> itemIds)
+                    Log.d("gptResponse", "error: " + gptResponse.getError().getMessage());
+                    Log.d("gptResponse", "error type: " + gptResponse.getError().getType());
+                    setTextBlockStateById(textBlock.getId(), BlockState.ERROR);
+                }
+                else
+                {
+                    storeCharactersForTextBlock(gptResponse, textBlock, new InsertedMultipleItemsListener()
                     {
-                        Log.d("ProcessTextFileViewModel", "OnCompletionResponse - inserted " + String.valueOf(itemIds.size()) + " characters for text block ID: " + String.valueOf(textBlock.getId()));
-                        setTextBlockStateById(textBlock.getId(), BlockState.NOT_REVIEWED);
-                    }
-                });
+                        @Override
+                        public void onInsert(List<Long> itemIds)
+                        {
+                            Log.d("ProcessTextFileViewModel", "OnCompletionResponse - inserted " + String.valueOf(itemIds.size()) + " characters for text block ID: " + String.valueOf(textBlock.getId()));
+                            setTextBlockStateById(textBlock.getId(), BlockState.NOT_REVIEWED);
+                        }
+                    });
+                }
             }
             catch (com.google.gson.JsonSyntaxException ex)
             {
@@ -196,7 +234,14 @@ public class ProcessTextFileViewModel extends AndroidViewModel
     private void OnCompletionError(String error,  TextBlock textBlock)
     {
         Log.d("ProcessTextFileViewModel", "OnCompletionError exception: " + error);
-        setTextBlockStateById(textBlock.getId(), BlockState.ERROR);
+        if (error.equals("Canceled"))
+        {
+            setTextBlockStateById(textBlock.getId(), BlockState.NOT_REQUESTED);
+        }
+        else
+        {
+            setTextBlockStateById(textBlock.getId(), BlockState.ERROR);
+        }
     }
     
     public void setTextBlockStateById(int textBlock_Id, BlockState state)
@@ -212,62 +257,11 @@ public class ProcessTextFileViewModel extends AndroidViewModel
         String responseContent = apiResponse.getChoices().get(0).getMessage().getContent();
         try
         {
-            GptCompletion completion = gson.fromJson(apiResponse.getChoices().get(0).getMessage().getContent(), GptCompletion.class);
-    
-            List<StoryCharacter> storyCharacters = new ArrayList<>();
-            storyCharacters.add(new StoryCharacter("Narrator", "none", ttsRepository.getRandomVoiceName(), textBlock.getProjectId()));
-    
-            addUniqueStoryCharacters(completion.getCharacters(), storyCharacters, ttsRepository.getRandomVoiceName(), textBlock.getProjectId());
-    
-    
-            List<CharacterLine> characterLinesList = new ArrayList<>();
-            for (GptCharacterLine characterLine : completion.getCharacterLines())
-            {
-                addCharacterLine(characterLine, textBlock, characterLinesList);
-/*
-//TODO: REMOVE ME!!! TEST ONLY!!!
-CharacterLine newCharacterLine = characterLinesList.get(characterLinesList.size()-1);
-String characterLine = textBlock.getLineByIndex(newCharacterLine.getStartIndex());
-String characterVoice = getVoiceByCharacterName(newCharacterLine.getCharacterName(), storyCharacters);
-
-if (newCharacterLine != null)
-{
-    ttsRepository.speakCharacterLine(characterLine, characterVoice, textBlock.getLineAudioPath(newCharacterLine.getStartIndex()), new TtsListener()
-    {
-        @Override
-        public void OnInitSuccess()
-        {
-
-        }
-
-        @Override
-        public void OnInitFailure()
-        {
-
-        }
-
-        @Override
-        public void OnUtteranceStart(String s)
-        {
-
-        }
-
-        @Override
-        public void OnUtteranceDone(String s)
-        {
-            Log.i("TTS_REPO_GENERATION", "Utterance " + s + " generated");
-        }
-
-        @Override
-        public void OnUtteranceError(String s)
-        {
-
-        }
-    });
-}
- */
-            }
-    
+            GptCompletion completion = gson.fromJson(responseContent, GptCompletion.class);
+            
+            List<CharacterLine> characterLinesList = addCharacterLines(textBlock.getId(), completion.getCharacterLines());
+            List<StoryCharacter> storyCharacters = addAllStoryCharacters(completion.getCharacters(),textBlock.getProjectId());
+            
             databaseRepository.storeCharacterLinesAndCharacters(characterLinesList, storyCharacters, onInsertListener);
         }
         catch (com.google.gson.JsonSyntaxException ex)
@@ -275,135 +269,33 @@ if (newCharacterLine != null)
             Log.d("ProcessTextFileViewModel", "storeCharactersForTextBlock couldn't parse completion json: " + ex);
             setTextBlockStateById(textBlock.getId(), BlockState.ERROR);
         }
-        //ttsRepository.stitchWavFiles(textBlock.getId(), textBlock.getGeneratedAudioPath());
     }
     
-    private String getVoiceByCharacterName(String charName, List<StoryCharacter> characters)
+    private List<StoryCharacter> addAllStoryCharacters(List<GptCharacter> characters, int projectId)
     {
-        for(StoryCharacter character : characters)
-        {
-            if(charName.equals(character.getName()))
-            {
-                return character.getVoice();
-            }
-        }
-        return "en-us-x-tpd-network";
-    }
+        ArrayList<StoryCharacter> result = new ArrayList<>();
+        result.add(new StoryCharacter("Narrator", "none", ttsRepository.getRandomVoiceName(), projectId));
     
-    /*
-    private String getRawResponseText(JSONObject apiResponse) throws JSONException
-    {
-        JSONArray choicesArray = apiResponse.getJSONArray("choices");
-        for (int i = 0; i < choicesArray.length(); i++)
-        {
-            String message = choicesArray.getJSONObject(i).getJSONObject("message").getString("content");
-            return message;
-        }
-        return null;
-    }
-     */
-    
-    private void addUniqueStoryCharacters(List<GptCharacter> characters, List<StoryCharacter> existingCharacters, String voice, int projectId)
-    {
         for (GptCharacter character : characters)
         {
             String characterName = character.getCharacter();
             String characterGender = character.getGender();
-        
-            boolean isExisting = false;
-            for (StoryCharacter storyCharacter : existingCharacters)
-            {
-                if (storyCharacter.getName().equals(characterName))
-                {
-                    isExisting = true;
-                    break;
-                }
-            }
-        
-            if(!isExisting)
-            {
-                existingCharacters.add(new StoryCharacter(characterName, characterGender, voice, projectId));
-            }
+    
+            result.add(new StoryCharacter(characterName, characterGender, ttsRepository.getRandomVoiceName(), projectId));
         }
+        return result;
     }
     
-    private void addCharacterLine(GptCharacterLine characterLine, TextBlock textBlock, List<CharacterLine> characterLinesList)
+    private ArrayList<CharacterLine> addCharacterLines(int textBlockId, List<GptCharacterLine> completionLines)
     {
-        int startingIndex = determineTextLineStartIndex(characterLine.getLine(), textBlock.getTextLines());
-        if (startingIndex >= 0)
+        ArrayList<CharacterLine> result = new ArrayList<>();
+        int i=0;
+        for (GptCharacterLine characterLine : completionLines)
         {
-            characterLinesList.add(new CharacterLine(textBlock.getId(), startingIndex, characterLine.getCharacter()));
+            result.add(new CharacterLine(textBlockId, i, characterLine.getCharacter()));
+            i++;
         }
-    }
-    
-    private int determineTextLineStartIndex(String textLine, String[] lines)
-    {
-        // Normalize all types of quotation marks in textLine
-        if (textLine.startsWith(String.valueOf(fileRepository.getDialogueStartChar())) || textLine.startsWith(String.valueOf(fileRepository.getDialogueStartChar())))
-        {
-            textLine = normalizeQuotes(textLine);
-        }
-
-        // Iterate over the lines array.
-        for (int i = 0; i < lines.length; i++)
-        {
-            String line = lines[i];
-        
-            // Normalize all types of quotation marks in the current line
-            if (line.startsWith(String.valueOf(fileRepository.getDialogueStartChar())) || line.startsWith(String.valueOf(fileRepository.getDialogueEndChar())))
-            {
-                line = normalizeQuotes(line);
-            }
-        
-            // If the line matches textLine, return the current index.
-            if (line.trim().contains(textLine.trim()))
-            {
-                return i;
-            }
-        }
-    
-        // If no match was found, return -1.
-        return -1;
-    }
-    
-    private String normalizeQuotes(String s)
-    {
-        // Replace all types of quotation marks with a standard one
-        String res = s.replace(fileRepository.getDialogueStartChar(), '\"').replace(fileRepository.getDialogueEndChar(), '\"');
-        return res;
-    }
-    
-    
-    public void initTTS()
-    {
-        ttsRepository.initTTS(new TtsListener()
-        {
-        @Override
-        public void OnInitSuccess()
-        {
-            voices = ttsRepository.getVoiceNamesForCurrentLocale(); //("en", "US");
-        }
-    
-        @Override
-        public void OnInitFailure()
-        {
-        }
-    
-        @Override
-        public void OnUtteranceStart(String s)
-        {
-        }
-    
-        @Override
-        public void OnUtteranceDone(String s)
-        {
-        }
-    
-        @Override
-        public void OnUtteranceError(String s)
-        {
-        }
-        });
+        return result;
     }
 
     public void destroyTTS()

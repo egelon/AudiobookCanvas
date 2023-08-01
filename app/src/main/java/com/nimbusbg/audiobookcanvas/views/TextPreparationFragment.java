@@ -18,30 +18,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.VolleyError;
 import com.nimbusbg.audiobookcanvas.R;
-import com.nimbusbg.audiobookcanvas.data.local.entities.BlockState;
 import com.nimbusbg.audiobookcanvas.data.local.entities.TextBlock;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithTextBlocks;
-import com.nimbusbg.audiobookcanvas.data.network.RequestQueueSingleton;
-import com.nimbusbg.audiobookcanvas.data.repository.ApiResponseListener;
-import com.nimbusbg.audiobookcanvas.data.repository.FileOperationListener;
-import com.nimbusbg.audiobookcanvas.data.repository.InsertedItemListener;
-import com.nimbusbg.audiobookcanvas.data.repository.InsertedMultipleItemsListener;
-import com.nimbusbg.audiobookcanvas.data.repository.TtsListener;
+import com.nimbusbg.audiobookcanvas.data.listeners.FileOperationListener;
+import com.nimbusbg.audiobookcanvas.data.listeners.InsertedItemListener;
+import com.nimbusbg.audiobookcanvas.data.listeners.TtsInitListener;
 import com.nimbusbg.audiobookcanvas.databinding.TextPreparationFragmentBinding;
 import com.nimbusbg.audiobookcanvas.viewmodels.ProcessTextFileViewModel;
 import com.nimbusbg.audiobookcanvas.viewmodelfactories.ProcessTextFileViewModelFactory;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.time.Duration;
 import java.util.ArrayList;
-import java.util.List;
 
 public class TextPreparationFragment extends Fragment
 {
@@ -105,13 +93,14 @@ public class TextPreparationFragment extends Fragment
     
         appActivityContext = this.getActivity();
     
-        processTextFileViewModel = new ViewModelProvider(this, new ProcessTextFileViewModelFactory(requireActivity().getApplication(), projectId)).get(ProcessTextFileViewModel.class);
+        processTextFileViewModel = new ViewModelProvider(NavHostFragment.findNavController(this).getViewModelStoreOwner(R.id.nav_graph), new ProcessTextFileViewModelFactory(requireActivity().getApplication(), projectId)).get(ProcessTextFileViewModel.class);
         
         //TODO: we need some good way of detecting this, and this needs to be stored with the project settings
         processTextFileViewModel.setDialogueStartChar('“');
         processTextFileViewModel.setDialogueEndChar('”');
     
-        processTextFileViewModel.initTTS();
+        
+        
         
         Uri fileUri = Uri.parse(textFileURI);
     
@@ -149,6 +138,68 @@ public class TextPreparationFragment extends Fragment
                         break;
                     }
                 }
+            }
+        });
+    
+        binding.stopProcessingBtn.setVisibility(View.GONE);
+        binding.enqueueBlocksBtn.setVisibility(View.GONE);
+        binding.retryErrorBlocksBtn.setVisibility(View.GONE);
+    
+        processTextFileViewModel.waitForTTS(new TtsInitListener()
+        {
+            @Override
+            public void OnInitSuccess()
+            {
+                binding.enqueueBlocksBtn.setVisibility(View.VISIBLE);
+                binding.retryErrorBlocksBtn.setVisibility(View.VISIBLE);
+            }
+        
+            @Override
+            public void OnInitFailure()
+            {
+                binding.enqueueBlocksBtn.setVisibility(View.GONE);
+                binding.retryErrorBlocksBtn.setVisibility(View.GONE);
+            }
+        });
+        
+        binding.enqueueBlocksBtn.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                
+                    processTextFileViewModel.fetchCharactersForUnprocessedTextBlocks();
+                    binding.enqueueBlocksBtn.setVisibility(View.GONE);
+                
+                binding.stopProcessingBtn.setVisibility(View.VISIBLE);
+            }
+        });
+        
+        binding.retryErrorBlocksBtn.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                
+                    processTextFileViewModel.retryErrorTextBlocks();
+                    binding.retryErrorBlocksBtn.setVisibility(View.GONE);
+                
+                binding.stopProcessingBtn.setVisibility(View.VISIBLE);
+            }
+        });
+    
+        binding.stopProcessingBtn.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+            
+                processTextFileViewModel.stopCharacterRequests();
+            
+                binding.stopProcessingBtn.setVisibility(View.GONE);
+                binding.enqueueBlocksBtn.setText(R.string.continue_processing_btn_label);
+                binding.enqueueBlocksBtn.setVisibility(View.VISIBLE);
+                binding.retryErrorBlocksBtn.setVisibility(View.VISIBLE);
             }
         });
     
@@ -202,7 +253,6 @@ public class TextPreparationFragment extends Fragment
             @Override
             public void onChanged(@Nullable ProjectWithTextBlocks textBlockData)
             {
-                
                 // Update your UI here.
                 if(isNewProject)
                 {
@@ -218,9 +268,7 @@ public class TextPreparationFragment extends Fragment
                 //update the recycler view
                 //TODO: and here we would start a background worker to query the text blocks in paralel?
                 
-                
                 textBlockAdapter.setTextBlocks(textBlockData);
-                processTextFileViewModel.fetchCharactersForUnprocessedTextBlocks();
             }
         });
     }

@@ -3,8 +3,6 @@ package com.nimbusbg.audiobookcanvas.viewmodels;
 import android.app.Application;
 import android.icu.util.Calendar;
 import android.os.Build;
-import android.text.Editable;
-import android.text.TextWatcher;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -17,8 +15,8 @@ import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
 import com.nimbusbg.audiobookcanvas.data.repository.AudiobookRepository;
-import com.nimbusbg.audiobookcanvas.data.repository.DeletedItemListener;
-import com.nimbusbg.audiobookcanvas.data.repository.InsertedItemListener;
+import com.nimbusbg.audiobookcanvas.data.listeners.DeletedItemListener;
+import com.nimbusbg.audiobookcanvas.data.listeners.InsertedItemListener;
 
 import java.util.Date;
 import java.util.List;

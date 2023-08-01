@@ -3,10 +3,13 @@ package com.nimbusbg.audiobookcanvas.data.repository;
 import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.speech.tts.Voice;
 import android.util.Log;
+
+import com.nimbusbg.audiobookcanvas.data.listeners.TtsInitListener;
+import com.nimbusbg.audiobookcanvas.data.listeners.TtsUtteranceListener;
+import com.nimbusbg.audiobookcanvas.data.singletons.TtsSingleton;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,8 +28,7 @@ import java.util.concurrent.Executors;
 public class TtsRepository
 {
     Context context;
-    private TextToSpeech tts;
-    List<Voice> voicesForLocale;
+    List<Voice> currentLocaleVoices;
     
     public static final ExecutorService ttsOperationExecutor = Executors.newFixedThreadPool(1);
     
@@ -36,30 +37,22 @@ public class TtsRepository
         this.context = application.getApplicationContext();
     }
     
-    public void initTTS(TtsListener listener)
+    public void initTTS(TtsInitListener listener)
     {
-        tts = new TextToSpeech(context, new TextToSpeech.OnInitListener()
+        TtsSingleton.getInstance(context).initTTS(new TtsInitListener()
         {
             @Override
-            public void onInit(int status)
+            public void OnInitSuccess()
             {
-                if (status == TextToSpeech.SUCCESS)
-                {
-                    voicesForLocale = new ArrayList<>();
-                    for (Voice voice : tts.getVoices())
-                    {
-                        if (voice.getLocale().equals(Locale.getDefault()))
-                        {
-                            voicesForLocale.add(voice);
-                        }
-                    }
-                    
-                    listener.OnInitSuccess();
-                }
-                else
-                {
-                    listener.OnInitFailure();
-                }
+                currentLocaleVoices = TtsSingleton.getInstance(context).getHighQualityVoicesForCurrentLocale();
+                listener.OnInitSuccess();
+            }
+        
+            @Override
+            public void OnInitFailure()
+            {
+                currentLocaleVoices = new ArrayList<>();
+                listener.OnInitFailure();
             }
         });
     }
@@ -67,7 +60,7 @@ public class TtsRepository
     public ArrayList<String> getVoiceNamesForCurrentLocale()
     {
         ArrayList<String> voiceNamesForLocale = new ArrayList<String>();
-        for (Voice voice : voicesForLocale)
+        for (Voice voice : currentLocaleVoices)
         {
             voiceNamesForLocale.add(voice.getName());
         }
@@ -76,23 +69,19 @@ public class TtsRepository
     
     public String getRandomVoiceName()
     {
-        if(voicesForLocale != null)
-        {
-            // Create a Random object
-            Random rand = new Random();
+        // Create a Random object
+        Random rand = new Random();
     
-            // Generate a random index within the bounds of the list
-            int randomIndex = rand.nextInt(voicesForLocale.size());
+        // Generate a random index within the bounds of the list
+        int randomIndex = rand.nextInt(currentLocaleVoices.size());
     
-            // Return the element at the random index
-            return voicesForLocale.get(randomIndex).getName();
-        }
-        return "";
+        // Return the element at the random index
+        return currentLocaleVoices.get(randomIndex).getName();
     }
     
     private Voice findVoiceByName(String desiredVoiceName)
     {
-        for (Voice voice : voicesForLocale)
+        for (Voice voice : currentLocaleVoices)
         {
             if (desiredVoiceName.equals(voice.getName()))
             {
@@ -104,58 +93,67 @@ public class TtsRepository
     
     public void destroyTTS()
     {
-        if (tts != null)
+        if(TtsSingleton.getInstance(context).isTtsInitialised())
         {
-            tts.stop();
-            tts.shutdown();
+            TtsSingleton.getInstance(context).getTts().stop();
+            TtsSingleton.getInstance(context).getTts().shutdown();
         }
     }
     
     private File getAudioFile(String fileName)
     {
         File exportFolder = new File(context.getExternalFilesDir(null), "tmp");
-        if (!exportFolder.exists() && !exportFolder.mkdirs()) {
+        if (!exportFolder.exists() && !exportFolder.mkdirs())
+        {
             Log.v("TTS_REPOSITORY", "Couldn't find or create export folder " + exportFolder);
             return null;
         }
         return new File(exportFolder, fileName);
     }
     
-    public void speakCharacterLine(String characterLine, String voiceName, String fileName, TtsListener listener)
+    public void speakCharacterLine(String characterLine, String voiceName, String fileName, TtsUtteranceListener listener)
     {
         String utteranceId = "utterance_" + fileName;
-        File file = getAudioFile(fileName);
-        Voice characterVoice = findVoiceByName(voiceName);
-        Bundle params = new Bundle();
-    
-        // Set desired speech rate and pitch
-        tts.setSpeechRate(1.0f); // Normal speed
-        tts.setPitch(1.0f); // Normal pitch
-        
-        tts.setOnUtteranceProgressListener(new UtteranceProgressListener()
+        try
         {
-            @Override
-            public void onStart(String s)
-            {
-                listener.OnUtteranceStart(s);
-            }
+            
+            File file = getAudioFile(fileName);
+            Voice characterVoice = findVoiceByName(voiceName);
+            Bundle params = new Bundle();
     
-            @Override
-            public void onDone(String s)
-            {
-                listener.OnUtteranceDone(s);
-            }
+            // Set desired speech rate and pitch
+            TtsSingleton.getInstance(context).getTts().setSpeechRate(1.0f); // Normal speed
+            TtsSingleton.getInstance(context).getTts().setPitch(1.0f); // Normal pitch
     
-            @Override
-            public void onError(String s)
+            TtsSingleton.getInstance(context).getTts().setOnUtteranceProgressListener(new UtteranceProgressListener()
             {
-                listener.OnUtteranceError(s);
-            }
-        });
-        tts.setVoice(characterVoice);
-        tts.synthesizeToFile(characterLine, params, file, utteranceId);
+                @Override
+                public void onStart(String s)
+                {
+                    listener.OnUtteranceStart(s);
+                }
+        
+                @Override
+                public void onDone(String s)
+                {
+                    listener.OnUtteranceDone(s);
+                }
+        
+                @Override
+                public void onError(String s)
+                {
+                    listener.OnUtteranceError(s);
+                }
+            });
+            TtsSingleton.getInstance(context).getTts().setVoice(characterVoice);
+            TtsSingleton.getInstance(context).getTts().synthesizeToFile(characterLine, params, file, utteranceId);
+        }
+        catch (NullPointerException ex)
+        {
+            Log.e("TTS_REPOSITORY", ex.getMessage());
+            Log.e("TTS_REPOSITORY", "can't open audio file " + utteranceId);
+        }
     }
-    
     
     public void stitchWavFiles(int id, String outputFileName)
     {
@@ -281,6 +279,10 @@ public class TtsRepository
     // Helper method to write the WAV file header
     private void writeWavFileHeader(OutputStream outputStream, long totalAudioLength) throws IOException
     {
+        short NumChannels = 1; // Mono
+        int SampleRate = 24000; // SampleRate
+        short BitsPerSample = 16; // BitsPerSample
+    
         outputStream.write(new byte[] {'R', 'I', 'F', 'F'}); // ChunkID
         outputStream.write(intToBytesLittleEndian((int) (36 + totalAudioLength))); // ChunkSize
         outputStream.write(new byte[] {'W', 'A', 'V', 'E'}); // Format
@@ -288,11 +290,11 @@ public class TtsRepository
         outputStream.write(new byte[] {'f', 'm', 't', ' '}); // Subchunk1ID
         outputStream.write(intToBytesLittleEndian(16)); // Subchunk1Size
         outputStream.write(shortToBytesLittleEndian((short) 1)); // AudioFormat
-        outputStream.write(shortToBytesLittleEndian((short) 1)); // NumChannels
-        outputStream.write(intToBytesLittleEndian(24000)); // SampleRate
-        outputStream.write(intToBytesLittleEndian(48000)); // ByteRate
-        outputStream.write(shortToBytesLittleEndian((short) 2)); // BlockAlign
-        outputStream.write(shortToBytesLittleEndian((short) 16)); // BitsPerSample
+        outputStream.write(shortToBytesLittleEndian(NumChannels)); // NumChannels
+        outputStream.write(intToBytesLittleEndian(SampleRate)); // SampleRate
+        outputStream.write(intToBytesLittleEndian((SampleRate * NumChannels * BitsPerSample) / 8)); // ByteRate
+        outputStream.write(shortToBytesLittleEndian((short) (NumChannels * BitsPerSample / 8))); // BlockAlign
+        outputStream.write(shortToBytesLittleEndian(BitsPerSample)); // BitsPerSample
     
         outputStream.write(new byte[] {'d', 'a', 't', 'a'}); // Subchunk2ID
         outputStream.write(intToBytesLittleEndian((int) totalAudioLength)); // Subchunk2Size

@@ -29,4 +29,7 @@ public interface TextBlockWithDataDao
     @Transaction
     @Query("Select * FROM storyCharacter WHERE project_id = :prjId")
     LiveData<List<StoryCharacter>> getAllCharactersByProjectId(int prjId);
+
+    @Query("UPDATE characterLine SET character_name = :selectedCharacter WHERE text_block_id =:textblockId AND start_index =:itemIndex")
+    void updateCharacter(String selectedCharacter, int itemIndex, int textblockId);
 }

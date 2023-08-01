@@ -9,6 +9,8 @@ public class GptChatResponse
     private long created;
     private List<GptChatChoice> choices;
     private GptUsage usage;
+    private GptError error;
+    
     
     // Add getters and setters.
     
@@ -50,5 +52,20 @@ public class GptChatResponse
     
     public void setUsage(GptUsage usage) {
         this.usage = usage;
+    }
+    
+    public GptError getError()
+    {
+        return error;
+    }
+    
+    public void setError(GptError error)
+    {
+        this.error = error;
+    }
+    
+    public boolean hasError()
+    {
+        return error != null;
     }
 }
