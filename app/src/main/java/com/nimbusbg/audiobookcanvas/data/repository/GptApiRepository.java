@@ -36,7 +36,7 @@ public class GptApiRepository
     public GptApiRepository(Application application)
     {
         this.appContext = application.getApplicationContext();
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(application.getApplicationContext());
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(appContext);
         this.API_key = preferences.getString("openai_API_key", "");
         if(!API_key.isEmpty())
         {

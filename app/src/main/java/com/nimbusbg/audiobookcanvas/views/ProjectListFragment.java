@@ -1,5 +1,6 @@
 package com.nimbusbg.audiobookcanvas.views;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -15,6 +16,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,6 +32,7 @@ public class ProjectListFragment extends Fragment
     
     private ProjectListFragmentBinding binding;
     private ProjectWithMetadataViewModel projectWithMetadataViewModel;
+    
     
     @Override
     public View onCreateView(
@@ -100,48 +103,63 @@ public class ProjectListFragment extends Fragment
         
         // The ViewModel is scoped to the `nav_graph` Navigation graph
         projectWithMetadataViewModel = new ViewModelProvider(NavHostFragment.findNavController(this).getViewModelStoreOwner(R.id.nav_graph)).get(ProjectWithMetadataViewModel.class);
-        
-        RecyclerView projectRecyclerView = binding.projectsRecyclerView;
-        projectRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        projectRecyclerView.setHasFixedSize(true);
-        
-        final ProjectAdapter projectAdapter = new ProjectAdapter();
-        projectRecyclerView.setAdapter(projectAdapter);
     
-    
-        projectAdapter.setOnProjectClickListener(new ProjectAdapter.OnProjectClickListener()
+        if(!projectWithMetadataViewModel.hasApiKey())
         {
-            @Override
-            public void onProjectClicked(ProjectWithMetadata project)
+            binding.addApiKeyText.setVisibility(View.VISIBLE);
+            binding.tutorialArrow.setVisibility(View.VISIBLE);
+            binding.fabAddProject.setVisibility(View.GONE);
+            binding.projectsRecyclerView.setVisibility(View.GONE);
+        }
+        else
+        {
+            binding.addApiKeyText.setVisibility(View.GONE);
+            binding.tutorialArrow.setVisibility(View.GONE);
+            binding.fabAddProject.setVisibility(View.VISIBLE);
+            binding.projectsRecyclerView.setVisibility(View.VISIBLE);
+    
+            RecyclerView projectRecyclerView = binding.projectsRecyclerView;
+            projectRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+            projectRecyclerView.setHasFixedSize(true);
+    
+            final ProjectAdapter projectAdapter = new ProjectAdapter();
+            projectRecyclerView.setAdapter(projectAdapter);
+    
+    
+            projectAdapter.setOnProjectClickListener(new ProjectAdapter.OnProjectClickListener()
             {
-                Bundle bundle = new Bundle();
-                bundle.putInt(bundleKey_projID, project.project.getId());
-                bundle.putBoolean(bundleKey_isNewProj, false);
-
-                Navigation.findNavController(getView()).navigate(R.id.actionProjectSelected, bundle);
-            }
-        });
-        
-        //load all projects into the recycler view
-        projectWithMetadataViewModel.getAllProjectsWithMetadata().observe(getViewLifecycleOwner(),
-                new Observer<List<ProjectWithMetadata>>()
+                @Override
+                public void onProjectClicked(ProjectWithMetadata project)
                 {
-                    @Override
-                    public void onChanged(@Nullable List<ProjectWithMetadata> projects)
+                    Bundle bundle = new Bundle();
+                    bundle.putInt(bundleKey_projID, project.project.getId());
+                    bundle.putBoolean(bundleKey_isNewProj, false);
+            
+                    Navigation.findNavController(getView()).navigate(R.id.actionProjectSelected, bundle);
+                }
+            });
+    
+            //load all projects into the recycler view
+            projectWithMetadataViewModel.getAllProjectsWithMetadata().observe(getViewLifecycleOwner(),
+                    new Observer<List<ProjectWithMetadata>>()
                     {
-                        //update our recycler view
-                        projectAdapter.setProjects(projects);
-                    }
-                });
-        
-        binding.fabAddProject.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
+                        @Override
+                        public void onChanged(@Nullable List<ProjectWithMetadata> projects)
+                        {
+                            //update our recycler view
+                            projectAdapter.setProjects(projects);
+                        }
+                    });
+    
+            binding.fabAddProject.setOnClickListener(new View.OnClickListener()
             {
-                Navigation.findNavController(getView()).navigate(R.id.actionProjectAdded);
-            }
-        });
+                @Override
+                public void onClick(View view)
+                {
+                    Navigation.findNavController(getView()).navigate(R.id.actionProjectAdded);
+                }
+            });
+        }
     }
     
     @Override

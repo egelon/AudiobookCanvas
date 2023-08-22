@@ -104,5 +104,6 @@ Mark the name and gender of each character at the start of his or her dialogue l
     <string name="stop_processing_btn">Stop processing</string>
     <string name="retry_errors_btn_label">Retry errors</string>
     <string name="generate_audio_btn_label">Generate audio</string>
+    <string name="add_api_key_text">Please, add your OpenAI API key in the Settings menu (tap the three dots in the top right)</string>
 
 </resources>

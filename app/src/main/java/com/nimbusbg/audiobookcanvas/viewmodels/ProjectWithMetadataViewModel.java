@@ -1,12 +1,14 @@
 package com.nimbusbg.audiobookcanvas.viewmodels;
 
 import android.app.Application;
+import android.content.SharedPreferences;
 import android.icu.util.Calendar;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.preference.PreferenceManager;
 
 import com.nimbusbg.audiobookcanvas.BuildConfig;
 import com.nimbusbg.audiobookcanvas.R;
@@ -26,6 +28,8 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel
 {
     private final AudiobookRepository repository;
     private ProjectWithMetadata emptyProject;
+    SharedPreferences preferences;
+    
     
     private LiveData<List<ProjectWithMetadata>> allProjectsWithMetadata;
     
@@ -50,6 +54,8 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel
     public ProjectWithMetadataViewModel(@NonNull Application application)
     {
         super(application);
+    
+        preferences = PreferenceManager.getDefaultSharedPreferences(application.getApplicationContext());
         
         repository = new AudiobookRepository(application);
         createEmptyProject();
@@ -120,6 +126,16 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel
         Date currentTime = Calendar.getInstance().getTime();
         String newAudiobookName = projectNameStr + ".mp3";
         repository.updateProjectWithMetadata(id, projectNameStr, newAudiobookName, bookNameStr, authorNameStr, projectDescriptionStr, currentTime);
+    }
+    
+    public boolean hasApiKey()
+    {
+        String API_key = preferences.getString("openai_API_key", "");
+        if(API_key.isEmpty())
+        {
+            return false;
+        }
+        return true;
     }
 }
 
