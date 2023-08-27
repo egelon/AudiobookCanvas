@@ -14,4 +14,7 @@
     <color name="textblock_done">#8BC34A</color>
     <color name="textblock_not_reviewed">#673AB7</color>
     <color name="textblock_error">#D1064B</color>
+    <color name="voice_male_background">#99CDF4</color>
+    <color name="voice_female_background">#FFD2F9</color>
+    <color name="voice_general_background">#FFE4D2</color>
 </resources>

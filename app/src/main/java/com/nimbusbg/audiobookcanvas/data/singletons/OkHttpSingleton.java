@@ -49,7 +49,7 @@ public class OkHttpSingleton
             requestDispatcher.setMaxRequestsPerHost(numThreads);
             
             client = new OkHttpClient().newBuilder()
-                    .readTimeout(50, TimeUnit.SECONDS)
+                    .readTimeout(60, TimeUnit.SECONDS)
                     .retryOnConnectionFailure(true)
                     .connectTimeout(2,TimeUnit.SECONDS)
                     .connectionPool(new ConnectionPool(numThreads,5,TimeUnit.SECONDS))

@@ -29,7 +29,7 @@ import java.util.concurrent.Executors;
 public class TtsRepository
 {
     Context context;
-    List<Voice> currentLocaleVoices;
+    List<Voice> allEnglishVoices;
     
     public static final ExecutorService ttsOperationExecutor = Executors.newFixedThreadPool(1);
     
@@ -45,27 +45,27 @@ public class TtsRepository
             @Override
             public void OnInitSuccess()
             {
-                currentLocaleVoices = TtsSingleton.getInstance(context).getHighQualityVoicesForCurrentLocale();
+                allEnglishVoices = TtsSingleton.getInstance(context).getExtendedHQVoicesForEnglish(false);
                 listener.OnInitSuccess();
             }
         
             @Override
             public void OnInitFailure()
             {
-                currentLocaleVoices = new ArrayList<>();
+                allEnglishVoices = new ArrayList<>();
                 listener.OnInitFailure();
             }
         });
     }
     
-    public ArrayList<String> getVoiceNamesForCurrentLocale()
+    public ArrayList<String> getExtendedEnglishVoiceNames()
     {
-        ArrayList<String> voiceNamesForLocale = new ArrayList<String>();
-        for (Voice voice : currentLocaleVoices)
+        ArrayList<String> voiceNames = new ArrayList<String>();
+        for (Voice voice : allEnglishVoices)
         {
-            voiceNamesForLocale.add(voice.getName());
+            voiceNames.add(voice.getName());
         }
-        return voiceNamesForLocale;
+        return voiceNames;
     }
     
     public String getRandomVoiceName()
@@ -74,15 +74,15 @@ public class TtsRepository
         Random rand = new Random();
     
         // Generate a random index within the bounds of the list
-        int randomIndex = rand.nextInt(currentLocaleVoices.size());
+        int randomIndex = rand.nextInt(allEnglishVoices.size());
     
         // Return the element at the random index
-        return currentLocaleVoices.get(randomIndex).getName();
+        return allEnglishVoices.get(randomIndex).getName();
     }
     
     private Voice findVoiceByName(String desiredVoiceName)
     {
-        for (Voice voice : currentLocaleVoices)
+        for (Voice voice : allEnglishVoices)
         {
             if (desiredVoiceName.equals(voice.getName()))
             {

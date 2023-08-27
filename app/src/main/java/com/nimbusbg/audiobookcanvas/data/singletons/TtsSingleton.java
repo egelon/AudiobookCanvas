@@ -8,6 +8,7 @@ import android.util.Log;
 import com.nimbusbg.audiobookcanvas.data.listeners.TtsInitListener;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class TtsSingleton
@@ -44,7 +45,15 @@ public class TtsSingleton
                     isTtsInitialised = true;
                     listener.OnInitSuccess();
                     Log.d("TTS", "TTS initialised");
-                } else
+    
+                    List<TextToSpeech.EngineInfo> engineInfo = tts.getEngines();
+                    for (TextToSpeech.EngineInfo info : engineInfo) {
+                        Log.d("TTS","info: "+info);
+                    }
+                    
+                    
+                }
+                else
                 {
                     isTtsInitialised = false;
                     listener.OnInitFailure();
@@ -76,18 +85,28 @@ public class TtsSingleton
         return voicesForLocale;
     }
     
-    public ArrayList<Voice> getHighQualityVoicesForCurrentLocale()
+    public ArrayList<Voice> getVoicesForLocale(Locale locale, int quality, boolean isNetworkRequired)
     {
-        ArrayList<Voice> highQualityVoices = new ArrayList<>();
-        for(Voice voice: getTts().getVoices())
+        ArrayList<Voice> voicesForLocale = new ArrayList<>();
+        for (Voice voice : getTts().getVoices())
         {
-            if (voice.getQuality() >= Voice.QUALITY_HIGH &&
-                !voice.isNetworkConnectionRequired() &&
-                voice.getLocale().equals(Locale.getDefault()))
+            if (voice.getLocale().equals(locale) &&
+                voice.getQuality() >= quality &&
+                voice.isNetworkConnectionRequired() == isNetworkRequired)
             {
-                highQualityVoices.add(voice);
+                voicesForLocale.add(voice);
             }
         }
+        return voicesForLocale;
+    }
+    
+    public ArrayList<Voice> getExtendedHQVoicesForEnglish(boolean isNetworkRequired)
+    {
+        ArrayList<Voice> highQualityVoices = new ArrayList<>();
+        highQualityVoices.addAll(getVoicesForLocale(Locale.US, Voice.QUALITY_HIGH, isNetworkRequired));
+        highQualityVoices.addAll(getVoicesForLocale(Locale.UK, Voice.QUALITY_HIGH, isNetworkRequired));
+        highQualityVoices.addAll(getVoicesForLocale(Locale.CANADA, Voice.QUALITY_HIGH, isNetworkRequired));
+        highQualityVoices.addAll(getVoicesForLocale(Locale.ENGLISH, Voice.QUALITY_HIGH, isNetworkRequired));
         return highQualityVoices;
     }
     

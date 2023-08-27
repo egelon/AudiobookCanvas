@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 public class TextFileRepository
 {
-    
+    private volatile boolean isCancelled = false;
     ContentResolver contentResolver;
     ArrayList<String> textChunks;
     private int maxChunkSize;
@@ -85,6 +85,12 @@ public class TextFileRepository
         
         for (int i = 0; i < fileData.length(); i++)
         {
+            if(isCancelled)
+            {
+                textChunks.clear();
+                return textChunks;
+            }
+            
             char c = fileData.charAt(i);
             text.append(c);
             
@@ -102,6 +108,12 @@ public class TextFileRepository
             
             while (matcher.find())
             {
+                if(isCancelled)
+                {
+                    textChunks.clear();
+                    return textChunks;
+                }
+                
                 // If we're inside a dialogue line, ignore sentence boundaries.
                 if (insideQuotes) continue;
                 
@@ -134,148 +146,72 @@ public class TextFileRepository
         return textChunks;
     }
     
-    private String sanitiseChunk2(String chunk) {
-        StringBuilder sanitisedChunk = new StringBuilder();
-        boolean inDialogue = false;
-        boolean justExitedDialogue = false; // Tracks if we have just exited a dialogue line
-        
-        for (int i = 0; i < chunk.length(); i++) {
-            char c = chunk.charAt(i);
-            
-            if (c == dialogueStartChar) {
-                if (i > 0 && (!justExitedDialogue || (justExitedDialogue && chunk.charAt(i-1) != '\n'))) {
-                    sanitisedChunk.append("\n");
-                }
-                sanitisedChunk.append(c);
-                inDialogue = true;
-                justExitedDialogue = false; // Reset this flag as we're in a dialogue line now
-            } else if (c == dialogueEndChar) {
-                sanitisedChunk.append(c);
-                inDialogue = false;
-                justExitedDialogue = true; // We just exited a dialogue line
-                
-                if (i + 1 < chunk.length()) {
-                    char nextChar = chunk.charAt(i + 1);
-                    // Add newline if the next character isn't the start of another dialogue line
-                    if (nextChar != ' ' && nextChar != dialogueStartChar) {
-                        sanitisedChunk.append("\n");
-                        justExitedDialogue = false; // We've handled the exit, so reset the flag
-                    }
-                }
-            } else {
-                // If we're not in a dialogue line but just exited one, we must be at the start of a narration line
-                if (!inDialogue && justExitedDialogue) {
-                    sanitisedChunk.append("\n");
-                    justExitedDialogue = false; // We've handled the exit, so reset the flag
-                }
-                sanitisedChunk.append(c);
-            }
-        }
-        
-        // If the string ends with a dialogue line, append a newline
-        if (justExitedDialogue) {
-            sanitisedChunk.append("\n");
-        }
-        
-        return sanitisedChunk.toString();
-    }
-    
-    private String sanitiseChunk_old(String chunk) {
-        StringBuilder sanitisedChunk = new StringBuilder();
-        boolean inDialogue = false;
-        boolean justExitedDialogue = false;
-        
-        for (int i = 0; i < chunk.length(); i++) {
-            char c = chunk.charAt(i);
-            
-            if (c == dialogueStartChar) {
-                if (i > 0 && (!justExitedDialogue || (justExitedDialogue && chunk.charAt(i-1) != '\n'))) {
-                    sanitisedChunk.append("\n");
-                }
-                sanitisedChunk.append(c);
-                inDialogue = true;
-                justExitedDialogue = false;
-            } else if (c == dialogueEndChar) {
-                sanitisedChunk.append(c);
-                if (inDialogue) {
-                    inDialogue = false;
-                    justExitedDialogue = true;
-                    
-                    if (i + 1 < chunk.length()) {
-                        char nextChar = chunk.charAt(i + 1);
-                        if (nextChar != ' ' && nextChar != dialogueStartChar) {
-                            sanitisedChunk.append("\n");
-                            justExitedDialogue = false;
-                        }
-                    }
-                }
-            } else {
-                if (!inDialogue && justExitedDialogue) {
-                    sanitisedChunk.append("\n");
-                    justExitedDialogue = false;
-                }
-                sanitisedChunk.append(c);
-            }
-        }
-        
-        if (justExitedDialogue) {
-            sanitisedChunk.append("\n");
-        }
-        
-        return sanitisedChunk.toString();
-    }
-    
-    private String sanitiseChunk(String chunk) {
+    private String sanitiseChunk(String chunk)
+    {
         StringBuilder sanitisedChunk = new StringBuilder();
         boolean inDialogue = false;
         boolean justExitedDialogue = false;
         List<Character> sentenceEndChars = Arrays.asList('.', '!', '?');
         
-        for (int i = 0; i < chunk.length(); i++) {
+        for (int i = 0; i < chunk.length(); i++)
+        {
             char c = chunk.charAt(i);
             
-            if (c == dialogueStartChar) {
-                if (i > 0 && (!justExitedDialogue || (justExitedDialogue && chunk.charAt(i-1) != '\n'))) {
+            if (c == dialogueStartChar)
+            {
+                if (i > 0 && (!justExitedDialogue || (justExitedDialogue && chunk.charAt(i-1) != '\n')))
+                {
                     sanitisedChunk.append("\n");
                 }
                 sanitisedChunk.append(c);
                 inDialogue = true;
                 justExitedDialogue = false;
-            } else if (c == dialogueEndChar) {
+            }
+            else if (c == dialogueEndChar)
+            {
                 sanitisedChunk.append(c);
-                if (inDialogue) {
+                if (inDialogue)
+                {
                     inDialogue = false;
                     justExitedDialogue = true;
                     
-                    if (i + 1 < chunk.length()) {
+                    if (i + 1 < chunk.length())
+                    {
                         char nextChar = chunk.charAt(i + 1);
-                        if (nextChar != ' ' && nextChar != dialogueStartChar) {
+                        if (nextChar != ' ' && nextChar != dialogueStartChar)
+                        {
                             sanitisedChunk.append("\n");
                             justExitedDialogue = false;
                         }
                     }
                 }
-            } else {
-                if (!inDialogue && justExitedDialogue) {
+            }
+            else
+            {
+                if (!inDialogue && justExitedDialogue)
+                {
                     sanitisedChunk.append("\n");
                     justExitedDialogue = false;
                 }
                 sanitisedChunk.append(c);
                 
                 // check if c is an end-of-sentence character and we are in narration
-                if (!inDialogue && sentenceEndChars.contains(c)) {
+                if (!inDialogue && sentenceEndChars.contains(c))
+                {
                     sanitisedChunk.append("\n");
                 }
             }
         }
         
-        if (justExitedDialogue) {
+        if (justExitedDialogue)
+        {
             sanitisedChunk.append("\n");
         }
     
         // Remove leading whitespace from each line and remove empty lines
         String[] lines = sanitisedChunk.toString().split("\n");
-        for (int i = 0; i < lines.length; i++) {
+        for (int i = 0; i < lines.length; i++)
+        {
             lines[i] = lines[i].stripLeading();
         }
     
@@ -310,7 +246,15 @@ public class TextFileRepository
                 fileContents = readFileContent(uri);
                 listener.OnFileLoaded(fileContents);
                 textChunks = chunkFileData(sanitiseFileContents(fileContents));
-                listener.OnFileChunked(textChunks);
+                if(isCancelled)
+                {
+                    listener.OnChunkingStopped();
+                }
+                else
+                {
+                    listener.OnFileChunked(textChunks);
+                }
+                isCancelled = false;
             } catch (IOException e) {
                 Log.e("Error", e.getMessage());
             }
@@ -325,5 +269,11 @@ public class TextFileRepository
     public char getDialogueEndChar()
     {
         return dialogueEndChar;
+    }
+    
+    public void StopChunking()
+    {
+        isCancelled = true;
+        //fileOperationExecutor.shutdown();
     }
 }

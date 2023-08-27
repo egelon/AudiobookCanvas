@@ -59,7 +59,7 @@
             app:destination="@id/ProjectListFragment" />
         <action
             android:id="@+id/actionStartProcessing"
-            app:destination="@id/TextPreparationFragment" />
+            app:destination="@id/TextChunkingFragment" />
     </fragment>
     <fragment
         android:id="@+id/TextPreparationFragment"
@@ -67,7 +67,7 @@
         android:label="@string/text_preparation_fragment_title"
         tools:layout="@layout/text_preparation_fragment" >
         <action
-            android:id="@+id/actionBackFromNewProjectTextProcessing"
+            android:id="@+id/actionBackFromTextProcessing"
             app:destination="@id/ProjectSetupFragment" />
         <action
             android:id="@+id/actionProcessedTextBlockSelected"
@@ -82,4 +82,16 @@
         android:name="com.nimbusbg.audiobookcanvas.views.CharacterSettingsFragment"
         android:label="character_settings_fragment"
         tools:layout="@layout/character_settings_fragment" />
+    <fragment
+        android:id="@+id/TextChunkingFragment"
+        android:name="com.nimbusbg.audiobookcanvas.views.TextChunkingFragment"
+        android:label="fragment_text_chunking"
+        tools:layout="@layout/fragment_text_chunking" >
+        <action
+            android:id="@+id/actionTextChunked"
+            app:destination="@id/TextPreparationFragment" />
+        <action
+            android:id="@+id/actionStopTextChunking"
+            app:destination="@id/ProjectListFragment" />
+    </fragment>
 </navigation>

@@ -72,9 +72,9 @@ public class CharacterSettingsViewModel extends AndroidViewModel
         databaseRepository.updateCharacterVoice(selectedCharacterName, newVoice, projectId);
     }
     
-    public ArrayList<String> getAllVoices()
+    public ArrayList<String> getExtendedEnglishVoices()
     {
-        return ttsRepository.getVoiceNamesForCurrentLocale();
+        return ttsRepository.getExtendedEnglishVoiceNames();
     }
     
     public void destroyTTS()

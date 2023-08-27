@@ -65,6 +65,14 @@ public class AudiobookRepository
         });
     }
     
+    public void deleteTextBlocksByProjectId(int id, final DeletedItemListener onDeleteListener)
+    {
+        AudiobookProjectDatabase.databaseWriteExecutor.execute(() -> {
+            projectWithMetadataDao.deleteProjectWithMetadataById(id);
+            onDeleteListener.onDelete();
+        });
+    }
+    
     public LiveData<ProjectWithMetadata> getProjectWithMetadataById(int id)
     {
         return projectWithMetadataDao.getProjectWithMetadataById(id);
@@ -90,6 +98,7 @@ public class AudiobookRepository
         });
     }
     
+    
     public void insertTextBlocks(int projectID, ArrayList<String> textChunks, InsertedItemListener onInsertListener)
     {
         AudiobookProjectDatabase.databaseWriteExecutor.execute(() -> {
@@ -103,6 +112,13 @@ public class AudiobookRepository
             onInsertListener.onInsert(0); //we don't care about the IDs here
         });
     }
+    
+    public LiveData<List<TextBlock>> getTextBlocksByProjectId(int prj_id)
+    {
+        return projectWithTextBlocksDao.getTextBlocksByProjectId(prj_id);
+    }
+    
+    
     
     public LiveData<ProjectWithTextBlocks> getProjectWithTextBlocksById(int id)
     {

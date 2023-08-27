@@ -2,6 +2,7 @@ package com.nimbusbg.audiobookcanvas.views;
 
 import android.os.Bundle;
 
+import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -95,7 +96,7 @@ public class CharacterSettingsFragment extends Fragment
 
     private void loadCharacters(List<StoryCharacter> storyCharacters)
     {
-        ArrayList<String> allVoices = characterSettingsViewModel.getAllVoices();
+        ArrayList<String> allVoices = characterSettingsViewModel.getExtendedEnglishVoices();
     
         binding.characterSettingsLayout.removeAllViews();
         for (int i = 0; i < storyCharacters.size(); i++)
@@ -141,6 +142,17 @@ public class CharacterSettingsFragment extends Fragment
             // Set the pre-selected value for the spinner
             int currentVoiceId = adapter.getPosition(currentVoice);
             voicePicker.setSelection(currentVoiceId);
+            int backgroundColor = itemView.getResources().getColor(R.color.voice_general_background);;
+            if(storyCharacters.get(i).getGender().equals("male"))
+            {
+                backgroundColor = itemView.getResources().getColor(R.color.voice_male_background);
+                
+            }
+            else if(storyCharacters.get(i).getGender().equals("female"))
+            {
+                backgroundColor = itemView.getResources().getColor(R.color.voice_female_background);
+            }
+            characterName.setBackgroundColor(backgroundColor);
     
             // Set up the text view
             characterName.setText(storyCharacters.get(i).getName());

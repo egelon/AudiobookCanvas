@@ -22,6 +22,10 @@ public interface ProjectWithTextBlocksDao
     public List<Long> insertTextBlocks(List<TextBlock> textBlocks);
     
     @Transaction
+    @Query("Select * FROM textBlock WHERE project_id = :prj_id")
+    LiveData<List<TextBlock>> getTextBlocksByProjectId(int prj_id);
+    
+    @Transaction
     @Query("Select * FROM audiobookProject WHERE id = :id")
     LiveData<ProjectWithTextBlocks> getProjectWithTextBlocksById(int id);
     
