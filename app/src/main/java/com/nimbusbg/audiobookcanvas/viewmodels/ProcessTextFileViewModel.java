@@ -8,6 +8,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 
 import com.google.gson.Gson;
@@ -52,6 +53,7 @@ public class ProcessTextFileViewModel extends AndroidViewModel
     private ArrayList<TextBlockWithData> textBlocks;
     
     private LiveData<ProjectWithTextBlocks> currentProjectWithTextBlocks;
+    private MutableLiveData<Boolean> ttsInitStatus = new MutableLiveData<>();
     
     public TextToSpeech tts;
     
@@ -79,7 +81,7 @@ public class ProcessTextFileViewModel extends AndroidViewModel
     public void setDialogueEndChar(char end)
     {
         fileRepository.setDialogueEndChar(end);
-        gptApiRepository.setDialogueStartChar(end);
+        gptApiRepository.setDialogueEndChar(end);
     }
     
     public ArrayList<String> getTextChunks()
@@ -105,16 +107,36 @@ public class ProcessTextFileViewModel extends AndroidViewModel
         fileRepository = new TextFileRepository(application);
         gptApiRepository = new GptApiRepository(application);
         ttsRepository = new TtsRepository(application);
-    
+        ttsInitStatus.postValue(false);
         currentProjectWithTextBlocks = databaseRepository.getProjectWithTextBlocksById(proj_id);
     }
     
-    public void waitForTTS(TtsInitListener listener)
+    public LiveData<Boolean> getTtsInitStatus()
     {
-        ttsRepository.initTTS(listener);
+        if(ttsInitStatus.getValue() == false)
+        {
+            waitForTTS();
+        }
+        return ttsInitStatus;
     }
     
-    
+    private void waitForTTS()
+    {
+        ttsRepository.initTTS(new TtsInitListener()
+        {
+            @Override
+            public void OnInitSuccess()
+            {
+                ttsInitStatus.postValue(true); // Update LiveData
+            }
+        
+            @Override
+            public void OnInitFailure()
+            {
+                ttsInitStatus.postValue(false); // Handle failure
+            }
+        });
+    }
     
     public void chunkInputFile(Uri uri, FileOperationListener listener) {
         fileRepository.GetSanitisedChunks(uri, listener);
@@ -300,6 +322,7 @@ public class ProcessTextFileViewModel extends AndroidViewModel
 
     public void destroyTTS()
     {
+        ttsInitStatus.postValue(false);
         ttsRepository.destroyTTS();
     }
     

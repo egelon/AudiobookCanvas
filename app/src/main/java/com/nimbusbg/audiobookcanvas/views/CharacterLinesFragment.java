@@ -43,37 +43,7 @@ public class CharacterLinesFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         binding = CharacterLinesFragmentBinding.inflate(inflater, container, false);
-        populateCharacterLinesList();
         return binding.getRoot();
-    }
-    
-    private void populateCharacterLinesList()
-    {
-        // Replace with your actual data
-        /*
-        List<String> data = characterLinesViewModel.getCharacterLines();
-    
-        for (MyData item : data) {
-            View itemView = getLayoutInflater().inflate(R.layout.character_line_item, binding.CharacterLineLayout, false);
-            Spinner characterNameSpinner = itemView.findViewById(R.id.character_item_name);
-            TextView characterLineView = itemView.findViewById(R.id.character_item_line);
-        
-            // Set up the spinner with an ArrayAdapter
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, item.getOptions());
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinner.setAdapter(adapter);
-        
-            // Set the pre-selected value for the spinner
-            int spinnerPosition = adapter.getPosition(item.getSelectedOption());
-            spinner.setSelection(spinnerPosition);
-        
-            // Set up the text view
-            textView.setText(item.getText());
-        
-            // Add the view to the linear layout
-            mLinearLayout.addView(itemView);
-        }
-         */
     }
     
     @Override
@@ -99,7 +69,7 @@ public class CharacterLinesFragment extends Fragment
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState)
     {
         super.onViewCreated(view, savedInstanceState);
-        characterLinesViewModel = new ViewModelProvider(NavHostFragment.findNavController(this).getViewModelStoreOwner(R.id.nav_graph), new CharacterLinesViewModelFactory(requireActivity().getApplication(), textblockId, projectId)).get(CharacterLinesViewModel.class);
+        characterLinesViewModel = new ViewModelProvider(this, new CharacterLinesViewModelFactory(requireActivity().getApplication(), textblockId, projectId)).get(CharacterLinesViewModel.class);
         storyCharacterNames = new ArrayList<String>();
     
         binding.generateAudioBtn.setVisibility(View.GONE);
@@ -143,6 +113,7 @@ public class CharacterLinesFragment extends Fragment
             public void onChanged(TextBlockWithData textBlockWithData)
             {
                 populateList(textBlockWithData.textBlock.getTextLines(), textBlockWithData.characterLines, storyCharacterNames);
+                binding.generateAudioBtn.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -200,22 +171,6 @@ public class CharacterLinesFragment extends Fragment
             // Add the view to the linear layout
             binding.CharacterLineLayout.addView(itemView);
         }
-    
-    
-        characterLinesViewModel.waitForTTS(new TtsInitListener()
-        {
-            @Override
-            public void OnInitSuccess()
-            {
-                binding.generateAudioBtn.setVisibility(View.VISIBLE);
-            }
-        
-            @Override
-            public void OnInitFailure()
-            {
-                binding.generateAudioBtn.setVisibility(View.GONE);
-            }
-        });
     }
     
     @Override
@@ -223,6 +178,5 @@ public class CharacterLinesFragment extends Fragment
     {
         super.onDestroyView();
         binding = null;
-        characterLinesViewModel.destroyTTS();
     }
 }

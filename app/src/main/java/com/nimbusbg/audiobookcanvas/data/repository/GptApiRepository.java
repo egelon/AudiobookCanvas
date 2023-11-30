@@ -53,7 +53,9 @@ public class GptApiRepository
         GptChatRequest requestBody = new GptChatRequest();
         
         // adding params to json object.
-        requestBody.setModel("gpt-3.5-turbo");
+        //requestBody.setModel("gpt-3.5-turbo");
+    
+        requestBody.setModel("ft:gpt-3.5-turbo-0613:personal::8Hz1WPKV");
         //requestBody.setModel("gpt-4");
     
         String namedEntityRecognitionPrompt = "You are a Named Entity Recognition web server. Perform Named Entity Recognition on the following text fragment, following these rules:\n" +

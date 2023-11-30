@@ -57,6 +57,7 @@ public class TextPreparationFragment extends Fragment
             public void handleOnBackPressed()
             {
                 Navigation.findNavController(getView()).navigate(R.id.actionBackFromTextProcessing, navigateBackBundle);
+                processTextFileViewModel.destroyTTS();
             }
         });
     }
@@ -187,24 +188,19 @@ public class TextPreparationFragment extends Fragment
         if(loadingBarVisibility == View.GONE)
         {
             binding.textBlocksRecyclerView.setVisibility(View.VISIBLE);
-    
-            processTextFileViewModel.waitForTTS(new TtsInitListener()
-            {
-                @Override
-                public void OnInitSuccess()
+            
+            // Observe the TTS initialization status
+            processTextFileViewModel.getTtsInitStatus().observe(getViewLifecycleOwner(), isInitialized -> {
+                if (isInitialized)
                 {
                     binding.enqueueBlocksBtn.setVisibility(View.VISIBLE);
-                    //binding.retryErrorBlocksBtn.setVisibility(View.VISIBLE);
                 }
-        
-                @Override
-                public void OnInitFailure()
+                else
                 {
                     binding.enqueueBlocksBtn.setVisibility(View.GONE);
                     binding.retryErrorBlocksBtn.setVisibility(View.GONE);
                 }
             });
-            
         }
         else if(loadingBarVisibility == View.VISIBLE)
         {
@@ -219,7 +215,6 @@ public class TextPreparationFragment extends Fragment
     public void onDestroyView()
     {
         processTextFileViewModel.stopCharacterRequests();
-        processTextFileViewModel.destroyTTS();
         super.onDestroyView();
         binding = null;
     }

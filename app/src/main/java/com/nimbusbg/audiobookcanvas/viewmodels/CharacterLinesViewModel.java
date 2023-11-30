@@ -32,20 +32,17 @@ public class CharacterLinesViewModel extends AndroidViewModel
     private LiveData<List<StoryCharacter>> allCharacters;
 
     private AtomicInteger processedUtterances;
+    private MutableLiveData<Boolean> ttsInitStatus = new MutableLiveData<>();
     
     public CharacterLinesViewModel(@NonNull Application application, int textblockId, int projectId)
     {
         super(application);
         databaseRepository = new AudiobookRepository(application);
         ttsRepository = new TtsRepository(application);
-    
+        isUtteranceStarted = false;
         currentTextBlockWithData = databaseRepository.getTextBlockWithDataByTextBlockId(textblockId);
         allCharacters = databaseRepository.getAllCharactersByProjectId(projectId);
-    }
-    
-    public void waitForTTS(TtsInitListener listener)
-    {
-        ttsRepository.initTTS(listener);
+        
     }
     
     public LiveData<List<StoryCharacter>> getAllCharacters()

@@ -50,8 +50,6 @@ public class TtsSingleton
                     for (TextToSpeech.EngineInfo info : engineInfo) {
                         Log.d("TTS","info: "+info);
                     }
-                    
-                    
                 }
                 else
                 {
