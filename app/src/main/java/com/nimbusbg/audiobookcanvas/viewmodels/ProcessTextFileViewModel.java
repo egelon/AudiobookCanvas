@@ -34,7 +34,9 @@ import com.nimbusbg.audiobookcanvas.data.repository.TtsRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import okhttp3.Call;
 import okhttp3.Response;
@@ -273,28 +275,40 @@ public class ProcessTextFileViewModel extends AndroidViewModel
     
     
     
-    public void storeCharactersForTextBlock(GptChatResponse apiResponse, TextBlock textBlock, InsertedMultipleItemsListener onInsertListener)
-    {
+    public void storeCharactersForTextBlock(GptChatResponse apiResponse, TextBlock textBlock, InsertedMultipleItemsListener onInsertListener) {
         Gson gson = new Gson();
         String responseContent = apiResponse.getChoices().get(0).getMessage().getContent();
-        try
-        {
+        try {
             GptCompletion completion = gson.fromJson(responseContent, GptCompletion.class);
             
+            // Capitalize the 'character' member of each GptCharacterLine
+            for (GptCharacterLine characterLine : completion.getCharacterLines()) {
+                characterLine.setCharacter(capitalizeFirstLetter(characterLine.getCharacter()));
+            }
+            
+            // Capitalize the 'character' member of each GptCharacter
+            for (GptCharacter character : completion.getCharacters()) {
+                character.setCharacter(capitalizeFirstLetter(character.getCharacter()));
+            }
+            
             List<CharacterLine> characterLinesList = addCharacterLines(textBlock.getId(), completion.getCharacterLines());
-            List<StoryCharacter> storyCharacters = addAllStoryCharacters(completion.getCharacters(),textBlock.getProjectId());
+            List<StoryCharacter> storyCharacters = addAllStoryCharacters(completion.getCharacters(), textBlock.getProjectId());
             
             databaseRepository.storeCharacterLinesAndCharacters(characterLinesList, storyCharacters, onInsertListener);
-        }
-        catch (com.google.gson.JsonSyntaxException ex)
-        {
+        } catch (com.google.gson.JsonSyntaxException ex) {
             Log.d("ProcessTextFileViewModel", "storeCharactersForTextBlock couldn't parse completion json: " + ex);
             setTextBlockStateById(textBlock.getId(), BlockState.ERROR);
         }
     }
     
-    private List<StoryCharacter> addAllStoryCharacters(List<GptCharacter> characters, int projectId)
-    {
+    private String capitalizeFirstLetter(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+        return Character.toTitleCase(input.charAt(0)) + input.substring(1);
+    }
+    
+    private List<StoryCharacter> addAllStoryCharacters(List<GptCharacter> characters, int projectId) {
         ArrayList<StoryCharacter> result = new ArrayList<>();
         result.add(new StoryCharacter("Narrator", "none", ttsRepository.getRandomVoiceName(), projectId));
     

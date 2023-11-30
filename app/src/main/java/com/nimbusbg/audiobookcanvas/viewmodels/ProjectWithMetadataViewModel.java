@@ -27,18 +27,18 @@ import java.util.Locale;
 public class ProjectWithMetadataViewModel extends AndroidViewModel
 {
     private final AudiobookRepository repository;
-    private ProjectWithMetadata emptyProject;
+    private ProjectWithMetadata newProject;
     SharedPreferences preferences;
     
     
     private LiveData<List<ProjectWithMetadata>> allProjectsWithMetadata;
     
-    public void createEmptyProject()
+    public void createEmptyNewProject()
     {
-        emptyProject = new ProjectWithMetadata();
+        newProject = new ProjectWithMetadata();
         
         Date currentTime = Calendar.getInstance().getTime();
-        emptyProject.project = new AudiobookProject(getResourceString(R.string.xmlProjectFileVersion),
+        newProject.project = new AudiobookProject(getResourceString(R.string.xmlProjectFileVersion),
                 false,
                 0,
                 getResourceString(R.string.defaultAudiobookProjName),
@@ -47,8 +47,8 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel
                 getResourceString(R.string.defaultAudiobookTitle) + ".mp3",
                 currentTime,
                 currentTime);
-        emptyProject.appInfo = new AppInfo(0, BuildConfig.VERSION_NAME, getAndroidVersion(), getDeviceName());
-        emptyProject.audiobookData = new AudiobookData(0, getResourceString(R.string.defaultAudiobookTitle), "", Locale.getDefault().toLanguageTag(), "");
+        newProject.appInfo = new AppInfo(0, BuildConfig.VERSION_NAME, getAndroidVersion(), getDeviceName());
+        newProject.audiobookData = new AudiobookData(0, getResourceString(R.string.defaultAudiobookTitle), "", Locale.getDefault().toLanguageTag(), "");
     }
     
     public ProjectWithMetadataViewModel(@NonNull Application application)
@@ -58,7 +58,7 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel
         preferences = PreferenceManager.getDefaultSharedPreferences(application.getApplicationContext());
         
         repository = new AudiobookRepository(application);
-        createEmptyProject();
+        createEmptyNewProject();
         allProjectsWithMetadata = repository.getAllProjectsWithMetadata();
     }
     
@@ -82,21 +82,51 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel
         }
     }
     
-    public ProjectWithMetadata getEmptyProject()
+    public ProjectWithMetadata getNewProject()
     {
-        return emptyProject;
+        return newProject;
+    }
+    
+    public void setProjectName(String projectName) {
+        if (newProject != null) {
+            newProject.project.setProjectName(projectName);
+        }
+    }
+    
+    public void setBookName(String bookTitle) {
+        if (newProject != null) {
+            newProject.audiobookData.setBookTitle(bookTitle);
+        }
+    }
+    
+    public void setAuthorName(String author) {
+        if (newProject != null) {
+            newProject.audiobookData.setAuthor(author);
+        }
+    }
+    
+    public void setDescriptionText(String description) {
+        if (newProject != null) {
+            newProject.audiobookData.setDescription(description);
+        }
+    }
+    
+    public void setSelectedFileUri(String uri) {
+        if (newProject != null) {
+            newProject.project.setInputFilePath(uri);
+        }
     }
     
     public void insertNewProject(String projName, String title, String author, String descr, String uri, InsertedItemListener onInsertListener)
     {
-        createEmptyProject();
-        emptyProject.project.setProjectName(projName);
-        emptyProject.project.setInputFilePath(uri);
-        emptyProject.audiobookData.setBookTitle(title);
-        emptyProject.audiobookData.setAuthor(author);
-        emptyProject.audiobookData.setDescription(descr);
+        createEmptyNewProject();
+        newProject.project.setProjectName(projName);
+        newProject.project.setInputFilePath(uri);
+        newProject.audiobookData.setBookTitle(title);
+        newProject.audiobookData.setAuthor(author);
+        newProject.audiobookData.setDescription(descr);
         
-        repository.insertProjectWithMetadata(emptyProject.project, emptyProject.appInfo, emptyProject.audiobookData, onInsertListener);
+        repository.insertProjectWithMetadata(newProject.project, newProject.appInfo, newProject.audiobookData, onInsertListener);
     }
     
     private String getResourceString(int resourceID)

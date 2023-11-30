@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
@@ -13,11 +14,16 @@ import java.io.Serializable;
                 @ForeignKey(entity = AudiobookProject.class,
                         parentColumns = "id",
                         childColumns = "project_id",
-                        onDelete = ForeignKey.CASCADE)})
+                        onDelete = ForeignKey.CASCADE)},
+        indices = {@Index(value = {"name", "project_id"}, unique = true)}) // Unique constraint)
 public class StoryCharacter  implements Serializable {
     @NonNull
+    @ColumnInfo(name = "id")
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+    
+    @NonNull
     @ColumnInfo(name = "name")
-    @PrimaryKey(autoGenerate = false)
     private String name;
 
     @NonNull
@@ -71,5 +77,15 @@ public class StoryCharacter  implements Serializable {
     public void setProjectId(int projectId)
     {
         this.projectId = projectId;
+    }
+    
+    public int getId()
+    {
+        return id;
+    }
+    
+    public void setId(int id)
+    {
+        this.id = id;
     }
 }

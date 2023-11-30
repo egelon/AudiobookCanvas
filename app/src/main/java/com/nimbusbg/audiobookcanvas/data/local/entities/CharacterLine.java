@@ -14,10 +14,6 @@ import java.io.Serializable;
                 @ForeignKey(entity = TextBlock.class,
                         parentColumns = "id",
                         childColumns = "text_block_id",
-                        onDelete = ForeignKey.CASCADE),
-                @ForeignKey(entity = StoryCharacter.class,
-                        parentColumns = "name",
-                        childColumns = "character_name",
                         onDelete = ForeignKey.CASCADE)
         })
 public class CharacterLine implements Serializable {
