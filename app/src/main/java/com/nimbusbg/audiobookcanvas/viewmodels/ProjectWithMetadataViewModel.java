@@ -12,13 +12,13 @@ import androidx.preference.PreferenceManager;
 
 import com.nimbusbg.audiobookcanvas.BuildConfig;
 import com.nimbusbg.audiobookcanvas.R;
+import com.nimbusbg.audiobookcanvas.data.listeners.DeletedItemListener;
+import com.nimbusbg.audiobookcanvas.data.listeners.InsertedItemListener;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
 import com.nimbusbg.audiobookcanvas.data.repository.AudiobookRepository;
-import com.nimbusbg.audiobookcanvas.data.listeners.DeletedItemListener;
-import com.nimbusbg.audiobookcanvas.data.listeners.InsertedItemListener;
 
 import java.util.Date;
 import java.util.List;
@@ -44,7 +44,7 @@ public class ProjectWithMetadataViewModel extends AndroidViewModel
                 getResourceString(R.string.defaultAudiobookProjName),
                 "",
                 getResourceString(R.string.defaultAudiobookProjName) + ".xml",
-                getResourceString(R.string.defaultAudiobookTitle) + ".mp3",
+                getResourceString(R.string.defaultAudiobookTitle),
                 currentTime,
                 currentTime);
         newProject.appInfo = new AppInfo(0, BuildConfig.VERSION_NAME, getAndroidVersion(), getDeviceName());

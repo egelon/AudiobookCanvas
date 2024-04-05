@@ -1,6 +1,7 @@
 package com.nimbusbg.audiobookcanvas.views;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,13 +16,12 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.fragment.NavHostFragment;
 
 import com.nimbusbg.audiobookcanvas.R;
 import com.nimbusbg.audiobookcanvas.data.local.entities.CharacterLine;
 import com.nimbusbg.audiobookcanvas.data.local.entities.StoryCharacter;
+import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
 import com.nimbusbg.audiobookcanvas.data.local.relations.TextBlockWithData;
-import com.nimbusbg.audiobookcanvas.data.listeners.TtsInitListener;
 import com.nimbusbg.audiobookcanvas.databinding.CharacterLinesFragmentBinding;
 import com.nimbusbg.audiobookcanvas.viewmodelfactories.CharacterLinesViewModelFactory;
 import com.nimbusbg.audiobookcanvas.viewmodels.CharacterLinesViewModel;
@@ -81,8 +81,27 @@ public class CharacterLinesFragment extends Fragment
                 characterLinesViewModel.recordAllCharacterLines();
             }
         });
-        
-        loadAllCharacters();
+    
+        Log.d("CharacterLinesFragment", "Trying to observe tts status");
+        characterLinesViewModel.getTtsInitStatus().observe(getViewLifecycleOwner(), isInitialized -> {
+                    if (isInitialized)
+                    {
+                        Log.d("CharacterLinesFragment", "getTtsInitStatus: " + isInitialized);
+    
+                        characterLinesViewModel.getProjectMetadata().observe(getViewLifecycleOwner(), new Observer<ProjectWithMetadata>()
+                        {
+                            @Override
+                            public void onChanged(ProjectWithMetadata projectWithMetadata)
+                            {
+                                loadAllCharacters();
+                            }
+                        });
+                    }
+                    else
+                    {
+                        Log.d("CharacterLinesFragment", "getTtsInitStatus: " + isInitialized);
+                    }
+                });
     }
     
     private void loadAllCharacters()

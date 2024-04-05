@@ -8,17 +8,16 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.nimbusbg.audiobookcanvas.data.listeners.TtsInitListener;
+import com.nimbusbg.audiobookcanvas.data.listeners.TtsUtteranceListener;
 import com.nimbusbg.audiobookcanvas.data.local.entities.CharacterLine;
 import com.nimbusbg.audiobookcanvas.data.local.entities.StoryCharacter;
 import com.nimbusbg.audiobookcanvas.data.local.entities.TextBlock;
+import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
 import com.nimbusbg.audiobookcanvas.data.local.relations.TextBlockWithData;
 import com.nimbusbg.audiobookcanvas.data.repository.AudiobookRepository;
-import com.nimbusbg.audiobookcanvas.data.listeners.TtsInitListener;
-import com.nimbusbg.audiobookcanvas.data.listeners.TtsUtteranceListener;
 import com.nimbusbg.audiobookcanvas.data.repository.TtsRepository;
-import com.nimbusbg.audiobookcanvas.ui_state.CharacterLinesViewState;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,6 +29,7 @@ public class CharacterLinesViewModel extends AndroidViewModel
     
     private LiveData<TextBlockWithData> currentTextBlockWithData;
     private LiveData<List<StoryCharacter>> allCharacters;
+    private LiveData<ProjectWithMetadata> projectMetadata;
 
     private AtomicInteger processedUtterances;
     private MutableLiveData<Boolean> ttsInitStatus = new MutableLiveData<>();
@@ -39,11 +39,46 @@ public class CharacterLinesViewModel extends AndroidViewModel
         super(application);
         databaseRepository = new AudiobookRepository(application);
         ttsRepository = new TtsRepository(application);
+        ttsInitStatus.postValue(false);
         isUtteranceStarted = false;
         currentTextBlockWithData = databaseRepository.getTextBlockWithDataByTextBlockId(textblockId);
         allCharacters = databaseRepository.getAllCharactersByProjectId(projectId);
+        projectMetadata = databaseRepository.getProjectWithMetadataById(projectId);
         
     }
+    
+    public LiveData<Boolean> getTtsInitStatus()
+    {
+        Log.d("CharacterLinesViewModel", "getTtsInitStatus");
+        // Check if ttsInitStatus is null OR its value is false
+        if (ttsInitStatus.getValue() == null || !ttsInitStatus.getValue()) {
+            Log.d("CharacterLinesViewModel", "Not initialised - waiting for TTS");
+            waitForTTS();
+        }
+        return ttsInitStatus;
+    }
+    
+    private void waitForTTS()
+    {
+        ttsRepository.initTTS(new TtsInitListener()
+        {
+            @Override
+            public void OnInitSuccess()
+            {
+                Log.d("CharacterLinesViewModel", "Post value TTS initialised");
+                ttsInitStatus.postValue(true); // Update LiveData
+            }
+            
+            @Override
+            public void OnInitFailure()
+            {
+                Log.d("CharacterLinesViewModel", "Failed to initialise TTS");
+                ttsInitStatus.postValue(false); // Handle failure
+            }
+        });
+    }
+    
+    
     
     public LiveData<List<StoryCharacter>> getAllCharacters()
     {
@@ -53,6 +88,11 @@ public class CharacterLinesViewModel extends AndroidViewModel
     public LiveData<TextBlockWithData> getTextBlockWithData()
     {
         return currentTextBlockWithData;
+    }
+    
+    public LiveData<ProjectWithMetadata> getProjectMetadata()
+    {
+        return projectMetadata;
     }
     
     private String getVoiceByCharacterName(String charName)
@@ -72,10 +112,11 @@ public class CharacterLinesViewModel extends AndroidViewModel
         processedUtterances = new AtomicInteger(0);
         TextBlock currentTextBlock = currentTextBlockWithData.getValue().textBlock;
         List<CharacterLine> characterLines = currentTextBlockWithData.getValue().characterLines;
+        String audiobookName = projectMetadata.getValue().project.getOutput_audiobook_path();
         
         for (CharacterLine line: characterLines)
         {
-            recordCharacterLine(line, new TtsUtteranceListener()
+            recordCharacterLine(audiobookName, line, new TtsUtteranceListener()
             {
                 @Override
                 public void OnUtteranceStart(String s)
@@ -91,7 +132,7 @@ public class CharacterLinesViewModel extends AndroidViewModel
                     if(processedUtterances.get() >= characterLines.size())
                     {
                         Log.d("CharacterLinesViewModel", "stitchWavFiles");
-                        ttsRepository.stitchWavFiles(currentTextBlock.getId(), currentTextBlock.getGeneratedAudioPath());
+                        ttsRepository.stitchWavFiles(audiobookName, currentTextBlock.getId(), currentTextBlock.getGeneratedAudioPath());
                     }
                 }
     
@@ -101,7 +142,7 @@ public class CharacterLinesViewModel extends AndroidViewModel
                     processedUtterances.getAndIncrement();
                     if(processedUtterances.get() >= characterLines.size())
                     {
-                        ttsRepository.stitchWavFiles(currentTextBlock.getId(), currentTextBlock.getGeneratedAudioPath());
+                        ttsRepository.stitchWavFiles(audiobookName, currentTextBlock.getId(), currentTextBlock.getGeneratedAudioPath());
                     }
                     Log.d("CharacterLinesViewModel", "OnUtteranceError: " + s);
                 }
@@ -114,13 +155,14 @@ public class CharacterLinesViewModel extends AndroidViewModel
         }
     }
     
-    public void recordCharacterLine(CharacterLine characterLine, TtsUtteranceListener listener)
+    
+    public void recordCharacterLine(String folderName, CharacterLine characterLine, TtsUtteranceListener listener)
     {
         TextBlock currentTextBlock = currentTextBlockWithData.getValue().textBlock;
         String characterLineStr = currentTextBlock.getLineByIndex(characterLine.getStartIndex());
         String characterVoice = getVoiceByCharacterName(characterLine.getCharacterName());
         
-        ttsRepository.speakCharacterLine(characterLineStr, characterVoice, currentTextBlock.getLineAudioPath(characterLine.getStartIndex()), new TtsUtteranceListener()
+        ttsRepository.speakCharacterLine(characterLineStr, characterVoice, folderName, currentTextBlock.getLineAudioPath(characterLine.getStartIndex()), new TtsUtteranceListener()
         {
             @Override
             public void OnUtteranceStart(String s)

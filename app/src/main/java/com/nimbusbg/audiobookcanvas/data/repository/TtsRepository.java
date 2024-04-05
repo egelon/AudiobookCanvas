@@ -1,8 +1,12 @@
 package com.nimbusbg.audiobookcanvas.data.repository;
 
 import android.app.Application;
+import android.content.ContentValues;
 import android.content.Context;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.speech.tts.Voice;
@@ -14,10 +18,9 @@ import com.nimbusbg.audiobookcanvas.data.singletons.TtsSingleton;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -101,9 +104,9 @@ public class TtsRepository
         }
     }
     
-    private File getAudioFile(String fileName)
+    private File getAudioFile(String folderName, String fileName)
     {
-        File exportFolder = new File(context.getExternalFilesDir(null), "tmp");
+        File exportFolder = new File(context.getExternalFilesDir(null), folderName);
         if (!exportFolder.exists() && !exportFolder.mkdirs())
         {
             Log.v("TTS_REPOSITORY", "Couldn't find or create export folder " + exportFolder);
@@ -112,13 +115,18 @@ public class TtsRepository
         return new File(exportFolder, fileName);
     }
     
-    public void speakCharacterLine(String characterLine, String voiceName, String fileName, TtsUtteranceListener listener)
+    public void speakProjectIntroduction(String folderName, TtsUtteranceListener listener)
+    {
+    
+    }
+    
+    public void speakCharacterLine(String characterLine, String voiceName, String folderName, String fileName, TtsUtteranceListener listener)
     {
         String utteranceId = "utterance_" + fileName;
         try
         {
             
-            File file = getAudioFile(fileName);
+            File utteranceFile = getAudioFile(folderName, fileName);
             Voice characterVoice = findVoiceByName(voiceName);
             Bundle params = new Bundle();
     
@@ -147,7 +155,7 @@ public class TtsRepository
                 }
             });
             TtsSingleton.getInstance(context).getTts().setVoice(characterVoice);
-            TtsSingleton.getInstance(context).getTts().synthesizeToFile(characterLine, params, file, utteranceId);
+            TtsSingleton.getInstance(context).getTts().synthesizeToFile(characterLine, params, utteranceFile, utteranceId);
         }
         catch (NullPointerException ex)
         {
@@ -187,13 +195,13 @@ public class TtsRepository
         
     }
     
-    public void stitchWavFiles(int id, String outputFileName)
+    public void stitchWavFiles(String folderName, int id, String outputFileName)
     {
         // Get the directory path of the app's default storage
         File appDirectory = context.getExternalFilesDir(null);
         
         // Create the temporary folder path
-        String tmpFolderPath = appDirectory.getAbsolutePath() + File.separator + "tmp";
+        String tmpFolderPath = appDirectory.getAbsolutePath() + File.separator + folderName;
         
         // Create the temporary folder if it doesn't exist
         File tmpFolder = new File(tmpFolderPath);
@@ -230,52 +238,47 @@ public class TtsRepository
             }
         });
         
-        // Create a new output file for the stitched audio
-        File outputFile = new File(tmpFolder, outputFileName);
-    
         // Calculate the total audio length in bytes
         long totalAudioLength = 0;
-        for (File file : matchingFiles)
-        {
-            totalAudioLength += file.length() - 44; // Exclude the header size
+        for (File file : matchingFiles) {
+            totalAudioLength += file.length() - 44; // Calculate total length minus headers
         }
     
-        // Stitch the audio from the matching files
-        try (FileOutputStream fos = new FileOutputStream(outputFile))
-        {
-            // Write the WAV file header for the output file
-            writeWavFileHeader(fos, totalAudioLength);
-        
-            // Write the audio data from each file to the output file
-            for (File file : matchingFiles)
-            {
-                try (FileInputStream fis = new FileInputStream(file))
-                {
-                    // Skip the header of each input file
-                    fis.skip(44);
-                
-                    // Write the audio data to the output file
-                    byte[] buffer = new byte[1024];
-                    int bytesRead;
-                    while ((bytesRead = fis.read(buffer)) != -1)
-                    {
-                        fos.write(buffer, 0, bytesRead);
+        Uri outputFileUri = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.MediaColumns.DISPLAY_NAME, outputFileName);
+            values.put(MediaStore.MediaColumns.MIME_TYPE, "audio/x-wav");
+            values.put(MediaStore.MediaColumns.RELATIVE_PATH, "Music/AudiobookCanvas/" + folderName + "/");
+            outputFileUri = context.getContentResolver().insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values);
+        } else {
+            // Legacy method for older Android versions, not recommended for new apps
+        }
+    
+        if (outputFileUri != null) {
+            try (OutputStream fos = context.getContentResolver().openOutputStream(outputFileUri)) {
+                // Prepare the WAV file header with the correct sizes
+                writeWavFileHeader(fos, totalAudioLength);
+            
+                // Write the audio content from each file, skipping their headers
+                for (File file : matchingFiles) {
+                    try (InputStream fis = new FileInputStream(file)) {
+                        fis.skip(44); // Skip each file's header
+                        byte[] buffer = new byte[1024];
+                        int bytesRead;
+                        while ((bytesRead = fis.read(buffer)) != -1) {
+                            fos.write(buffer, 0, bytesRead);
+                        }
                     }
                 }
+            } catch (IOException e) {
+                // Handle exceptions
             }
-        
-            // Update the file size information in the WAV file header
-            updateWavFileSize(outputFile, totalAudioLength);
-        
-            // Stitching complete, the output file is saved
-            fos.close();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            // Error occurred during stitching or file operations
         }
     }
+    
+    
+    
     
     // Helper method to extract the number from the file name
     private int extractNumber(String fileName)
@@ -284,29 +287,24 @@ public class TtsRepository
         return Integer.parseInt(numberString);
     }
     
-    // Helper method to update the file size information in the WAV file header
-    private void updateWavFileSize(File file, long totalAudioLength) throws IOException
-    {
-        RandomAccessFile wavFile = new RandomAccessFile(file, "rw");
-        try
-        {
-            // Seek to the position where the file size is stored in the WAV file header
-            wavFile.seek(4);
-            
-            // Update the file size value (ChunkSize - 8)
-            int fileSize = (int) (totalAudioLength + 36);
-            wavFile.write(intToBytesLittleEndian(fileSize));
-            
-            // Update the data size value (Subchunk2Size)
-            int dataSize = (int) totalAudioLength;
-            wavFile.seek(40);
-            wavFile.write(intToBytesLittleEndian(dataSize));
-        }
-        finally
-        {
-            wavFile.close();
-        }
-    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     // Helper method to write the WAV file header
     private void writeWavFileHeader(OutputStream outputStream, long totalAudioLength) throws IOException
