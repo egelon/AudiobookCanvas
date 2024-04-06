@@ -135,7 +135,7 @@ public class TextBlock  implements Serializable {
     
     public String getLineAudioPath(int index)
     {
-        if(index > 0 && index <= this.textLines.length)
+        if(index >= 0 && index <= this.textLines.length)
         {
             return "textBlock_" + String.valueOf(id) + "_Line_" + String.valueOf(index) + ".wav";
         }

@@ -1,12 +1,8 @@
 package com.nimbusbg.audiobookcanvas.data.repository;
 
 import android.app.Application;
-import android.content.ContentValues;
 import android.content.Context;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.speech.tts.Voice;
@@ -17,13 +13,7 @@ import com.nimbusbg.audiobookcanvas.data.listeners.TtsUtteranceListener;
 import com.nimbusbg.audiobookcanvas.data.singletons.TtsSingleton;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -115,11 +105,6 @@ public class TtsRepository
         return new File(exportFolder, fileName);
     }
     
-    public void speakProjectIntroduction(String folderName, TtsUtteranceListener listener)
-    {
-    
-    }
-    
     public void speakCharacterLine(String characterLine, String voiceName, String folderName, String fileName, TtsUtteranceListener listener)
     {
         String utteranceId = "utterance_" + fileName;
@@ -175,194 +160,23 @@ public class TtsRepository
             @Override
             public void onStart(String s)
             {
-                Log.d("TTS_REPOSITORY", "playVoiceSample onStart: " +s);
+                Log.d("TTS_REPOSITORY", "playVoiceSample onStart: " + s);
             }
         
             @Override
             public void onDone(String s)
             {
-                Log.d("TTS_REPOSITORY", "playVoiceSample onDone: " +s);
+                Log.d("TTS_REPOSITORY", "playVoiceSample onDone: " + s);
             }
         
             @Override
             public void onError(String s)
             {
-                Log.d("TTS_REPOSITORY", "playVoiceSample onError: " +s);
+                Log.d("TTS_REPOSITORY", "playVoiceSample onError: " + s);
             }
         });
         String utteranceId = "utterance_" + voiceName;
         TtsSingleton.getInstance(context).getTts().speak(voiceSampleText, TextToSpeech.QUEUE_FLUSH, new Bundle(), utteranceId);
-        
     }
-    
-    public void stitchWavFiles(String folderName, int id, String outputFileName)
-    {
-        // Get the directory path of the app's default storage
-        File appDirectory = context.getExternalFilesDir(null);
-        
-        // Create the temporary folder path
-        String tmpFolderPath = appDirectory.getAbsolutePath() + File.separator + folderName;
-        
-        // Create the temporary folder if it doesn't exist
-        File tmpFolder = new File(tmpFolderPath);
-        if (!tmpFolder.exists())
-        {
-            tmpFolder.mkdirs();
-        }
-        
-        // List to store the matching WAV files
-        List<File> matchingFiles = new ArrayList<>();
-        
-        // Find all WAV files that contain the ID in their names
-        File[] files = tmpFolder.listFiles();
-        if (files != null)
-        {
-            for (File file : files)
-            {
-                if (file.isFile() && file.getName().contains(String.valueOf(id)) && file.getName().endsWith(".wav"))
-                {
-                    matchingFiles.add(file);
-                }
-            }
-        }
-        
-        // Sort the matching files based on the number in their names
-        Collections.sort(matchingFiles, new Comparator<File>()
-        {
-            @Override
-            public int compare(File file1, File file2)
-            {
-                int number1 = extractNumber(file1.getName());
-                int number2 = extractNumber(file2.getName());
-                return Integer.compare(number1, number2);
-            }
-        });
-        
-        // Calculate the total audio length in bytes
-        long totalAudioLength = 0;
-        for (File file : matchingFiles) {
-            totalAudioLength += file.length() - 44; // Calculate total length minus headers
-        }
-    
-        Uri outputFileUri = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ContentValues values = new ContentValues();
-            values.put(MediaStore.MediaColumns.DISPLAY_NAME, outputFileName);
-            values.put(MediaStore.MediaColumns.MIME_TYPE, "audio/x-wav");
-            values.put(MediaStore.MediaColumns.RELATIVE_PATH, "Music/AudiobookCanvas/" + folderName + "/");
-            outputFileUri = context.getContentResolver().insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values);
-        } else {
-            // Legacy method for older Android versions, not recommended for new apps
-        }
-    
-        if (outputFileUri != null) {
-            try (OutputStream fos = context.getContentResolver().openOutputStream(outputFileUri)) {
-                // Prepare the WAV file header with the correct sizes
-                writeWavFileHeader(fos, totalAudioLength);
-            
-                // Write the audio content from each file, skipping their headers
-                for (File file : matchingFiles) {
-                    try (InputStream fis = new FileInputStream(file)) {
-                        fis.skip(44); // Skip each file's header
-                        byte[] buffer = new byte[1024];
-                        int bytesRead;
-                        while ((bytesRead = fis.read(buffer)) != -1) {
-                            fos.write(buffer, 0, bytesRead);
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                // Handle exceptions
-            }
-        }
-    }
-    
-    
-    
-    
-    // Helper method to extract the number from the file name
-    private int extractNumber(String fileName)
-    {
-        String numberString = fileName.replaceAll("[^0-9]", "");
-        return Integer.parseInt(numberString);
-    }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    // Helper method to write the WAV file header
-    private void writeWavFileHeader(OutputStream outputStream, long totalAudioLength) throws IOException
-    {
-        short NumChannels = 1; // Mono
-        int SampleRate = 24000; // SampleRate
-        short BitsPerSample = 16; // BitsPerSample
-    
-        outputStream.write(new byte[] {'R', 'I', 'F', 'F'}); // ChunkID
-        outputStream.write(intToBytesLittleEndian((int) (36 + totalAudioLength))); // ChunkSize
-        outputStream.write(new byte[] {'W', 'A', 'V', 'E'}); // Format
-    
-        outputStream.write(new byte[] {'f', 'm', 't', ' '}); // Subchunk1ID
-        outputStream.write(intToBytesLittleEndian(16)); // Subchunk1Size
-        outputStream.write(shortToBytesLittleEndian((short) 1)); // AudioFormat
-        outputStream.write(shortToBytesLittleEndian(NumChannels)); // NumChannels
-        outputStream.write(intToBytesLittleEndian(SampleRate)); // SampleRate
-        outputStream.write(intToBytesLittleEndian((SampleRate * NumChannels * BitsPerSample) / 8)); // ByteRate
-        outputStream.write(shortToBytesLittleEndian((short) (NumChannels * BitsPerSample / 8))); // BlockAlign
-        outputStream.write(shortToBytesLittleEndian(BitsPerSample)); // BitsPerSample
-    
-        outputStream.write(new byte[] {'d', 'a', 't', 'a'}); // Subchunk2ID
-        outputStream.write(intToBytesLittleEndian((int) totalAudioLength)); // Subchunk2Size
-    }
-    
-    // Helper method to convert a long to a little-endian byte array
-    private byte[] longToBytesLittleEndian(long value)
-    {
-        return new byte[] {
-                (byte) (value & 0xFF),
-                (byte) ((value >> 8) & 0xFF),
-                (byte) ((value >> 16) & 0xFF),
-                (byte) ((value >> 24) & 0xFF),
-                (byte) ((value >> 32) & 0xFF),
-                (byte) ((value >> 40) & 0xFF),
-                (byte) ((value >> 48) & 0xFF),
-                (byte) ((value >> 56) & 0xFF)
-        };
-    }
-    
-    // Helper method to convert an integer to a little-endian byte array
-    private byte[] intToBytesLittleEndian(int value)
-    {
-        return new byte[] {
-                (byte) (value & 0xFF),
-                (byte) ((value >> 8) & 0xFF),
-                (byte) ((value >> 16) & 0xFF),
-                (byte) ((value >> 24) & 0xFF)
-        };
-    }
-    
-    // Helper method to convert a short to a little-endian byte array
-    private byte[] shortToBytesLittleEndian(short value)
-    {
-        return new byte[]{
-                (byte) (value & 0xFF),
-                (byte) ((value >> 8) & 0xFF)
-        };
-    }
-    
 }
+    

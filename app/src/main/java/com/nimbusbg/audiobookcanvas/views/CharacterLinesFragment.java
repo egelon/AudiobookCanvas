@@ -18,6 +18,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.nimbusbg.audiobookcanvas.R;
+import com.nimbusbg.audiobookcanvas.data.listeners.MixingProcessListener;
 import com.nimbusbg.audiobookcanvas.data.local.entities.CharacterLine;
 import com.nimbusbg.audiobookcanvas.data.local.entities.StoryCharacter;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
@@ -73,14 +74,29 @@ public class CharacterLinesFragment extends Fragment
         storyCharacterNames = new ArrayList<String>();
     
         binding.generateAudioBtn.setVisibility(View.GONE);
+        binding.generateAudioProgressBar.setVisibility(View.GONE);
         binding.generateAudioBtn.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                characterLinesViewModel.recordAllCharacterLines();
-            }
-        });
+                                                    {
+                                                        @Override
+                                                        public void onClick(View view)
+                                                        {
+                                                            binding.generateAudioProgressBar.setVisibility(View.VISIBLE);
+                                                            characterLinesViewModel.recordAllCharacterLines(new MixingProcessListener()
+                                                            {
+                                                                @Override
+                                                                public void onProgress(double progress)
+                                                                {
+                                                                    binding.generateAudioProgressBar.setProgress((int) (progress * 10000));
+                                                                }
+            
+                                                                @Override
+                                                                public void onEnd()
+                                                                {
+                                                                    binding.generateAudioProgressBar.setProgress(10000);
+                                                                }
+                                                            });
+                                                        }
+                                                    });
     
         Log.d("CharacterLinesFragment", "Trying to observe tts status");
         characterLinesViewModel.getTtsInitStatus().observe(getViewLifecycleOwner(), isInitialized -> {
