@@ -118,6 +118,34 @@ public class CharacterLinesFragment extends Fragment
                         Log.d("CharacterLinesFragment", "getTtsInitStatus: " + isInitialized);
                     }
                 });
+        
+        
+        characterLinesViewModel.getWavFilesStitched().observe(getViewLifecycleOwner(), areFilesStitched -> {
+            if(areFilesStitched)
+            {
+                Log.d("CharacterLinesFragment", "areFilesStitched: " + areFilesStitched);
+                characterLinesViewModel.addBackgroundMusic(new MixingProcessListener()
+                {
+                    @Override
+                    public void onProgress(double progress)
+                    {
+                        binding.generateAudioProgressBar.setBackgroundColor(getResources().getColor(R.color.textblock_done));
+                        binding.generateAudioProgressBar.setProgress((int) (progress * 10000));
+                    }
+    
+                    @Override
+                    public void onEnd()
+                    {
+                        binding.generateAudioProgressBar.setProgress(10000);
+                    }
+                });
+            }
+            else
+            {
+                Log.d("CharacterLinesFragment", "Waiting to stitch files");
+            }
+        });
+        
     }
     
     private void loadAllCharacters()

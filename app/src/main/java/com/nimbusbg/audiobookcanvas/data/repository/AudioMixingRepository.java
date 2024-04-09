@@ -87,6 +87,7 @@ public class AudioMixingRepository
     
     public void Release()
     {
+        Log.d("AudioMixingRepository", "Releasing audio mixer");
         audioMixer.release();
     }
     
@@ -98,6 +99,7 @@ public class AudioMixingRepository
         try
         {
             audioMixer = new AudioMixer(outputFile.getPath());
+            Log.d("AudioMixingRepository", "stitchWavFiles: set output " + outputFile.getPath());
             
             int i = 0;
             for (File file : matchingFiles)
@@ -112,6 +114,7 @@ public class AudioMixingRepository
                     audioMixer.setMixingType(AudioMixer.MixingType.SEQUENTIAL);
                 }
                 audioMixer.addDataSource(currentAudio);
+                Log.d("AudioMixingRepository", "stitchWavFiles: added audio source " + file.getPath());
                 i++;
             }
             
@@ -119,6 +122,7 @@ public class AudioMixingRepository
             
             //it is for setting up the all the things
             audioMixer.start();
+            Log.d("AudioMixingRepository", "stitchWavFiles: started mixer");
             
             //starting real processing
             audioMixer.processAsync();
@@ -127,5 +131,57 @@ public class AudioMixingRepository
             Log.e("AudioMixingRepository", "Exception while mixing audio: " + ex.getMessage());
         }
         
+    }
+    
+    private float mapVolume(int volume)
+    {
+        if (volume < 0 || volume > 100)
+        {
+            throw new IllegalArgumentException("Volume must be between 0 and 100");
+        }
+        return volume / 100.0f;
+    }
+    
+    public void addBackgroundMusic(File outputAudioFile, File bookPage, File backgroundAudio, int backgroundVolume, AudioMixer.ProcessingListener processingListener)
+    {
+        try
+        {
+            AudioInput bookAudio = new GeneralAudioInput(bookPage.getPath());
+            bookAudio.setVolume(1.0f);
+            
+            audioMixer = new AudioMixer(outputAudioFile.getPath());
+            audioMixer.setBitRate(bookAudio.getBitrate());
+            audioMixer.setSampleRate(bookAudio.getSampleRate());
+            audioMixer.setChannelCount(2); //stereo
+            audioMixer.setLoopingEnabled(true);
+            
+            audioMixer.addDataSource(bookAudio);
+            Log.d("AudioMixingRepository", "addBackgroundMusic: added audio source " + bookPage.getPath());
+            
+
+            AudioInput backgroundTrack = new GeneralAudioInput(backgroundAudio.getPath());
+            try
+            {
+                backgroundTrack.setVolume(mapVolume(backgroundVolume));
+            }
+            catch(IllegalArgumentException ex)
+            {
+                Log.e("AudioMixingRepository", ex.getMessage());
+            }
+
+            backgroundTrack.setStartTimeUs(0);
+            audioMixer.addDataSource(backgroundTrack);
+            Log.d("AudioMixingRepository", "addBackgroundMusic: added audio source " + backgroundAudio.getPath());
+        
+            
+            audioMixer.setMixingType(AudioMixer.MixingType.PARALLEL);
+            audioMixer.setProcessingListener(processingListener);
+            audioMixer.start();
+            Log.d("AudioMixingRepository", "addBackgroundMusic: started mixer");
+            audioMixer.processAsync();
+        } catch (IOException ex)
+        {
+            Log.e("AudioMixingRepository", "Exception while adding backgroiund music: " + ex.getMessage());
+        }
     }
 }

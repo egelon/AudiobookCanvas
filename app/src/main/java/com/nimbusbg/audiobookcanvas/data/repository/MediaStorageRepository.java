@@ -3,6 +3,7 @@ package com.nimbusbg.audiobookcanvas.data.repository;
 import android.app.Application;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -10,7 +11,10 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,13 +59,13 @@ public class MediaStorageRepository
     
     public File getAudioFile(String folderName, String fileName)
     {
-        File exportFolder = new File(context.getExternalFilesDir(null), folderName);
-        if (!exportFolder.exists() && !exportFolder.mkdirs())
+        File folder = new File(folderName);
+        if (!folder.exists())
         {
-            Log.v("MediaStorageRepository", "Couldn't find or create export folder " + exportFolder);
+            Log.v("MediaStorageRepository", "Couldn't find folder " + folderName);
             return null;
         }
-        return new File(exportFolder, fileName);
+        return new File(folder, fileName);
     }
     
     // Helper method to extract the number from the file name
@@ -156,5 +160,43 @@ public class MediaStorageRepository
             Log.e("MediaStorageRepository", "Error: " + ex.getMessage());
             throw ex;
         }
+    }
+    
+    public File copyResourceToFile(int resourceId, String fileName)
+    {
+        Resources resources = context.getResources();
+        InputStream inputStream = resources.openRawResource(resourceId);
+        File outputFile = new File(context.getFilesDir(), fileName);
+        
+        try (OutputStream outputStream = new FileOutputStream(outputFile))
+        {
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) > 0)
+            {
+                outputStream.write(buffer, 0, length);
+            }
+        }
+        catch (FileNotFoundException e)
+        {
+            Log.e("MediaStorageRepository", "Error: " + e.getMessage());
+        }
+        catch (IOException e)
+        {
+            Log.e("MediaStorageRepository", "Error: " + e.getMessage());
+        }
+        finally
+        {
+            try
+            {
+                inputStream.close();
+            }
+            catch (IOException e)
+            {
+                Log.e("MediaStorageRepository", "Error: " + e.getMessage());
+            }
+        }
+        
+        return outputFile;
     }
 }
