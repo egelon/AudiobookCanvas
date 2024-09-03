@@ -10,8 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.nimbusbg.audiobookcanvas.R;
-import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithTextBlocks;
 import com.nimbusbg.audiobookcanvas.data.local.entities.TextBlock;
+import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithTextBlocks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +71,7 @@ public class TextBlockAdapter extends RecyclerView.Adapter<TextBlockAdapter.Text
             case REVIEWED:
             {
                 holder.textBlockSnippet.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
-                holder.textBlockSnippet.setText("Checked!\n" + currentTextBlock.getText());
+                holder.textBlockSnippet.setText("Generated!\n" + currentTextBlock.getText());
                 completedColor = holder.itemView.getResources().getColor(R.color.textblock_done);
                 break;
             }

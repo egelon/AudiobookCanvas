@@ -2,7 +2,6 @@ package com.nimbusbg.audiobookcanvas.data.repository;
 
 import android.app.Application;
 import android.content.ContentResolver;
-
 import android.net.Uri;
 import android.util.Log;
 
@@ -35,7 +34,7 @@ public class TextFileRepository
     public TextFileRepository(Application application)
     {
         this.contentResolver = application.getApplicationContext().getContentResolver();
-        maxChunkSize = 3000;
+        maxChunkSize = 2500;
     }
     
     public void setDialogueStartChar(char dialogueStartChar)

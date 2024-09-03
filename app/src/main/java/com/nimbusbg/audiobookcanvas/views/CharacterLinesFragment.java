@@ -137,6 +137,8 @@ public class CharacterLinesFragment extends Fragment
                     public void onEnd()
                     {
                         binding.generateAudioProgressBar.setProgress(10000);
+                        binding.generateAudioProgressBar.setBackgroundColor(getResources().getColor(R.color.textblock_done));
+                        characterLinesViewModel.setCurrentTextblockDone();
                     }
                 });
             }

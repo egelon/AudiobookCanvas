@@ -12,6 +12,7 @@ import com.nimbusbg.audiobookcanvas.R;
 import com.nimbusbg.audiobookcanvas.data.listeners.MixingProcessListener;
 import com.nimbusbg.audiobookcanvas.data.listeners.TtsInitListener;
 import com.nimbusbg.audiobookcanvas.data.listeners.TtsUtteranceListener;
+import com.nimbusbg.audiobookcanvas.data.local.entities.BlockState;
 import com.nimbusbg.audiobookcanvas.data.local.entities.CharacterLine;
 import com.nimbusbg.audiobookcanvas.data.local.entities.StoryCharacter;
 import com.nimbusbg.audiobookcanvas.data.local.entities.TextBlock;
@@ -36,6 +37,7 @@ public class CharacterLinesViewModel extends AndroidViewModel
     private final MediaStorageRepository mediaStorageRepository;
     private final AudioMixingRepository audioMixingRepository;
     
+    private int currentTextblockId;
     private LiveData<TextBlockWithData> currentTextBlockWithData;
     private LiveData<List<StoryCharacter>> allCharacters;
     private LiveData<ProjectWithMetadata> projectMetadata;
@@ -55,7 +57,8 @@ public class CharacterLinesViewModel extends AndroidViewModel
         audioMixingRepository = new AudioMixingRepository(application);
         ttsInitStatus.postValue(false);
         wavFilesStitched.postValue(false);
-        currentTextBlockWithData = databaseRepository.getTextBlockWithDataByTextBlockId(textblockId);
+        currentTextblockId = textblockId;
+        currentTextBlockWithData = databaseRepository.getTextBlockWithDataByTextBlockId(currentTextblockId);
         allCharacters = databaseRepository.getAllCharactersByProjectId(projectId);
         projectMetadata = databaseRepository.getProjectWithMetadataById(projectId);
         
@@ -347,5 +350,10 @@ public class CharacterLinesViewModel extends AndroidViewModel
     public void updateCharacter(String selectedCharacter, int itemIndex, int textblockId)
     {
         databaseRepository.updateCharacter(selectedCharacter, itemIndex, textblockId);
+    }
+    
+    public void setCurrentTextblockDone()
+    {
+        databaseRepository.setTextBlockStateById(currentTextblockId, BlockState.REVIEWED);
     }
 }
