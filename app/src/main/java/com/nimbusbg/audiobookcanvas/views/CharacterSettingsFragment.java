@@ -1,15 +1,6 @@
 package com.nimbusbg.audiobookcanvas.views;
 
 import android.os.Bundle;
-
-import androidx.annotation.ColorRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.fragment.NavHostFragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,16 +11,24 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
+
 import com.nimbusbg.audiobookcanvas.R;
 import com.nimbusbg.audiobookcanvas.data.listeners.TtsInitListener;
-import com.nimbusbg.audiobookcanvas.data.local.entities.CharacterLine;
 import com.nimbusbg.audiobookcanvas.data.local.entities.StoryCharacter;
 import com.nimbusbg.audiobookcanvas.databinding.CharacterSettingsFragmentBinding;
 import com.nimbusbg.audiobookcanvas.viewmodelfactories.CharacterSettingsViewModelFactory;
 import com.nimbusbg.audiobookcanvas.viewmodels.CharacterSettingsViewModel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CharacterSettingsFragment extends Fragment
 {
@@ -37,6 +36,8 @@ public class CharacterSettingsFragment extends Fragment
     private int projectId;
     
     private CharacterSettingsViewModel characterSettingsViewModel;
+    
+    private Map<String, String> voiceNamesMap;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -51,6 +52,8 @@ public class CharacterSettingsFragment extends Fragment
     {
         setHasOptionsMenu(false);
         super.onCreate(savedInstanceState);
+    
+        voiceNamesMap = new HashMap<>();
         
         if (getArguments() != null)
         {
@@ -93,22 +96,68 @@ public class CharacterSettingsFragment extends Fragment
             }
         });
     }
+    
+    private void mapVoiceNamesToFriendlyNames(ArrayList<String> allVoices)
+    {
+        for(String voice : allVoices)
+        {
+            switch (voice)
+            {
+                case "en-us-x-tpf-local" : {voiceNamesMap.put("en-us-x-tpf-local", "US Female 1"); break;}
+                case "en-us-x-sfg-local" : {voiceNamesMap.put("en-us-x-sfg-local", "US Female 2"); break;}
+                case "en-us-x-iob-local" : {voiceNamesMap.put("en-us-x-iob-local", "US Female 3"); break;}
+                case "en-us-x-iom-local" : {voiceNamesMap.put("en-us-x-iom-local", "US Male 1"); break;}
+                case "en-US-language"    : {voiceNamesMap.put("en-US-language"   , "US Female 4"); break;}
+                case "en-us-x-tpd-local" : {voiceNamesMap.put("en-us-x-tpd-local", "US Male 2"); break;}
+                case "en-us-x-iog-local" : {voiceNamesMap.put("en-us-x-iog-local", "US Female 5"); break;}
+                case "en-us-x-tpc-local" : {voiceNamesMap.put("en-us-x-tpc-local", "US Female 6"); break;}
+                case "en-us-x-iol-local" : {voiceNamesMap.put("en-us-x-iol-local", "US Male 3"); break;}
+                case "en-gb-x-gba-local" : {voiceNamesMap.put("en-gb-x-gba-local", "UK Female 1"); break;}
+                case "en-gb-x-rjs-local" : {voiceNamesMap.put("en-gb-x-rjs-local", "UK Male 1"); break;}
+                case "en-gb-x-gbg-local" : {voiceNamesMap.put("en-gb-x-gbg-local", "UK Female 2"); break;}
+                case "en-gb-x-gbd-local" : {voiceNamesMap.put("en-gb-x-gbd-local", "UK Male 2"); break;}
+                case "en-gb-x-gbb-local" : {voiceNamesMap.put("en-gb-x-gbb-local", "UK Male 3"); break;}
+                case "en-gb-x-gbc-local" : {voiceNamesMap.put("en-gb-x-gbc-local", "UK Female 3"); break;}
+                case "en-GB-language"    : {voiceNamesMap.put("en-GB-language"   , "UK Male 4"); break;}
+            }
+        }
+    }
+    
+    private String getKeyByValue(String value)
+    {
+        for (Map.Entry<String, String> entry : voiceNamesMap.entrySet())
+        {
+            if (entry.getValue().equals(value))
+            {
+                return entry.getKey();
+            }
+        }
+        return null; // Return null if no key is found for the given value
+    }
 
     private void loadCharacters(List<StoryCharacter> storyCharacters)
     {
         ArrayList<String> allVoices = characterSettingsViewModel.getExtendedEnglishVoices();
+        mapVoiceNamesToFriendlyNames(allVoices);
+        ArrayList<String> friendlyVoiceNames = new ArrayList<>();
+        for(String voice : allVoices)
+        {
+            friendlyVoiceNames.add(voiceNamesMap.get(voice));
+        }
     
         binding.characterSettingsLayout.removeAllViews();
         for (int i = 0; i < storyCharacters.size(); i++)
         {
             String currentVoice = storyCharacters.get(i).getVoice();
+            
+            
             View itemView = getLayoutInflater().inflate(R.layout.character_settings_item, binding.characterSettingsLayout, false);
             Spinner voicePicker = itemView.findViewById(R.id.characterSettingsVoice);
             TextView characterName = itemView.findViewById(R.id.characterSettingsName);
             Button playVoiceSampleButton = itemView.findViewById(R.id.playSampleVoiceBtn);
     
             // Attach all voices to the spinner
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, allVoices);
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, friendlyVoiceNames);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             voicePicker.setAdapter(adapter);
             voicePicker.setTag(i);
@@ -128,7 +177,7 @@ public class CharacterSettingsFragment extends Fragment
                         int selectedCharacterIndex = (int) parent.getTag();
                         StoryCharacter selectedCharacter = storyCharacters.get(selectedCharacterIndex);
                         // Here you can call your function using the selected item
-                        characterSettingsViewModel.updateCharacterVoice(selectedCharacter.getName(), selectedVoice);
+                        characterSettingsViewModel.updateCharacterVoice(selectedCharacter.getName(), getKeyByValue(selectedVoice));
                     }
                 }
     
@@ -140,7 +189,8 @@ public class CharacterSettingsFragment extends Fragment
             });
     
             // Set the pre-selected value for the spinner
-            int currentVoiceId = adapter.getPosition(currentVoice);
+            String friendlyCurrentVoice = voiceNamesMap.get(currentVoice);
+            int currentVoiceId = adapter.getPosition(friendlyCurrentVoice);
             voicePicker.setSelection(currentVoiceId);
             int backgroundColor = itemView.getResources().getColor(R.color.voice_general_background);;
             if(storyCharacters.get(i).getGender().equals("male"))

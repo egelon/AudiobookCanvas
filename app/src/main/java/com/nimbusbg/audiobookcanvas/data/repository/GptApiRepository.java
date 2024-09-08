@@ -11,8 +11,10 @@ import androidx.preference.PreferenceManager;
 import com.google.gson.Gson;
 import com.nimbusbg.audiobookcanvas.R;
 import com.nimbusbg.audiobookcanvas.data.listeners.ApiResponseListener;
+import com.nimbusbg.audiobookcanvas.data.network.CharacterLinesResponseSchema;
 import com.nimbusbg.audiobookcanvas.data.network.GptChatMessage;
 import com.nimbusbg.audiobookcanvas.data.network.GptChatRequest;
+import com.nimbusbg.audiobookcanvas.data.network.GptResponseFormat;
 import com.nimbusbg.audiobookcanvas.data.singletons.OkHttpSingleton;
 
 import java.io.IOException;
@@ -55,6 +57,7 @@ public class GptApiRepository
         //requestBody.setModel("gpt-3.5-turbo");
     
         requestBody.setModel("ft:gpt-4o-2024-08-06:personal::A3PcsOfF");
+        requestBody.setResponse_format(new GptResponseFormat(new CharacterLinesResponseSchema().getSchema()));
         //requestBody.setModel("gpt-4");
 
         String namedEntityRecognitionPrompt = "You are a Named Entity Recognition web server. Perform Named Entity Recognition on the following text fragment, following these rules. " +

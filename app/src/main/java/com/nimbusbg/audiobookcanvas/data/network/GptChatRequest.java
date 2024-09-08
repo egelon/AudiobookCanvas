@@ -13,6 +13,7 @@ public class GptChatRequest
     double frequency_penalty;
     double presence_penalty;
     
+    private GptResponseFormat response_format;
     
     // Add getters and setters.
     
@@ -84,5 +85,15 @@ public class GptChatRequest
     public void setPresence_penalty(double presence_penalty)
     {
         this.presence_penalty = presence_penalty;
+    }
+    
+    public GptResponseFormat getResponse_format()
+    {
+        return response_format;
+    }
+    
+    public void setResponse_format(GptResponseFormat response_format)
+    {
+        this.response_format = response_format;
     }
 }
