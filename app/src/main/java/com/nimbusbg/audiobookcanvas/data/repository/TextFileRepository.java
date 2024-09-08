@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.nimbusbg.audiobookcanvas.data.listeners.FileOperationListener;
+import com.nimbusbg.audiobookcanvas.data.listeners.FileSampleListener;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -71,6 +72,49 @@ public class TextFileRepository
         inputStream.close();
         return stringBuilder.toString();
     }
+    
+    private String getTextStartSample(Uri uri, int sampleLength) throws IOException
+    {
+        InputStream inputStream = contentResolver.openInputStream(uri);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        StringBuilder stringBuilder = new StringBuilder();
+        int totalCharsRead = 0;
+        char[] buffer = new char[500]; // Buffer size can be adjusted
+        int charsRead;
+    
+        while ((charsRead = reader.read(buffer)) != -1)
+        {
+            if (totalCharsRead + charsRead > sampleLength)
+            {
+                int remainingChars = sampleLength - totalCharsRead;
+                stringBuilder.append(buffer, 0, remainingChars);
+                break;
+            }
+            else
+            {
+                stringBuilder.append(buffer, 0, charsRead);
+                totalCharsRead += charsRead;
+            }
+        }
+    
+        reader.close();
+        inputStream.close();
+        return stringBuilder.toString();
+    }
+    
+    public void getTextStartSample(Uri uri, FileSampleListener listener)
+    {
+        fileOperationExecutor.execute(() -> {
+            String textSample;
+            try {
+                textSample = getTextStartSample(uri, maxChunkSize);
+                listener.OnSampleLoaded(textSample);
+            } catch (IOException e) {
+                Log.e("Error", e.getMessage());
+            }
+        });
+    }
+    
     
     private ArrayList<String> chunkFileData(String fileData)
     {

@@ -15,6 +15,7 @@ import com.nimbusbg.audiobookcanvas.data.network.CharacterLinesResponseSchema;
 import com.nimbusbg.audiobookcanvas.data.network.GptChatMessage;
 import com.nimbusbg.audiobookcanvas.data.network.GptChatRequest;
 import com.nimbusbg.audiobookcanvas.data.network.GptResponseFormat;
+import com.nimbusbg.audiobookcanvas.data.network.TextLanguageResponseSchema;
 import com.nimbusbg.audiobookcanvas.data.singletons.OkHttpSingleton;
 
 import java.io.IOException;
@@ -122,6 +123,35 @@ public class GptApiRepository
     public void getCompletion(String[] textLines, String tag, ApiResponseListener responseListener)
     {
         GptChatRequest requestBody =  createCompletionRequestBody(textLines);
+        Log.d("GptApiRepository", "tag: " + tag + "\nrequestBody:\n" + requestBody.toString());
+        enqueueRequest(requestBody, responseListener);
+    }
+    
+    public void getTextLanguage(String textSample, String tag, ApiResponseListener responseListener)
+    {
+        GptChatRequest requestBody = new GptChatRequest();
+        requestBody.setModel("gpt-4o-2024-08-06");
+        requestBody.setResponse_format(new GptResponseFormat(new TextLanguageResponseSchema().getSchema()));
+        String languageRecognitionPrompt = "You are a language recogniser service. You need to recognise the language of the following snippet of text.\n"+
+                "Your response needs to be a well-formed JSON, containing an object with the following properties: \n"+
+                "'language' - this property must contain the ISO code of the language that the text snippet is written in. Here are the possible values for this property:\n"+
+                "en, fr, de, es, pt, it, ru, pl, ja, zh, ko, bg, el, sr, da, sv, fi, no, nl, he\n"+
+                "Here is the text snippet:";
+        
+        List<GptChatMessage> messages = new ArrayList<>();
+        // Create the system message object
+        messages.add(new GptChatMessage("system", languageRecognitionPrompt));
+    
+        // Create the second message object
+        messages.add(new GptChatMessage("user", textSample));
+    
+        requestBody.setMessages(messages);
+        requestBody.setTemperature(0);
+        requestBody.setMax_tokens(1700);
+        requestBody.setTop_p(1);
+        requestBody.setFrequency_penalty(0.0);
+        requestBody.setPresence_penalty(0.0);
+        
         Log.d("GptApiRepository", "tag: " + tag + "\nrequestBody:\n" + requestBody.toString());
         enqueueRequest(requestBody, responseListener);
     }

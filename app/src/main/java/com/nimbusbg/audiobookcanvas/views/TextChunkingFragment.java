@@ -1,28 +1,23 @@
 package com.nimbusbg.audiobookcanvas.views;
 
-import android.content.Context;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
 
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import com.nimbusbg.audiobookcanvas.R;
-import com.nimbusbg.audiobookcanvas.data.listeners.DeletedItemListener;
-import com.nimbusbg.audiobookcanvas.data.listeners.FileOperationListener;
-import com.nimbusbg.audiobookcanvas.data.listeners.InsertedItemListener;
 import com.nimbusbg.audiobookcanvas.data.local.entities.TextBlock;
 import com.nimbusbg.audiobookcanvas.databinding.FragmentTextChunkingBinding;
 import com.nimbusbg.audiobookcanvas.viewmodelfactories.TextChunkingViewModelFactory;
 import com.nimbusbg.audiobookcanvas.viewmodels.TextChunkingViewModel;
-import java.util.ArrayList;
+
 import java.util.List;
 
 public class TextChunkingFragment extends Fragment
@@ -73,38 +68,13 @@ public class TextChunkingFragment extends Fragment
         });
     
         textChunkingViewModel = new ViewModelProvider(this, new TextChunkingViewModelFactory(requireActivity().getApplication(), projectId, textFileURI)).get(TextChunkingViewModel.class);
-        //TODO: we need some good way of detecting this, and this needs to be stored with the project settings
-        textChunkingViewModel.setDialogueStartEndChar('“', '”');
+    
+    
+        textChunkingViewModel.getTextFileLanguage();
         
         binding.loadingChunksText.setText(R.string.loading_text_loading_file);
         //load chunks into the database
-        textChunkingViewModel.chunkInputFile(new FileOperationListener()
-        {
-            @Override
-            public void OnFileLoaded(String data)
-            {
-                Log.d("TextChunkingFragment", "OnFileLoaded");
-            }
-    
-            @Override
-            public void OnFileChunked(ArrayList<String> chunks)
-            {
-                textChunkingViewModel.insertTextBlocks(chunks, new InsertedItemListener()
-                {
-                    @Override
-                    public void onInsert(int itemId)
-                    {
-                        textChunkingViewModel.setAreTextBlocksInserted(true);
-                    }
-                });
-            }
-    
-            @Override
-            public void OnChunkingStopped()
-            {
-                Log.d("TextChunkingFragment", "textChunkingViewModel.chunkInputFile OnChunkingStopped");
-            }
-        });
+        
     
         textChunkingViewModel.getTextBlocksByProjectId(projectId).observe(getViewLifecycleOwner(), new Observer<List<TextBlock>>()
         {
