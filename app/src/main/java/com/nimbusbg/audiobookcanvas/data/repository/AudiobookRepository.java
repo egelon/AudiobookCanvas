@@ -18,6 +18,7 @@ import com.nimbusbg.audiobookcanvas.data.local.entities.BlockState;
 import com.nimbusbg.audiobookcanvas.data.local.entities.CharacterLine;
 import com.nimbusbg.audiobookcanvas.data.local.entities.StoryCharacter;
 import com.nimbusbg.audiobookcanvas.data.local.entities.TextBlock;
+import com.nimbusbg.audiobookcanvas.data.local.relations.MetadataWithCharacters;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithTextBlocks;
 import com.nimbusbg.audiobookcanvas.data.local.relations.TextBlockWithData;
@@ -98,6 +99,13 @@ public class AudiobookRepository
         });
     }
     
+    public void storeProjectLanguageByProjectId(int id, String languageISOCode)
+    {
+        AudiobookProjectDatabase.databaseWriteExecutor.execute(() -> {
+            projectWithMetadataDao.updateProjectLanguageById(id, languageISOCode);
+        });
+    }
+    
     
     public void insertTextBlocks(int projectID, ArrayList<String> textChunks, InsertedItemListener onInsertListener)
     {
@@ -151,9 +159,19 @@ public class AudiobookRepository
         return textBlockWithDataDao.getAllCharactersByProjectId(prjId);
     }
     
+    public LiveData<MetadataWithCharacters> getMetadataWithAllCharactersByProjectId(int prjId)
+    {
+        return textBlockWithDataDao.getMetadataWithAllCharactersByProjectId(prjId);
+    }
+    
     public LiveData<TextBlockWithData> getTextBlockWithDataByTextBlockId(int textblockId)
     {
         return textBlockWithDataDao.getTextBlockWithDataByTextBlockId(textblockId);
+    }
+    
+    public LiveData<AudiobookData> getMetadataByProjectId(int id)
+    {
+        return projectWithMetadataDao.getMetadataByProjectId(id);
     }
     
     public void updateCharacter(String selectedCharacter, int itemIndex, int textblockId)

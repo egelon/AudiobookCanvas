@@ -9,6 +9,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.nimbusbg.audiobookcanvas.R;
+import com.nimbusbg.audiobookcanvas.data.listeners.ApiResponseListener;
 import com.nimbusbg.audiobookcanvas.data.listeners.MixingProcessListener;
 import com.nimbusbg.audiobookcanvas.data.listeners.TtsInitListener;
 import com.nimbusbg.audiobookcanvas.data.listeners.TtsUtteranceListener;
@@ -20,14 +21,19 @@ import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
 import com.nimbusbg.audiobookcanvas.data.local.relations.TextBlockWithData;
 import com.nimbusbg.audiobookcanvas.data.repository.AudioMixingRepository;
 import com.nimbusbg.audiobookcanvas.data.repository.AudiobookRepository;
+import com.nimbusbg.audiobookcanvas.data.repository.GptApiRepository;
 import com.nimbusbg.audiobookcanvas.data.repository.MediaStorageRepository;
 import com.nimbusbg.audiobookcanvas.data.repository.TtsRepository;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Random;
 
+import okhttp3.Call;
+import okhttp3.Response;
 import zeroonezero.android.audio_mixer.AudioMixer;
 
 public class CharacterLinesViewModel extends AndroidViewModel
@@ -36,17 +42,20 @@ public class CharacterLinesViewModel extends AndroidViewModel
     private final TtsRepository ttsRepository;
     private final MediaStorageRepository mediaStorageRepository;
     private final AudioMixingRepository audioMixingRepository;
+    private GptApiRepository gptApiRepository;
     
     private int currentTextblockId;
     private LiveData<TextBlockWithData> currentTextBlockWithData;
     private LiveData<List<StoryCharacter>> allCharacters;
     private LiveData<ProjectWithMetadata> projectMetadata;
-
-    private AtomicInteger processedUtterances;
+    
     private MutableLiveData<Boolean> ttsInitStatus = new MutableLiveData<>();
     private MutableLiveData<Boolean> wavFilesStitched = new MutableLiveData<>();
     
+    private MutableLiveData<Integer> processedUtterances;
+    
     private AudioMixer audioMixer;
+    private int numCharacterLines;
     
     public CharacterLinesViewModel(@NonNull Application application, int textblockId, int projectId)
     {
@@ -55,14 +64,26 @@ public class CharacterLinesViewModel extends AndroidViewModel
         ttsRepository = new TtsRepository(application);
         mediaStorageRepository = new MediaStorageRepository(application);
         audioMixingRepository = new AudioMixingRepository(application);
+        gptApiRepository = new GptApiRepository(application);
         ttsInitStatus.postValue(false);
         wavFilesStitched.postValue(false);
         currentTextblockId = textblockId;
         currentTextBlockWithData = databaseRepository.getTextBlockWithDataByTextBlockId(currentTextblockId);
         allCharacters = databaseRepository.getAllCharactersByProjectId(projectId);
         projectMetadata = databaseRepository.getProjectWithMetadataById(projectId);
+    
+        processedUtterances = new MutableLiveData<Integer>(0);
+        numCharacterLines = 0;
+        
         
     }
+    
+    public void setNumCharacterLines(int numCharacterLines)
+    {
+        this.numCharacterLines = numCharacterLines;
+    }
+    
+    
     
     public LiveData<Boolean> getTtsInitStatus()
     {
@@ -84,7 +105,8 @@ public class CharacterLinesViewModel extends AndroidViewModel
     
     private void waitForTTS()
     {
-        ttsRepository.initTTS(new TtsInitListener()
+        String isoLanguageCode = projectMetadata.getValue().audiobookData.getLanguage();
+        ttsRepository.initTTS(isoLanguageCode, new TtsInitListener()
         {
             @Override
             public void OnInitSuccess()
@@ -131,7 +153,7 @@ public class CharacterLinesViewModel extends AndroidViewModel
         return "en-us-x-tpd-network";
     }
     
-    private static float mapIntToFloatRange(int currentVal, int maxVal) {
+    public static float mapIntToFloatRange(int currentVal, int maxVal) {
         if (currentVal < 0 || currentVal > maxVal) {
             throw new IllegalArgumentException("currentVal must be within the range of 0 to maxVal.");
         }
@@ -142,30 +164,55 @@ public class CharacterLinesViewModel extends AndroidViewModel
         return (float) currentVal / maxVal;
     }
     
+    public MutableLiveData<Integer> getProcessedUtterances()
+    {
+        return processedUtterances;
+    }
+    
+    public int getNumCharacterLines()
+    {
+        return numCharacterLines;
+    }
+    
     public void recordAllCharacterLines(MixingProcessListener processingListener)
     {
         wavFilesStitched.postValue(false);
-        processedUtterances = new AtomicInteger(0);
-        int currentTextBlockId = currentTextBlockWithData.getValue().textBlock.getId();
-        String generatedAudioPath = currentTextBlockWithData.getValue().textBlock.getGeneratedAudioPath();
+
+        processedUtterances.postValue(0);
         
         List<CharacterLine> characterLines = currentTextBlockWithData.getValue().characterLines;
         String audiobookName = projectMetadata.getValue().project.getOutput_audiobook_path();
-
-
+        
         for (CharacterLine line: characterLines)
         {
-            float progress = 0.0f;
-            try
+    
+            recordNetworkVoiceCharacterLine(audiobookName, line, new ApiResponseListener()
             {
-                progress = mapIntToFloatRange(processedUtterances.get(), characterLines.size());
-            }
-            catch (IllegalArgumentException e)
-            {
-                Log.e("CharacterLinesViewModel", "recordAllCharacterLines, " + e.getMessage());
-            }
+                @Override
+                public void OnResponse(@NonNull Call call, @NonNull Response response) throws IOException
+                {
+                    processedUtterances.postValue(processedUtterances.getValue() + 1);
+                }
+    
+                @Override
+                public void OnError(@NonNull Call call, @NonNull IOException e)
+                {
+                    processedUtterances.postValue(processedUtterances.getValue() + 1);
+                }
+            });
             
-            float finalProgress = progress;
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            /*
             recordCharacterLine(audiobookName, line, new TtsUtteranceListener()
             {
                 @Override
@@ -177,15 +224,15 @@ public class CharacterLinesViewModel extends AndroidViewModel
                 @Override
                 public void OnUtteranceDone(String s)
                 {
-                    processedUtterances.getAndIncrement();
-                    processingListener.onProgress(finalProgress);
+                    processedUtterances.postValue(processedUtterances.getValue() + 1);
+                    //processingListener.onProgress(finalProgress);
                     Log.d("CharacterLinesViewModel", "OnUtteranceDone: " + s);
                 }
     
                 @Override
                 public void OnUtteranceError(String s)
                 {
-                    processedUtterances.getAndIncrement();
+                    processedUtterances.postValue(processedUtterances.getValue() + 1);
                     //if(processedUtterances.get() >= characterLines.size())
                     //{
                     //    combineVoices(audiobookName, currentTextBlockId, generatedAudioPath, processingListener);
@@ -193,23 +240,17 @@ public class CharacterLinesViewModel extends AndroidViewModel
                     Log.e("CharacterLinesViewModel", "OnUtteranceError: " + s);
                 }
             });
+            
+             */
         }
-        
-        while (processedUtterances.get() < characterLines.size())
-        {
-        
-        }
-    
-        if(processedUtterances.get() >= characterLines.size())
-        {
-            combineVoices(audiobookName, currentTextBlockId, generatedAudioPath, processingListener);
-        }
-    
-        
     }
     
-    private void combineVoices(String audiobookName, int currentTextBlockId, String generatedAudioPath, MixingProcessListener processingListener)
+    public void combineVoices(MixingProcessListener processingListener)
     {
+        String audiobookName = projectMetadata.getValue().project.getOutput_audiobook_path();
+        int currentTextBlockId = currentTextBlockWithData.getValue().textBlock.getId();
+        String generatedAudioPath = currentTextBlockWithData.getValue().textBlock.getGeneratedAudioPath();
+    
         // Create the temporary folder if it doesn't exist
         File tmpFolder = mediaStorageRepository.makeFolderInAppStorage(audiobookName);
     
@@ -322,10 +363,9 @@ public class CharacterLinesViewModel extends AndroidViewModel
     public void recordCharacterLine(String folderName, CharacterLine characterLine, TtsUtteranceListener listener)
     {
         TextBlock currentTextBlock = currentTextBlockWithData.getValue().textBlock;
-        String characterLineStr = currentTextBlock.getLineByIndex(characterLine.getStartIndex());
         String characterVoice = getVoiceByCharacterName(characterLine.getCharacterName());
         
-        ttsRepository.speakCharacterLine(characterLineStr, characterVoice, folderName, currentTextBlock.getLineAudioPath(characterLine.getStartIndex()), new TtsUtteranceListener()
+        ttsRepository.speakCharacterLine(characterLine.getLine(), characterVoice, folderName, currentTextBlock.getLineAudioPath(characterLine.getStartIndex()), new TtsUtteranceListener()
         {
             @Override
             public void OnUtteranceStart(String s)
@@ -345,6 +385,73 @@ public class CharacterLinesViewModel extends AndroidViewModel
                 listener.OnUtteranceError(s);
             }
         });
+    }
+    
+    public void recordNetworkVoiceCharacterLine(String folderName, CharacterLine characterLine, ApiResponseListener listener)
+    {
+        TextBlock currentTextBlock = currentTextBlockWithData.getValue().textBlock;
+        
+        String fileName = currentTextBlock.getLineAudioPath(characterLine.getStartIndex());
+    
+        String[] voices = {
+                "alloy", "echo", "fable", "onyx", "nova", "shimmer"
+        };
+    
+        Random random = new Random();
+        String randomVoice = voices[random.nextInt(voices.length)];
+        
+        gptApiRepository.getSpeech(characterLine.getLine(), randomVoice, fileName, new ApiResponseListener()
+        {
+            @Override
+            public void OnResponse(@NonNull Call call, @NonNull Response response)
+            {
+                
+                try
+                {
+                    listener.OnResponse(call, response);
+                    
+                    //String appDirectory = mediaStorageRepository.getAppDirectory().getAbsolutePath();
+                    //File sampleAudioFile = mediaStorageRepository.getAudioFile(appDirectory + "/New Audiobook", fileName);
+    
+    
+    
+                    File exportFolder = new File(getApplication().getExternalFilesDir(null), folderName);
+                    if (!exportFolder.exists() && !exportFolder.mkdirs())
+                    {
+                        Log.v("TTS_REPOSITORY", "Couldn't find or create export folder " + exportFolder);
+                    }
+                    File sampleAudioFile =  new File(exportFolder, fileName);
+                
+                    InputStream is = response.body().byteStream();
+                    FileOutputStream fos = new FileOutputStream(sampleAudioFile);
+                    int read = 0;
+                    byte[] buffer = new byte[32768];
+                    while ((read = is.read(buffer)) > 0)
+                    {
+                        fos.write(buffer, 0, read);
+                    }
+                
+                    fos.close();
+                    is.close();
+    
+                    listener.OnResponse(call, response);
+                    
+                }
+                catch (IOException e)
+                {
+                    Log.e("Error", e.getMessage());
+                }
+            }
+        
+            @Override
+            public void OnError(@NonNull Call call, @NonNull IOException e)
+            {
+                Log.e("Error", e.getMessage());
+            }
+        });
+        
+        
+        
     }
     
     public void updateCharacter(String selectedCharacter, int itemIndex, int textblockId)

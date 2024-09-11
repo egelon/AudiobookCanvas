@@ -15,6 +15,7 @@ import com.nimbusbg.audiobookcanvas.data.network.CharacterLinesResponseSchema;
 import com.nimbusbg.audiobookcanvas.data.network.GptChatMessage;
 import com.nimbusbg.audiobookcanvas.data.network.GptChatRequest;
 import com.nimbusbg.audiobookcanvas.data.network.GptResponseFormat;
+import com.nimbusbg.audiobookcanvas.data.network.GptTextToSpeechRequest;
 import com.nimbusbg.audiobookcanvas.data.network.TextLanguageResponseSchema;
 import com.nimbusbg.audiobookcanvas.data.singletons.OkHttpSingleton;
 
@@ -30,6 +31,7 @@ import okhttp3.Response;
 public class GptApiRepository
 {
     private String openaiCompletionsEndpoint;
+    private String openaiSpeechEndpoint;
     private String API_key;
     private char dialogueStartChar, dialogueEndChar;
     
@@ -45,21 +47,20 @@ public class GptApiRepository
         
         }
         this.openaiCompletionsEndpoint = application.getString(R.string.openai_completions_endpoint);
+        this.openaiSpeechEndpoint = application.getString(R.string.openai_speech_endpoint);
     }
     
     public void setDialogueStartChar(char dialogueStartChar) { this.dialogueStartChar = dialogueStartChar; }
     public void setDialogueEndChar(char dialogueEndChar) { this.dialogueEndChar = dialogueEndChar; }
     
-    private GptChatRequest createCompletionRequestBody(String[] textLines)
+    private GptChatRequest createCompletionRequestBody(String text)
     {
         GptChatRequest requestBody = new GptChatRequest();
         
         // adding params to json object.
-        //requestBody.setModel("gpt-3.5-turbo");
-    
+
         requestBody.setModel("ft:gpt-4o-2024-08-06:personal::A3PcsOfF");
         requestBody.setResponse_format(new GptResponseFormat(new CharacterLinesResponseSchema().getSchema()));
-        //requestBody.setModel("gpt-4");
 
         String namedEntityRecognitionPrompt = "You are a Named Entity Recognition web server. Perform Named Entity Recognition on the following text fragment, following these rules. " +
                 "This symbol always marks the start of a dialogue line: \"" + dialogueStartChar + "\". " +
@@ -101,11 +102,7 @@ public class GptApiRepository
         messages.add(new GptChatMessage("system", namedEntityRecognitionPrompt));
         
         String prompt = "[Input]\n";;
-        for(int i=0; i<textLines.length; i++)
-        {
-            prompt = prompt.concat(textLines[i]);
-            prompt = prompt.concat("\n");
-        }
+        prompt = prompt.concat(text);
         prompt = prompt.concat("\n[Output]");
         
         // Create the second message object
@@ -120,11 +117,12 @@ public class GptApiRepository
         return requestBody;
     }
     
-    public void getCompletion(String[] textLines, String tag, ApiResponseListener responseListener)
+    public void getCompletion(String text, String tag, ApiResponseListener responseListener)
     {
-        GptChatRequest requestBody =  createCompletionRequestBody(textLines);
+        GptChatRequest requestBody =  createCompletionRequestBody(text);
         Log.d("GptApiRepository", "tag: " + tag + "\nrequestBody:\n" + requestBody.toString());
-        enqueueRequest(requestBody, responseListener);
+        Gson gson = new Gson();
+        enqueueRequest(openaiCompletionsEndpoint, gson.toJson(requestBody), responseListener);
     }
     
     public void getTextLanguage(String textSample, String tag, ApiResponseListener responseListener)
@@ -134,8 +132,8 @@ public class GptApiRepository
         requestBody.setResponse_format(new GptResponseFormat(new TextLanguageResponseSchema().getSchema()));
         String languageRecognitionPrompt = "You are a language recogniser service. You need to recognise the language of the following snippet of text.\n"+
                 "Your response needs to be a well-formed JSON, containing an object with the following properties: \n"+
-                "'language' - this property must contain the ISO code of the language that the text snippet is written in. Here are the possible values for this property:\n"+
-                "en, fr, de, es, pt, it, ru, pl, ja, zh, ko, bg, el, sr, da, sv, fi, no, nl, he\n"+
+                "'language' - this property must contain the ISO 639 alpha-2 code of the language that the text snippet is written in. Here are all the possible values for this property:\n"+
+                "en_US, en_GB, fr_FR, de_DE, es_ES, pt_PT, it_IT, ru_RU, bg_BG, el_GR\n"+
                 "Here is the text snippet:";
         
         List<GptChatMessage> messages = new ArrayList<>();
@@ -153,13 +151,21 @@ public class GptApiRepository
         requestBody.setPresence_penalty(0.0);
         
         Log.d("GptApiRepository", "tag: " + tag + "\nrequestBody:\n" + requestBody.toString());
-        enqueueRequest(requestBody, responseListener);
+        Gson gson = new Gson();
+        enqueueRequest(openaiCompletionsEndpoint, gson.toJson(requestBody), responseListener);
     }
     
-    private void enqueueRequest(GptChatRequest jsonRequestBody, ApiResponseListener responseListener)
+    public void getSpeech(String input, String voice, String tag, ApiResponseListener responseListener)
     {
+        GptTextToSpeechRequest requestBody = new GptTextToSpeechRequest("tts-1", input, voice, "wav");
+        Log.d("GptApiRepository", "tag: " + tag + "\nrequestBody:\n" + requestBody.toString());
         Gson gson = new Gson();
-        Request request = OkHttpSingleton.getInstance(appContext).createRequest(openaiCompletionsEndpoint, gson.toJson(jsonRequestBody), API_key);
+        enqueueRequest(openaiSpeechEndpoint, gson.toJson(requestBody), responseListener);
+    }
+    
+    private void enqueueRequest(String endpoint, String jsonRequestBody, ApiResponseListener responseListener)
+    {
+        Request request = OkHttpSingleton.getInstance(appContext).createRequest(endpoint, jsonRequestBody, API_key);
         OkHttpSingleton.getInstance(appContext).getClient().newCall(request).enqueue(new Callback()
         {
             @Override
@@ -169,7 +175,7 @@ public class GptApiRepository
             }
     
             @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response)
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException
             {
                 responseListener.OnResponse(call, response);
             }

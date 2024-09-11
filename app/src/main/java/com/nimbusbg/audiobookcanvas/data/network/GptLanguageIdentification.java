@@ -27,26 +27,16 @@ public class GptLanguageIdentification
     {
         switch(this.language)
         {
-            case "en": {this.dialogue_start = '“'; break;}
-            case "fr": {this.dialogue_start = '«'; break;}
-            case "de": {this.dialogue_start = '„'; break;}
-            case "es": {this.dialogue_start = '«'; break;}
-            case "pt": {this.dialogue_start = '—'; break;}
-            case "it": {this.dialogue_start = '«'; break;}
-            case "ru": {this.dialogue_start = '«'; break;}
-            case "pl": {this.dialogue_start = '„'; break;}
-            case "ja": {this.dialogue_start = '「'; break;}
-            case "zh": {this.dialogue_start = '“'; break;}
-            case "ko": {this.dialogue_start = '「'; break;}
-            case "bg": {this.dialogue_start = '—'; break;}
-            case "el": {this.dialogue_start = '«'; break;}
-            case "sr": {this.dialogue_start = '„'; break;}
-            case "da": {this.dialogue_start = '»'; break;}
-            case "sv": {this.dialogue_start = '”'; break;}
-            case "fi": {this.dialogue_start = '”'; break;}
-            case "no": {this.dialogue_start = '«'; break;}
-            case "nl": {this.dialogue_start = '„'; break;}
-            case "he": {this.dialogue_start = '„'; break;}
+            case "en_US": {this.dialogue_start = '\u201C'; break;}
+            case "en_GB": {this.dialogue_start = '\u201C'; break;}
+            case "fr_FR": {this.dialogue_start = '\u00AB'; break;}
+            case "de_DE": {this.dialogue_start = '\u201E'; break;}
+            case "es_ES": {this.dialogue_start = '\u00AB'; break;}
+            case "pt_PT": {this.dialogue_start = '\u2014'; break;}
+            case "it_IT": {this.dialogue_start = '\u00AB'; break;}
+            case "ru_RU": {this.dialogue_start = '\u00AB'; break;}
+            case "bg_BG": {this.dialogue_start = '\u2014'; break;}
+            case "el_GR": {this.dialogue_start = '\u00AB'; break;}
         }
         return this.dialogue_start;
     }
@@ -55,26 +45,16 @@ public class GptLanguageIdentification
     {
         switch(this.language)
         {
-            case "en": {this.dialogue_end = '”'; break;}
-            case "fr": {this.dialogue_end = '»'; break;}
-            case "de": {this.dialogue_end = '“'; break;}
-            case "es": {this.dialogue_end = '»'; break;}
-            case "pt": {this.dialogue_end = '—'; break;}
-            case "it": {this.dialogue_end = '»'; break;}
-            case "ru": {this.dialogue_end = '»'; break;}
-            case "pl": {this.dialogue_end = '”'; break;}
-            case "ja": {this.dialogue_end = '」'; break;}
-            case "zh": {this.dialogue_end = '”'; break;}
-            case "ko": {this.dialogue_end = '」'; break;}
-            case "bg": {this.dialogue_end = '—'; break;}
-            case "el": {this.dialogue_end = '»'; break;}
-            case "sr": {this.dialogue_end = '”'; break;}
-            case "da": {this.dialogue_end = '«'; break;}
-            case "sv": {this.dialogue_end = '”'; break;}
-            case "fi": {this.dialogue_end = '”'; break;}
-            case "no": {this.dialogue_end = '»'; break;}
-            case "nl": {this.dialogue_end = '”'; break;}
-            case "he": {this.dialogue_end = '”'; break;}
+            case "en_US": {this.dialogue_end = '\u201D'; break;}
+            case "en_GB": {this.dialogue_end = '\u201D'; break;}
+            case "fr_FR": {this.dialogue_end = '\u00BB'; break;}
+            case "de_DE": {this.dialogue_end = '\u201C'; break;}
+            case "es_ES": {this.dialogue_end = '\u00BB'; break;}
+            case "pt_PT": {this.dialogue_end = '\u2014'; break;}
+            case "it_IT": {this.dialogue_end = '\u00BB'; break;}
+            case "ru_RU": {this.dialogue_end = '\u00BB'; break;}
+            case "bg_BG": {this.dialogue_end = '\u2014'; break;}
+            case "el_GR": {this.dialogue_end = '\u00BB'; break;}
         }
         return this.dialogue_end;
     }

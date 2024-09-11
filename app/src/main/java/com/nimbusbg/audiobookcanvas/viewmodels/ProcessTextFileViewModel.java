@@ -10,8 +10,12 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-
 import com.google.gson.Gson;
+import com.nimbusbg.audiobookcanvas.data.listeners.ApiResponseListener;
+import com.nimbusbg.audiobookcanvas.data.listeners.FileOperationListener;
+import com.nimbusbg.audiobookcanvas.data.listeners.InsertedItemListener;
+import com.nimbusbg.audiobookcanvas.data.listeners.InsertedMultipleItemsListener;
+import com.nimbusbg.audiobookcanvas.data.listeners.TtsInitListener;
 import com.nimbusbg.audiobookcanvas.data.local.entities.BlockState;
 import com.nimbusbg.audiobookcanvas.data.local.entities.CharacterLine;
 import com.nimbusbg.audiobookcanvas.data.local.entities.StoryCharacter;
@@ -22,21 +26,14 @@ import com.nimbusbg.audiobookcanvas.data.network.GptCharacter;
 import com.nimbusbg.audiobookcanvas.data.network.GptCharacterLine;
 import com.nimbusbg.audiobookcanvas.data.network.GptChatResponse;
 import com.nimbusbg.audiobookcanvas.data.network.GptCompletion;
-import com.nimbusbg.audiobookcanvas.data.listeners.ApiResponseListener;
 import com.nimbusbg.audiobookcanvas.data.repository.AudiobookRepository;
-import com.nimbusbg.audiobookcanvas.data.listeners.FileOperationListener;
 import com.nimbusbg.audiobookcanvas.data.repository.GptApiRepository;
-import com.nimbusbg.audiobookcanvas.data.listeners.InsertedItemListener;
-import com.nimbusbg.audiobookcanvas.data.listeners.InsertedMultipleItemsListener;
 import com.nimbusbg.audiobookcanvas.data.repository.TextFileRepository;
-import com.nimbusbg.audiobookcanvas.data.listeners.TtsInitListener;
 import com.nimbusbg.audiobookcanvas.data.repository.TtsRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import okhttp3.Call;
 import okhttp3.Response;
@@ -124,7 +121,8 @@ public class ProcessTextFileViewModel extends AndroidViewModel
     
     private void waitForTTS()
     {
-        ttsRepository.initTTS(new TtsInitListener()
+        String languageISOCode = currentProjectWithTextBlocks.getValue().audiobookData.getLanguage();
+        ttsRepository.initTTS(languageISOCode, new TtsInitListener()
         {
             @Override
             public void OnInitSuccess()
@@ -192,7 +190,7 @@ public class ProcessTextFileViewModel extends AndroidViewModel
     public void performNamedEntityRecognition(TextBlock textBlock, String tag)
     {
         setTextBlockStateById(textBlock.getId(), BlockState.WAITING_RESPONSE);
-        gptApiRepository.getCompletion(textBlock.getTextLines(), tag, new ApiResponseListener()
+        gptApiRepository.getCompletion(textBlock.getText(), tag, new ApiResponseListener()
         {
             @Override
             public void OnResponse(@NonNull Call call, @NonNull Response response)
@@ -328,7 +326,7 @@ public class ProcessTextFileViewModel extends AndroidViewModel
         int i=0;
         for (GptCharacterLine characterLine : completionLines)
         {
-            result.add(new CharacterLine(textBlockId, i, characterLine.getCharacter()));
+            result.add(new CharacterLine(textBlockId, i, characterLine.getCharacter(), characterLine.getLine()));
             i++;
         }
         return result;

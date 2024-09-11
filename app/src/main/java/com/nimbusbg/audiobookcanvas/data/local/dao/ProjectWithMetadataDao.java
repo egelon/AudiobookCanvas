@@ -10,10 +10,8 @@ import androidx.room.Transaction;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AppInfo;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookData;
 import com.nimbusbg.audiobookcanvas.data.local.entities.AudiobookProject;
-import com.nimbusbg.audiobookcanvas.data.local.entities.BlockState;
 import com.nimbusbg.audiobookcanvas.data.local.relations.ProjectWithMetadata;
 
-import java.util.Date;
 import java.util.List;
 
 @Dao
@@ -61,4 +59,11 @@ public interface ProjectWithMetadataDao
     @Query("UPDATE audiobookData SET book_title = :bookNameStr, author = :authorNameStr, description = :projectDescriptionStr WHERE project_id =:project_id")
     void updateProjectMetadataById(int project_id, String bookNameStr, String authorNameStr, String projectDescriptionStr);
     
+    @Query("UPDATE audiobookData SET book_language = :languageISOCode WHERE project_id =:project_id")
+    void updateProjectLanguageById(int project_id, String languageISOCode);
+    
+    
+    @Transaction
+    @Query("Select * FROM audiobookData WHERE project_id =:id")
+    LiveData<AudiobookData> getMetadataByProjectId(int id);
 }

@@ -7,6 +7,7 @@ import androidx.room.Transaction;
 
 import com.nimbusbg.audiobookcanvas.data.local.entities.CharacterLine;
 import com.nimbusbg.audiobookcanvas.data.local.entities.StoryCharacter;
+import com.nimbusbg.audiobookcanvas.data.local.relations.MetadataWithCharacters;
 import com.nimbusbg.audiobookcanvas.data.local.relations.TextBlockWithData;
 
 import java.util.List;
@@ -25,6 +26,10 @@ public interface TextBlockWithDataDao
     @Transaction
     @Query("Select * FROM characterLine WHERE text_block_id = :id")
     LiveData<List<CharacterLine>> getCharacterLinesByTextBlockId(int id);
+    
+    @Transaction
+    @Query("Select * FROM audiobookData WHERE project_id = :prjId")
+    LiveData<MetadataWithCharacters> getMetadataWithAllCharactersByProjectId(int prjId);
     
     @Transaction
     @Query("Select * FROM storyCharacter WHERE project_id = :prjId")

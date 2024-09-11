@@ -15,26 +15,16 @@ public class TextLanguageResponseSchema
                 "      \"language\": {\n" +
                 "        \"type\": \"string\",\n" +
                 "        \"enum\": [\n" +
-                "          \"en\",\n" +
-                "          \"fr\",\n" +
-                "          \"de\",\n" +
-                "          \"es\",\n" +
-                "          \"pt\",\n" +
-                "          \"it\",\n" +
-                "          \"ru\",\n" +
-                "          \"pl\",\n" +
-                "          \"ja\",\n" +
-                "          \"zh\",\n" +
-                "          \"ko\",\n" +
-                "          \"bg\",\n" +
-                "          \"el\",\n" +
-                "          \"sr\",\n" +
-                "          \"da\",\n" +
-                "          \"sv\",\n" +
-                "          \"fi\",\n" +
-                "          \"no\",\n" +
-                "          \"nl\",\n" +
-                "          \"he\"\n" +
+                "          \"en_US\",\n" +
+                "          \"en_GB\",\n" +
+                "          \"fr_FR\",\n" +
+                "          \"de_DE\",\n" +
+                "          \"es_ES\",\n" +
+                "          \"pt_PT\",\n" +
+                "          \"it_IT\",\n" +
+                "          \"ru_RU\",\n" +
+                "          \"bg_BG\",\n" +
+                "          \"el_GR\"\n" +
                 "        ]\n" +
                 "      }\n" +
                 "    },\n" +

@@ -21,6 +21,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.nimbusbg.audiobookcanvas.R;
 import com.nimbusbg.audiobookcanvas.data.listeners.TtsInitListener;
 import com.nimbusbg.audiobookcanvas.data.local.entities.StoryCharacter;
+import com.nimbusbg.audiobookcanvas.data.local.relations.MetadataWithCharacters;
 import com.nimbusbg.audiobookcanvas.databinding.CharacterSettingsFragmentBinding;
 import com.nimbusbg.audiobookcanvas.viewmodelfactories.CharacterSettingsViewModelFactory;
 import com.nimbusbg.audiobookcanvas.viewmodels.CharacterSettingsViewModel;
@@ -70,31 +71,40 @@ public class CharacterSettingsFragment extends Fragment
     {
         super.onViewCreated(view, savedInstanceState);
         characterSettingsViewModel = new ViewModelProvider(NavHostFragment.findNavController(this).getViewModelStoreOwner(R.id.nav_graph), new CharacterSettingsViewModelFactory(requireActivity().getApplication(), projectId)).get(CharacterSettingsViewModel.class);
-        characterSettingsViewModel.getAllCharacters().observe(getViewLifecycleOwner(), new Observer<List<StoryCharacter>>()
+        
+
+        characterSettingsViewModel.getMetadataWithCharacters().observe(getViewLifecycleOwner(), new Observer<MetadataWithCharacters>()
         {
             @Override
-            public void onChanged(List<StoryCharacter> storyCharacters)
+            public void onChanged(MetadataWithCharacters metadataWithCharacters)
             {
-                if(storyCharacters != null)
+                if(metadataWithCharacters != null)
                 {
                     characterSettingsViewModel.waitForTTS(new TtsInitListener()
                     {
                         @Override
                         public void OnInitSuccess()
                         {
-                            loadCharacters(storyCharacters);
+                            loadCharacters(metadataWithCharacters.storyCharacters);
                         }
-        
+            
                         @Override
                         public void OnInitFailure()
                         {
                             Toast.makeText(requireActivity(), "Couldn't initialise TTS", Toast.LENGTH_LONG).show();
                         }
                     });
-                    
+        
                 }
             }
         });
+        
+        
+        
+        
+        
+        
+        
     }
     
     private void mapVoiceNamesToFriendlyNames(ArrayList<String> allVoices)
@@ -119,6 +129,9 @@ public class CharacterSettingsFragment extends Fragment
                 case "en-gb-x-gbb-local" : {voiceNamesMap.put("en-gb-x-gbb-local", "UK Male 3"); break;}
                 case "en-gb-x-gbc-local" : {voiceNamesMap.put("en-gb-x-gbc-local", "UK Female 3"); break;}
                 case "en-GB-language"    : {voiceNamesMap.put("en-GB-language"   , "UK Male 4"); break;}
+                case "bg-bg-x-ifk-network": {voiceNamesMap.put("bg-bg-x-ifk-network"   , "BG Female 1"); break;}
+                case "bg-bg-language": {voiceNamesMap.put("bg-bg-language"   , "BG Female 2"); break;}
+                case "bg-bg-x-ifk-local": {voiceNamesMap.put("bg-bg-x-ifk-local"   , "BG Female 3"); break;}
             }
         }
     }
@@ -212,7 +225,8 @@ public class CharacterSettingsFragment extends Fragment
                 @Override
                 public void onClick(View view)
                 {
-                    characterSettingsViewModel.playVoiceSampleForVoice(currentVoice);
+                    //characterSettingsViewModel.playVoiceSampleForVoice(currentVoice);
+                    characterSettingsViewModel.requestOnlineVoiceSampleText();
                 }
             });
     

@@ -33,11 +33,16 @@ public class CharacterLine implements Serializable {
     @NonNull
     @ColumnInfo(name = "character_name")
     private String characterName;
+    
+    @NonNull
+    @ColumnInfo(name = "line")
+    private String line;
 
-    public CharacterLine(int textBlockId, int startIndex, String characterName) {
+    public CharacterLine(int textBlockId, int startIndex, String characterName, String line) {
         this.textBlockId = textBlockId;
         this.startIndex = startIndex;
         this.characterName = characterName;
+        this.line = line;
     }
 
     public int getId() {
@@ -71,4 +76,8 @@ public class CharacterLine implements Serializable {
     public void setCharacterName(String characterName) {
         this.characterName = characterName;
     }
+    
+    public String getLine() {return line;}
+    
+    public void setLine( String line) {this.line = line;}
 }

@@ -119,11 +119,6 @@ public class TextBlock  implements Serializable {
         storeTextLines();
     }
     
-    public String[] getTextLines()
-    {
-        return this.textLines;
-    }
-    
     public String getLineByIndex(int index)
     {
         if(this.textLines != null && index >= 0 && index < this.textLines.length)

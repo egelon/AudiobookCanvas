@@ -15,6 +15,7 @@ import com.nimbusbg.audiobookcanvas.data.singletons.TtsSingleton;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -22,7 +23,7 @@ import java.util.concurrent.Executors;
 public class TtsRepository
 {
     Context context;
-    List<Voice> allEnglishVoices;
+    List<Voice> allVoicesForLocale;
     
     public static final ExecutorService ttsOperationExecutor = Executors.newFixedThreadPool(1);
     
@@ -31,30 +32,33 @@ public class TtsRepository
         this.context = application.getApplicationContext();
     }
     
-    public void initTTS(TtsInitListener listener)
+    public void initTTS(String isoLanguageCode, TtsInitListener listener)
     {
         TtsSingleton.getInstance(context).initTTS(new TtsInitListener()
         {
             @Override
             public void OnInitSuccess()
             {
-                allEnglishVoices = TtsSingleton.getInstance(context).getExtendedHQVoicesForEnglish(false);
+                String[] localeData = isoLanguageCode.split("_");
+                Locale bookLocale = new Locale(localeData[0], localeData[1]);
+                
+                allVoicesForLocale = TtsSingleton.getInstance(context).getVoicesForLocale(bookLocale, Voice.QUALITY_HIGH, false);
                 listener.OnInitSuccess();
             }
         
             @Override
             public void OnInitFailure()
             {
-                allEnglishVoices = new ArrayList<>();
+                allVoicesForLocale = new ArrayList<>();
                 listener.OnInitFailure();
             }
         });
     }
     
-    public ArrayList<String> getExtendedEnglishVoiceNames()
+    public ArrayList<String> getExtendedLocaleVoiceNames()
     {
         ArrayList<String> voiceNames = new ArrayList<String>();
-        for (Voice voice : allEnglishVoices)
+        for (Voice voice : allVoicesForLocale)
         {
             voiceNames.add(voice.getName());
         }
@@ -67,15 +71,15 @@ public class TtsRepository
         Random rand = new Random();
     
         // Generate a random index within the bounds of the list
-        int randomIndex = rand.nextInt(allEnglishVoices.size());
+        int randomIndex = rand.nextInt(allVoicesForLocale.size());
     
         // Return the element at the random index
-        return allEnglishVoices.get(randomIndex).getName();
+        return allVoicesForLocale.get(randomIndex).getName();
     }
     
     private Voice findVoiceByName(String desiredVoiceName)
     {
-        for (Voice voice : allEnglishVoices)
+        for (Voice voice : allVoicesForLocale)
         {
             if (desiredVoiceName.equals(voice.getName()))
             {

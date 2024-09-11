@@ -112,6 +112,7 @@ public class TextChunkingViewModel extends AndroidViewModel
                     try {
                         GptLanguageIdentification languageIdentification = gson.fromJson(responseContent, GptLanguageIdentification.class);
                         setDialogueStartEndChar(languageIdentification.getDialogue_start(), languageIdentification.getDialogue_end());
+                        databaseRepository.storeProjectLanguageByProjectId(projID, languageIdentification.getLanguage());
     
                         fileRepository.GetSanitisedChunks(fileUri, new FileOperationListener()
                         {

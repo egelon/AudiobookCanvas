@@ -99,26 +99,77 @@ public class CharacterLinesFragment extends Fragment
                                                     });
     
         Log.d("CharacterLinesFragment", "Trying to observe tts status");
-        characterLinesViewModel.getTtsInitStatus().observe(getViewLifecycleOwner(), isInitialized -> {
+    
+    
+        characterLinesViewModel.getProjectMetadata().observe(getViewLifecycleOwner(), new Observer<ProjectWithMetadata>()
+        {
+            @Override
+            public void onChanged(ProjectWithMetadata projectWithMetadata)
+            {
+                    characterLinesViewModel.getTtsInitStatus().observe(getViewLifecycleOwner(), isInitialized -> {
                     if (isInitialized)
                     {
                         Log.d("CharacterLinesFragment", "getTtsInitStatus: " + isInitialized);
-    
-                        characterLinesViewModel.getProjectMetadata().observe(getViewLifecycleOwner(), new Observer<ProjectWithMetadata>()
-                        {
-                            @Override
-                            public void onChanged(ProjectWithMetadata projectWithMetadata)
-                            {
-                                loadAllCharacters();
-                            }
-                        });
+                        loadAllCharacters();
                     }
                     else
                     {
                         Log.d("CharacterLinesFragment", "getTtsInitStatus: " + isInitialized);
                     }
                 });
+            }
+        });
         
+        characterLinesViewModel.getProcessedUtterances().observe(getViewLifecycleOwner(), processedUtterances ->{
+            int numCharacterLines = characterLinesViewModel.getNumCharacterLines();
+            float progress = 0.0f;
+            if(processedUtterances == numCharacterLines && numCharacterLines > 0)
+            {
+                binding.generateAudioProgressBar.setProgress(10000);
+                characterLinesViewModel.combineVoices(new MixingProcessListener()
+                {
+                    @Override
+                    public void onProgress(double progress)
+                    {
+                        Log.d("CharacterLinesViewModel", "combineVoices progress: " + progress);
+    
+    
+    
+                        requireActivity().runOnUiThread(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                binding.generateAudioProgressBar.setBackgroundColor(getResources().getColor(R.color.textblock_waiting_api));
+                                binding.generateAudioProgressBar.setProgress((int) (progress * 10000));
+                            }
+                        });
+                        
+                        
+                    }
+    
+                    @Override
+                    public void onEnd()
+                    {
+                        binding.generateAudioProgressBar.setProgress(10000);
+                        binding.generateAudioProgressBar.setBackgroundColor(getResources().getColor(R.color.textblock_done));
+                        characterLinesViewModel.setCurrentTextblockDone();
+                    }
+                });
+            }
+            else
+            {
+                try
+                {
+                    progress = characterLinesViewModel.mapIntToFloatRange(processedUtterances, characterLinesViewModel.getNumCharacterLines());
+                }
+                catch (IllegalArgumentException e)
+                {
+                    Log.e("CharacterLinesViewModel", "recordAllCharacterLines, " + e.getMessage());
+                }
+                binding.generateAudioProgressBar.setProgress((int) (progress * 10000));
+            }
+        });
         
         characterLinesViewModel.getWavFilesStitched().observe(getViewLifecycleOwner(), areFilesStitched -> {
             if(areFilesStitched)
@@ -129,7 +180,6 @@ public class CharacterLinesFragment extends Fragment
                     @Override
                     public void onProgress(double progress)
                     {
-                        binding.generateAudioProgressBar.setBackgroundColor(getResources().getColor(R.color.textblock_done));
                         binding.generateAudioProgressBar.setProgress((int) (progress * 10000));
                     }
     
@@ -177,13 +227,14 @@ public class CharacterLinesFragment extends Fragment
             @Override
             public void onChanged(TextBlockWithData textBlockWithData)
             {
-                populateList(textBlockWithData.textBlock.getTextLines(), textBlockWithData.characterLines, storyCharacterNames);
+                characterLinesViewModel.setNumCharacterLines(textBlockWithData.characterLines.size());
+                populateList(textBlockWithData.characterLines, storyCharacterNames);
                 binding.generateAudioBtn.setVisibility(View.VISIBLE);
             }
         });
     }
     
-    private void populateList(String[] lines, List<CharacterLine> characterLines, List<String> characterNames)
+    private void populateList(List<CharacterLine> characterLines, List<String> characterNames)
     {
         binding.CharacterLineLayout.removeAllViews();
         int i=0;
@@ -231,7 +282,7 @@ public class CharacterLinesFragment extends Fragment
             spinner.setSelection(spinnerPosition);
         
             // Set up the text view
-            textView.setText(lines[line.getStartIndex()]);
+            textView.setText(line.getLine());
         
             // Add the view to the linear layout
             binding.CharacterLineLayout.addView(itemView);
