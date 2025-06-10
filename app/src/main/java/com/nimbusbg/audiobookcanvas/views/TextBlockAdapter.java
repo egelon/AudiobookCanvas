@@ -26,7 +26,7 @@ public class TextBlockAdapter extends RecyclerView.Adapter<TextBlockAdapter.Text
     public TextBlockAdapter.TextBlockHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
         //This is where we inflate the layout (where we set how the rows are going to look like)
-        //we use our project_item.xml for this
+        //we use our text_block_item.xml for this
         View textBlockItemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.text_block_item, parent, false);
         
