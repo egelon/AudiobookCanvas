@@ -173,7 +173,7 @@ public class TextPreparationFragment extends Fragment
                     // Update your UI here.
                     toggleLoadingBarVisibility(View.GONE);
                     //update the recycler view
-                    //TODO: and here we would start a background worker to query the text blocks in paralel?
+                    //TODO: and here we would start a background worker to query the text blocks in parallel?
     
                     textBlockAdapter.setTextBlocks(textBlockData);
                 }
