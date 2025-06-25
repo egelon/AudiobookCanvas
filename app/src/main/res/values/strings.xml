@@ -35,6 +35,10 @@
     <string name="use_high_quality_voices_summary">Toggle between offline and network voices</string>
     <string name="use_high_quality_voices_summary_off">Using built-in Android offline voices. No internet connection needed.</string>
     <string name="use_high_quality_voices_summary_on">Using network high-quality voices. Internet connection required.</string>
+    <string name="network_voice_provider_title">Network voice provider</string>
+    <string name="network_voice_provider_summary">Pick the provider for high-quality voices</string>
+    <string name="network_voice_provider_option_openai">OpenAI</string>
+    <string name="network_voice_provider_option_elevenlabs">Elevenlabs</string>
     <string name="named_entity_recognition_prompt">Perform Named Entity Recognition on the following text fragment.\n
 This symbol always marks the start of a dialogue line: \"“\".\n
 This symbol always marks the end of a dialogue line: \"”\".\n

@@ -23,6 +23,13 @@
             app:summaryOff="@string/use_high_quality_voices_summary_off"
             app:summaryOn="@string/use_high_quality_voices_summary_on"
             app:title="@string/use_high_quality_voices_title" />
+        <ListPreference
+            android:key="network_voice_provider"
+            android:dependency="useHighQualityVoices"
+            android:entries="@array/network_voice_provider_entries"
+            android:entryValues="@array/network_voice_provider_values"
+            android:title="@string/network_voice_provider_title"
+            android:summary="@string/network_voice_provider_summary" />
 
     </PreferenceCategory>
 
