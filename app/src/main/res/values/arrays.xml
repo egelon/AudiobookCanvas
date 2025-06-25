@@ -1,4 +1,13 @@
 <resources>
     <!-- Reply Preference -->
 
+    <string-array name="network_voice_provider_entries">
+        <item>@string/network_voice_provider_option_openai</item>
+        <item>@string/network_voice_provider_option_elevenlabs</item>
+    </string-array>
+    <string-array name="network_voice_provider_values">
+        <item>openai</item>
+        <item>elevenlabs</item>
+    </string-array>
+
 </resources>
