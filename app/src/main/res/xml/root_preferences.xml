@@ -16,6 +16,13 @@
             android:singleLine="true"
             android:title="@string/openai_api_key"
             app:summary="@string/openai_api_key_summary" />
+        <SwitchPreferenceCompat
+            app:key="useHighQualityVoices"
+            app:persistent="true"
+            app:summary="@string/use_high_quality_voices_summary"
+            app:summaryOff="@string/use_high_quality_voices_summary_off"
+            app:summaryOn="@string/use_high_quality_voices_summary_on"
+            app:title="@string/use_high_quality_voices_title" />
 
     </PreferenceCategory>
 

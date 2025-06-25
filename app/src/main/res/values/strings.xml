@@ -31,6 +31,10 @@
     <string name="default_project_name">newAudiobookProject</string>
     <string name="openai_api_key_summary">Paste your OpenAI API key here</string>
     <string name="openai_api_key">OpenAI API Key</string>
+    <string name="use_high_quality_voices_title">Use high-quality voices</string>
+    <string name="use_high_quality_voices_summary">Toggle between offline and network voices</string>
+    <string name="use_high_quality_voices_summary_off">Using built-in Android offline voices. No internet connection needed.</string>
+    <string name="use_high_quality_voices_summary_on">Using network high-quality voices. Internet connection required.</string>
     <string name="named_entity_recognition_prompt">Perform Named Entity Recognition on the following text fragment.\n
 This symbol always marks the start of a dialogue line: \"“\".\n
 This symbol always marks the end of a dialogue line: \"”\".\n
